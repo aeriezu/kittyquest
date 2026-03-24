@@ -19,7 +19,6 @@ function ImportSchedule({ subjects, onImport }) {
     try {
       const data = JSON.parse(json);
       if (!Array.isArray(data)) throw new Error("Must be an array of days");
-      // validate shape
       data.forEach((d, i) => {
         if (!d.date) throw new Error(`Day ${i} missing "date"`);
         if (!Array.isArray(d.tasks)) throw new Error(`Day ${i} missing "tasks" array`);
@@ -78,20 +77,19 @@ function ImportSchedule({ subjects, onImport }) {
 }
 
 // ─── TasksTab ─────────────────────────────────────────────────────────────────
-function TasksTab({ days, subjects, checked, onToggle, onAddTask, onDeleteTask, onImport, onDeleteDay }) {
+function TasksTab({ days, subjects, checked, onToggle, onAddTask, onDeleteTask, onDeleteDay, onImport }) {
   const [filter,    setFilter]    = useState("all");
   const [collapsed, setCollapsed] = useState({});
   const [newTask,   setNewTask]   = useState({ subject:"", label:"" });
-  const [addingTo,  setAddingTo]  = useState(null); // date string
+  const [addingTo,  setAddingTo]  = useState(null);
 
-  const allTasks = days.flatMap(d => d.tasks);
+  const allTasks = days.flatMap(d => d.tasks || []).filter(Boolean);
   const visible  = filter === "all" ? days : days.filter(d => d.group === filter);
   const groups   = [...new Set(days.map(d => d.group).filter(Boolean))];
 
   return (
     <div>
       <ImportSchedule subjects={subjects} onImport={onImport} />
-      {/* Subject progress mini-bars */}
       {subjects.length > 0 && (
         <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:5, marginBottom:10 }}>
           {subjects.map(s => {
@@ -119,7 +117,6 @@ function TasksTab({ days, subjects, checked, onToggle, onAddTask, onDeleteTask, 
         </div>
       )}
 
-      {/* Group filter */}
       {groups.length > 0 && (
         <div style={{ display:"flex", gap:4, marginBottom:10 }}>
           <button onClick={() => setFilter("all")} style={{
@@ -139,10 +136,10 @@ function TasksTab({ days, subjects, checked, onToggle, onAddTask, onDeleteTask, 
         </div>
       )}
 
-      {/* Days */}
       {visible.map(({ date, tasks }) => {
-        const d = tasks.filter(t => checked[t.id]).length;
-        const allDone = d === tasks.length && tasks.length > 0;
+        const safeTasks = (tasks || []).filter(Boolean);
+        const d = safeTasks.filter(t => checked[t.id]).length;
+        const allDone = d === safeTasks.length && safeTasks.length > 0;
         const isCol = collapsed[date];
         const subjectMap = Object.fromEntries(subjects.map(s => [s.name, s]));
 
@@ -162,8 +159,7 @@ function TasksTab({ days, subjects, checked, onToggle, onAddTask, onDeleteTask, 
               <span style={{ flex:1, fontSize:"0.78rem", fontWeight:700, color: allDone ? C.green : C.text }}>
                 {allDone ? "✅ " : ""}{date}
               </span>
-              <span style={{ fontSize:"0.65rem", color:C.muted }}>{d}/{tasks.length}</span>
-              {/* ── ADD THIS ── */}
+              <span style={{ fontSize:"0.65rem", color:C.muted }}>{d}/{safeTasks.length}</span>
               <button
                 onClick={e => { e.stopPropagation(); onDeleteDay(date); }}
                 style={{
@@ -176,7 +172,7 @@ function TasksTab({ days, subjects, checked, onToggle, onAddTask, onDeleteTask, 
 
             {!isCol && (
               <div style={{ padding:"5px 9px 9px" }}>
-                {tasks.map(task => {
+                {safeTasks.map(task => {
                   const s = subjectMap[task.subject] || { color:C.muted, bg:C.surface };
                   return (
                     <label key={task.id} style={{
@@ -213,7 +209,6 @@ function TasksTab({ days, subjects, checked, onToggle, onAddTask, onDeleteTask, 
                   );
                 })}
 
-                {/* Add task to this day */}
                 {addingTo === date ? (
                   <div style={{ display:"flex", gap:5, marginTop:6 }}>
                     <select
@@ -283,20 +278,19 @@ function TasksTab({ days, subjects, checked, onToggle, onAddTask, onDeleteTask, 
         );
       })}
 
-      {/* Add a new day */}
       <AddDayButton subjects={subjects} onAdd={onAddTask} existingDates={days.map(d => d.date)} />
     </div>
   );
 }
 
 function AddDayButton({ subjects, onAdd, existingDates }) {
-  const [open, setOpen]     = useState(false);
-  const [date, setDate]     = useState("");
-  const [group, setGroup]   = useState("");
+  const [open,  setOpen]  = useState(false);
+  const [date,  setDate]  = useState("");
+  const [group, setGroup] = useState("");
 
   const handleAdd = () => {
     if (!date.trim()) return;
-    onAdd(date.trim(), null, null, group.trim() || null); // null task = just creates the day
+    onAdd(date.trim(), null, null, group.trim() || null);
     setOpen(false); setDate(""); setGroup("");
   };
 
@@ -438,7 +432,7 @@ function QuestsTab({ coins, achievements, onSpin, dailyQuests, questDone }) {
 
       <div style={{ background:C.surface, borderRadius:12, padding:12, border:`1px solid ${C.surface2}` }}>
         <div style={{ fontSize:"0.78rem", fontWeight:700, color:C.text, marginBottom:8 }}>
-          Achievements ({achievements.length}/10)
+          Achievements ({achievements.filter(a => a.unlocked).length}/10)
         </div>
         <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:6 }}>
           {achievements.map(({ ach, unlocked }) => (
@@ -522,23 +516,21 @@ function ShopTab({ coins, owned, equipped, onBuy, onEquip }) {
 
 // ─── Root App ─────────────────────────────────────────────────────────────────
 export default function App() {
-  const [authReady,  setAuthReady]  = useState(false);
-  const [uid,        setUid]        = useState(null);
-  const [username, setUsername] = useState(
-    localStorage.getItem("sq-username") || ""
-  );
-  const [petId,   setPetId]   = useState(localStorage.getItem("sq-petId")   || "tabby");
-  const [petName, setPetName] = useState(localStorage.getItem("sq-petName") || "");
-  const [subjects,   setSubjects]   = useState([]);
-  const [days,       setDays]       = useState([]); // [{ date, group, tasks: [{id,label,subject,done}] }]
-  const [tab,        setTab]        = useState("tasks");
-  const [popup,      setPopup]      = useState(null);
-  const [newAch,     setNewAch]     = useState(null);
-  const [showSpin,   setShowSpin]   = useState(false);
-  const [dailyQuests, setDailyQuests] = useState([]);
-  const safeUsername = username || "";
+  const [authReady,    setAuthReady]    = useState(false);
+  const [uid,          setUid]          = useState(null);
+  const [username,     setUsername]     = useState(localStorage.getItem("sq-username") || "");
+  const [petId,        setPetId]        = useState(localStorage.getItem("sq-petId")    || "tabby");
+  const [petName,      setPetName]      = useState(localStorage.getItem("sq-petName")  || "");
+  const [subjects,     setSubjects]     = useState([]);
+  const [days,         setDays]         = useState([]);
+  const [tab,          setTab]          = useState("tasks");
+  const [popup,        setPopup]        = useState(null);
+  const [newAch,       setNewAch]       = useState(null);
+  const [showSpin,     setShowSpin]     = useState(false);
+  const [dailyQuests,  setDailyQuests]  = useState([]);
 
-  const allTasks = days.flatMap(d => d.tasks);
+  const allTasks = days.flatMap(d => d.tasks || []).filter(Boolean);
+
   const {
     state, done,
     toggleTask, handleSpin, buyItem, equipItem, cashOut,
@@ -552,48 +544,49 @@ export default function App() {
     return onAuthStateChanged(auth, async user => {
       if (user) {
         setUid(user.uid);
-        // Load user meta from Firebase
         const snap = await get(ref(db, `users/${user.uid}/meta`));
         if (snap.exists()) {
           const meta = snap.val();
           setUsername(meta.username || "");
           localStorage.setItem("sq-username", meta.username || "");
           setPetId(meta.petId || "tabby");
+          localStorage.setItem("sq-petId", meta.petId || "tabby");
           setPetName(meta.petName || "");
+          localStorage.setItem("sq-petName", meta.petName || "");
           setSubjects(meta.subjects || []);
         }
-       // after loading meta, also load days
-      const stateSnap = await get(ref(db, `users/${user.uid}/gameState`));
-      if (stateSnap.exists()) {
-        setState(prev => ({ ...prev, ...stateSnap.val() }));
-      }
-      const daysSnap = await get(ref(db, `users/${user.uid}/days`));
-      if (daysSnap.exists()) {
-        setDays(daysSnap.val());
-      } else {
-      // fall back to localStorage
-        const savedDays = JSON.parse(localStorage.getItem("studyquest-days") || "null");
-        if (savedDays) setDays(savedDays);
+        const stateSnap = await get(ref(db, `users/${user.uid}/gameState`));
+        if (stateSnap.exists()) {
+          setState(prev => ({ ...prev, ...stateSnap.val() }));
+        }
+        const daysSnap = await get(ref(db, `users/${user.uid}/days`));
+        if (daysSnap.exists()) {
+          setDays(daysSnap.val());
+        } else {
+          const savedDays = JSON.parse(localStorage.getItem("studyquest-days") || "null");
+          if (savedDays) setDays(savedDays);
         }
       }
       setAuthReady(true);
     });
   }, []);
 
-  // ── Persist days whenever they change ────────────────────────────────────
+  // ── Persist days ──────────────────────────────────────────────────────────
   useEffect(() => {
     if (days.length > 0) {
       localStorage.setItem("studyquest-days", JSON.stringify(days));
-      // also save to Firebase
       if (uid) set(ref(db, `users/${uid}/days`), days);
     }
   }, [days, uid]);
 
+  // ── Persist game state ────────────────────────────────────────────────────
   useEffect(() => {
     if (!uid || !state) return;
-    // Strip any checked keys with invalid Firebase characters
     const safeChecked = Object.fromEntries(
-      Object.entries(state.checked || {}).filter(([k]) => !k.includes("."))
+      Object.entries(state.checked || {}).filter(([k]) =>
+        k && !k.includes(".") && !k.includes("#") && !k.includes("$") &&
+        !k.includes("/") && !k.includes("[") && !k.includes("]")
+      )
     );
     set(ref(db, `users/${uid}/gameState`), { ...state, checked: safeChecked });
   }, [uid, state]);
@@ -629,16 +622,19 @@ export default function App() {
   // ── Onboarding done ───────────────────────────────────────────────────────
   const handleOnboardingDone = (newUid, uname, pid, pname, subs) => {
     setUid(newUid);
-    if (uname) { 
+    if (uname) {
       setUsername(uname);
       localStorage.setItem("sq-username", uname);
-      setPetId(pid); 
-      setPetName(pname); 
-      setSubjects(subs || []); }
+      setPetId(pid);
+      localStorage.setItem("sq-petId", pid);
+      setPetName(pname);
+      localStorage.setItem("sq-petName", pname);
+      setSubjects(subs || []);
+    }
   };
 
-  const showPopup = msg => { setPopup(msg); setTimeout(() => setPopup(null), 1800); };
-  const showAchievement = ach => { setNewAch(ach); setTimeout(() => setNewAch(null), 3000); };
+  const showPopup      = msg => { setPopup(msg);   setTimeout(() => setPopup(null),   1800); };
+  const showAchievement = ach => { setNewAch(ach); setTimeout(() => setNewAch(null),  3000); };
 
   // ── Task mutations ────────────────────────────────────────────────────────
   const handleToggle = id => toggleTask(id, showPopup, showAchievement);
@@ -646,10 +642,12 @@ export default function App() {
   const handleAddTask = (date, label, subject, group = null) => {
     setDays(prev => {
       const existing = prev.find(d => d.date === date);
-      const newTask = label ? { id:`t_${Date.now()}_${Math.random().toString(36).substr(2,9)}`, label, subject: subject || "", done:false } : null;
+      const newTask = label
+        ? { id:`t_${Date.now()}_${Math.random().toString(36).substr(2,9)}`, label, subject: subject || "", done:false }
+        : null;
       if (existing) {
         return prev.map(d => d.date === date
-          ? { ...d, tasks: newTask ? [...d.tasks, newTask] : d.tasks }
+          ? { ...d, tasks: newTask ? [...(d.tasks || []), newTask] : (d.tasks || []) }
           : d
         );
       }
@@ -659,7 +657,7 @@ export default function App() {
 
   const handleDeleteTask = (date, taskId) => {
     setDays(prev => prev.map(d =>
-      d.date === date ? { ...d, tasks: d.tasks.filter(t => t.id !== taskId) } : d
+      d.date === date ? { ...d, tasks: (d.tasks || []).filter(t => t && t.id !== taskId) } : d
     ));
     setState(prev => {
       const checked = { ...prev.checked };
@@ -671,10 +669,9 @@ export default function App() {
   const handleDeleteDay = (date) => {
     const dayToDelete = days.find(d => d.date === date);
     if (dayToDelete) {
-      // clean up checked state for deleted tasks
       setState(prev => {
         const checked = { ...prev.checked };
-        dayToDelete.tasks.forEach(t => delete checked[t.id]);
+        (dayToDelete.tasks || []).filter(Boolean).forEach(t => delete checked[t.id]);
         return { ...prev, checked };
       });
     }
@@ -685,8 +682,8 @@ export default function App() {
     const imported = data.map(d => ({
       date:  d.date,
       group: d.group || null,
-      tasks: d.tasks.map((t, i) => ({
-        id: `imported_${Date.now()}_${Math.random().toString(36).substr(2,9)}`,
+      tasks: d.tasks.map(t => ({
+        id:      `t_${Date.now()}_${Math.random().toString(36).substr(2,9)}`,
         label:   t.label,
         subject: t.subject || "",
         done:    false,
@@ -697,12 +694,12 @@ export default function App() {
 
   // ── Derived display ───────────────────────────────────────────────────────
   const { level, title, mood: rawMood } = getLevel(actualDone, allTasks.length);
-  const mood = state.happiness < 30 ? "sleepy" : state.happiness > 70 ? rawMood : "neutral";
-  const lvlThresholds = [0, 0.08, 0.22, 0.40, 0.60, 0.80, 1.0];
-  const pct = allTasks.length > 0 ? actualDone / allTasks.length : 0;
-  const lvlStart = lvlThresholds[level - 1] || 0;
-  const lvlEnd   = lvlThresholds[level]     || 1;
-  const lvlPct   = lvlEnd > lvlStart ? ((pct - lvlStart) / (lvlEnd - lvlStart)) * 100 : 100;
+  const mood       = state.happiness < 30 ? "sleepy" : state.happiness > 70 ? rawMood : "neutral";
+  const lvlThresh  = [0, 0.08, 0.22, 0.40, 0.60, 0.80, 1.0];
+  const pct        = allTasks.length > 0 ? actualDone / allTasks.length : 0;
+  const lvlStart   = lvlThresh[level - 1] || 0;
+  const lvlEnd     = lvlThresh[level]     || 1;
+  const lvlPct     = lvlEnd > lvlStart ? ((pct - lvlStart) / (lvlEnd - lvlStart)) * 100 : 100;
 
   const { ACHIEVEMENTS: ACH_LIST } = require("./data/constants");
   const achDisplay = ACH_LIST.map(a => ({ ach: a, unlocked: state.achievements.includes(a.id) }));
