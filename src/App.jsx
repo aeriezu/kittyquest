@@ -615,11 +615,13 @@ export default function App() {
   // ── Onboarding done ───────────────────────────────────────────────────────
   const handleOnboardingDone = (newUid, uname, pid, pname, subs) => {
     setUid(newUid);
-    if (uname) {
+    if (uname) { 
       setUsername(uname);
-      localStorage.setItem("sq-username", uname);  // ← add this
-      setPetId(pid); setPetName(pname); setSubjects(subs || []);
-    }
+      localStorage.setItem("sq-username", uname);
+      setPetId(pid); 
+      setPetName(pname); 
+      setSubjects(subs || []); }
+  };
 
   const showPopup = msg => { setPopup(msg); setTimeout(() => setPopup(null), 1800); };
   const showAchievement = ach => { setNewAch(ach); setTimeout(() => setNewAch(null), 3000); };
