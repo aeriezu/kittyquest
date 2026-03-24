@@ -155,14 +155,6 @@ function TasksTab({ days, subjects, checked, onToggle, onAddTask, onDeleteTask, 
           display: "flex", alignItems: "center", gap: 12,
           overflow: "hidden", position: "relative",
         }}>
-          {/* background tint */}
-          {petInfo.bg && (
-            <div style={{
-              position: "absolute", inset: 0, borderRadius: 14,
-              background: {bg1:"#c4b49a",bg2:"#a0b8c8",bg3:"#c8a870",bg4:"#3a2820",bg5:"#f0d8e8"}[petInfo.bg] || "transparent",
-              opacity: 0.25, pointerEvents: "none",
-            }} />
-          )}
           {/* bobbing cat */}
           <div style={{
             animation: "catBob 2.8s ease-in-out infinite",
@@ -778,7 +770,7 @@ export default function App() {
           onToggle={handleToggle} onAddTask={handleAddTask}
           onDeleteTask={handleDeleteTask} onDeleteDay={handleDeleteDay}
           onImport={handleImport} onEditSubjects={() => setShowSubjectEditor(true)}
-          petInfo={{ petName, petId, equipped: state.equipped, mood, happiness: state.happiness }}
+          petInfo={{ petName, petId, equipped: state.equipped, mood, happiness: state.happiness, bg: state.equipped.bg }}
         />
       )}
       {tab==="pet" && (
