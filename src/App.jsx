@@ -516,7 +516,9 @@ function ShopTab({ coins, owned, equipped, onBuy, onEquip }) {
 export default function App() {
   const [authReady,  setAuthReady]  = useState(false);
   const [uid,        setUid]        = useState(null);
-  const [username,   setUsername]   = useState("");
+  const [username, setUsername] = useState(
+    localStorage.getItem("sq-username") || ""
+  );
   const [petId,      setPetId]      = useState("tabby");
   const [petName,    setPetName]    = useState("");
   const [subjects,   setSubjects]   = useState([]);
@@ -545,22 +547,23 @@ export default function App() {
         if (snap.exists()) {
           const meta = snap.val();
           setUsername(meta.username || "");
+          localStorage.setItem("sq-username", meta.username || "");
           setPetId(meta.petId || "tabby");
           setPetName(meta.petName || "");
           setSubjects(meta.subjects || []);
         }
        // after loading meta, also load days
-       const stateSnap = await get(ref(db, `users/${user.uid}/gameState`));
-       if (stateSnap.exists()) {
-        setState(stateSnap.val());
-       }
-       const daysSnap = await get(ref(db, `users/${user.uid}/days`));
-        if (daysSnap.exists()) {
-          setDays(daysSnap.val());
-        } else {
-        // fall back to localStorage
-          const savedDays = JSON.parse(localStorage.getItem("studyquest-days") || "null");
-          if (savedDays) setDays(savedDays);
+      const stateSnap = await get(ref(db, `users/${user.uid}/gameState`));
+      if (stateSnap.exists()) {
+        setState(prev => ({ ...prev, ...stateSnap.val() }));
+      }
+      const daysSnap = await get(ref(db, `users/${user.uid}/days`));
+      if (daysSnap.exists()) {
+        setDays(daysSnap.val());
+      } else {
+      // fall back to localStorage
+        const savedDays = JSON.parse(localStorage.getItem("studyquest-days") || "null");
+        if (savedDays) setDays(savedDays);
         }
       }
       setAuthReady(true);
@@ -612,8 +615,11 @@ export default function App() {
   // ── Onboarding done ───────────────────────────────────────────────────────
   const handleOnboardingDone = (newUid, uname, pid, pname, subs) => {
     setUid(newUid);
-    if (uname) { setUsername(uname); setPetId(pid); setPetName(pname); setSubjects(subs || []); }
-  };
+    if (uname) {
+      setUsername(uname);
+      localStorage.setItem("sq-username", uname);  // ← add this
+      setPetId(pid); setPetName(pname); setSubjects(subs || []);
+    }
 
   const showPopup = msg => { setPopup(msg); setTimeout(() => setPopup(null), 1800); };
   const showAchievement = ach => { setNewAch(ach); setTimeout(() => setNewAch(null), 3000); };
