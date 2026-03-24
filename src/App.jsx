@@ -573,10 +573,8 @@ export default function App() {
 
   // ── Persist days ──────────────────────────────────────────────────────────
   useEffect(() => {
-    if (days.length > 0) {
-      localStorage.setItem("studyquest-days", JSON.stringify(days));
-      if (uid) set(ref(db, `users/${uid}/days`), days);
-    }
+    localStorage.setItem("studyquest-days", JSON.stringify(days));
+    if (uid) set(ref(db, `users/${uid}/days`), days);
   }, [days, uid]);
 
   // ── Persist game state ────────────────────────────────────────────────────
