@@ -557,6 +557,7 @@ export default function App() {
            const savedDays = JSON.parse(localStorage.getItem("studyquest-days") || "null");
            if (savedDays) setDays(savedDays);
          }
+      }
       setAuthReady(true);
     });
   }, []);
