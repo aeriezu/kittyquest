@@ -377,10 +377,14 @@ export default function PixelCat({ mood, hat, outfit, bg, comp, petId="tabby", s
 .${id} .bowtie-l{width:9%;height:6%;background:#4a7fa0;clip-path:polygon(0 0,100% 20%,100% 80%,0 100%);top:68%;left:38%;z-index:10;}
 .${id} .bowtie-r{width:9%;height:6%;background:#4a7fa0;clip-path:polygon(0 20%,100% 0,100% 100%,0 80%);top:68%;left:53%;z-index:10;}
 .${id} .bowtie-c{width:4%;height:4%;background:#3a6a90;border-radius:50%;top:69%;left:50%;translate:-50%;z-index:10;}
-.${id} .cape-l{width:60%;height:80%;background:#3a2060;border-radius:0 0 0 8em;top:10%;left:0;z-index:0;opacity:0.5;}
-.${id} .cape-r{width:60%;height:80%;background:#3a2060;border-radius:0 0 8em 0;top:10%;right:0;z-index:0;opacity:0.5;}
-.${id} .robe{width:130%;height:90%;background:linear-gradient(180deg,#4a1a6f,#2a0a4f);border-radius:0 0 4em 4em;bottom:0;left:50%;translate:-50%;z-index:0;opacity:0.55;}
-.${id} .cloak{width:130%;height:90%;background:linear-gradient(135deg,#0a0a3f,#3a0a6f);border-radius:0 0 4em 4em;bottom:0;left:50%;translate:-50%;z-index:0;opacity:0.45;}
+.${id} .cape-l{width:55%;height:75%;background:linear-gradient(160deg,#7a1a1a,#4a0a0a);border-radius:0 0 0 6em;top:12%;left:0;z-index:0;opacity:0.7;}
+.${id} .cape-r{width:55%;height:75%;background:linear-gradient(200deg,#7a1a1a,#4a0a0a);border-radius:0 0 6em 0;top:12%;right:0;z-index:0;opacity:0.7;}
+.${id} .cape-l::before{content:"";position:absolute;width:25%;height:30%;background:#c9a84e;border-radius:0 0 2em 2em;top:0;right:0;}
+.${id} .cape-r::before{content:"";position:absolute;width:25%;height:30%;background:#c9a84e;border-radius:0 0 2em 2em;top:0;left:0;}
+.${id} .robe{width:135%;height:92%;background:linear-gradient(180deg,#1a4a2a 0%,#0a2a18 60%,#082010 100%);border-radius:0 0 4em 4em;bottom:0;left:50%;translate:-50%;z-index:0;opacity:0.75;}
+.${id} .robe::before{content:"";position:absolute;width:20%;height:60%;background:linear-gradient(180deg,#c9a84e,#a07830);border-radius:1em;top:5%;left:50%;translate:-50%;opacity:0.9;}
+.${id} .cloak{width:135%;height:92%;background:linear-gradient(135deg,#0a0a2a 0%,#1a0a4a 40%,#0a0520 100%);border-radius:0 0 4em 4em;bottom:0;left:50%;translate:-50%;z-index:0;opacity:0.75;}
+.${id} .cloak::before{content:"";position:absolute;inset:0;background:radial-gradient(circle at 20% 30%,#fff1 0%,transparent 40%),radial-gradient(circle at 70% 20%,#fff1 0%,transparent 30%);border-radius:inherit;}
   `;
 
   const hatEl = hat === "hat1" ? <div className="hat-beanie" />
