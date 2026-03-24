@@ -510,6 +510,7 @@ export default function App() {
   const [showSpin,          setShowSpin]          = useState(false);
   const [dailyQuests,       setDailyQuests]       = useState([]);
   const [showSubjectEditor, setShowSubjectEditor] = useState(false);
+  const [daysLoaded, setDaysLoaded] = useState(false);
 
   const allTasks = days.flatMap(d => d.tasks || []).filter(Boolean);
   const { state, done, toggleTask, handleSpin, buyItem, equipItem, cashOut, tickHappiness, incrementCheers, setState } = useGameState(allTasks.length);
@@ -536,9 +537,11 @@ export default function App() {
         const daysSnap = await get(ref(db, `users/${user.uid}/days`));
         if (daysSnap.exists()) {
           setDays(daysSnap.val());
+          setDaysLoaded(true);
         } else {
           const savedDays = JSON.parse(localStorage.getItem("studyquest-days") || "null");
           if (savedDays) setDays(savedDays);
+          setDaysLoaded(true);
         }
       }
       setAuthReady(true);
@@ -547,9 +550,10 @@ export default function App() {
 
   // ── Persist days ──────────────────────────────────────────────────────────
   useEffect(() => {
+    if (!daysLoaded) return;
     localStorage.setItem("studyquest-days", JSON.stringify(days));
     if (uid) set(ref(db, `users/${uid}/days`), days);
-  }, [days, uid]);
+  }, [days, uid, daysLoaded]);
 
   // ── Persist game state ────────────────────────────────────────────────────
   useEffect(() => {
