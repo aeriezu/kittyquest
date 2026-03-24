@@ -78,7 +78,7 @@ function ImportSchedule({ subjects, onImport }) {
 }
 
 // ─── TasksTab ─────────────────────────────────────────────────────────────────
-function TasksTab({ days, subjects, checked, onToggle, onAddTask, onDeleteTask, onImport }) {
+function TasksTab({ days, subjects, checked, onToggle, onAddTask, onDeleteTask, onImport, onDeleteDay }) {
   const [filter,    setFilter]    = useState("all");
   const [collapsed, setCollapsed] = useState({});
   const [newTask,   setNewTask]   = useState({ subject:"", label:"" });
@@ -163,6 +163,14 @@ function TasksTab({ days, subjects, checked, onToggle, onAddTask, onDeleteTask, 
                 {allDone ? "✅ " : ""}{date}
               </span>
               <span style={{ fontSize:"0.65rem", color:C.muted }}>{d}/{tasks.length}</span>
+              {/* ── ADD THIS ── */}
+              <button
+                onClick={e => { e.stopPropagation(); onDeleteDay(date); }}
+                style={{
+                  background:"none", border:"none", color:C.muted,
+                  fontSize:"0.7rem", cursor:"pointer", padding:"0 4px"
+                }}
+              >🗑️</button>
               <span style={{ fontSize:"0.6rem", color:C.muted }}>{isCol ? "▶" : "▼"}</span>
             </div>
 
@@ -660,6 +668,10 @@ export default function App() {
     });
   };
 
+  const handleDeleteDay = (date) => {
+    setDays(prev => prev.filter(d => d.date !== date));
+  };
+
   const handleImport = (data) => {
     const imported = data.map(d => ({
       date:  d.date,
@@ -810,6 +822,7 @@ export default function App() {
           onToggle={handleToggle}
           onAddTask={handleAddTask}
           onDeleteTask={handleDeleteTask}
+          onDeleteDay={handleDeleteDay}
           onImport={handleImport}
         />
       )}
