@@ -163,7 +163,7 @@ function TasksTab({ days, subjects, checked, onToggle, onAddTask, onDeleteTask, 
             <style>{`@keyframes catBob { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-5px)} }`}</style>
             <PixelCat
               mood={petInfo.mood} hat={petInfo.equipped.hat}
-              outfit={petInfo.equipped.outfit} bg={null}
+              outfit={petInfo.equipped.outfit} bg={petInfo.bg}
               comp={petInfo.equipped.comp} petId={petInfo.petId} size={64}
             />
           </div>
