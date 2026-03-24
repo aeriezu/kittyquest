@@ -10,9 +10,77 @@ import SpinWheel from "./components/SpinWheel";
 import FriendsTab from "./components/FriendsTab";
 import Onboarding from "./components/Onboarding";
 
+// ─── Subject Editor Modal ─────────────────────────────────────────────────────
+function SubjectEditor({ subjects, onSave, onClose }) {
+  const [local, setLocal] = useState(subjects.map(s => ({ ...s })));
+
+  const updateName  = (i, name)  => setLocal(prev => prev.map((s, idx) => idx === i ? { ...s, name } : s));
+  const updateColor = (i, color) => setLocal(prev => prev.map((s, idx) => idx === i ? { ...s, color, bg: color + "22" } : s));
+  const addSubject  = () => {
+    const idx = local.length % SUBJECT_PALETTE.length;
+    setLocal(prev => [...prev, { name:"", ...SUBJECT_PALETTE[idx] }]);
+  };
+  const removeSubject = (i) => setLocal(prev => prev.filter((_, idx) => idx !== i));
+
+  return (
+    <div style={{
+      position:"fixed", inset:0, background:"rgba(0,0,0,0.5)",
+      display:"flex", alignItems:"center", justifyContent:"center", zIndex:1000
+    }}>
+      <div style={{ background:C.bg, borderRadius:16, padding:20, maxWidth:340, width:"90%", ...px }}>
+        <div style={{ fontSize:"0.85rem", fontWeight:700, color:C.text, marginBottom:12 }}>
+          Edit Subjects
+        </div>
+        <div style={{ display:"flex", flexDirection:"column", gap:7, marginBottom:12, maxHeight:300, overflowY:"auto" }}>
+          {local.map((s, i) => (
+            <div key={i} style={{ display:"flex", gap:6, alignItems:"center" }}>
+              <input
+                type="color" value={s.color}
+                onChange={e => updateColor(i, e.target.value)}
+                style={{ width:28, height:28, borderRadius:6, border:"none", cursor:"pointer", padding:0 }}
+              />
+              <input
+                value={s.name} onChange={e => updateName(i, e.target.value)}
+                placeholder={`Subject ${i + 1}...`}
+                style={{
+                  flex:1, padding:"6px 10px", borderRadius:7,
+                  border:`1px solid ${C.surface2}`, background:C.surface,
+                  color:C.text, fontFamily:"inherit", fontSize:"0.78rem"
+                }}
+              />
+              <button onClick={() => removeSubject(i)} style={{
+                background:"none", border:"none", color:C.muted,
+                cursor:"pointer", fontSize:"0.9rem", padding:"0 4px"
+              }}>✕</button>
+            </div>
+          ))}
+        </div>
+        <button onClick={addSubject} style={{
+          width:"100%", padding:"6px 0", borderRadius:8, marginBottom:10,
+          border:`2px dashed ${C.surface2}`, background:"none",
+          color:C.muted, fontFamily:"inherit", fontSize:"0.75rem", cursor:"pointer"
+        }}>+ Add Subject</button>
+        <div style={{ display:"flex", gap:6 }}>
+          <button onClick={() => onSave(local.filter(s => s.name.trim()))} style={{
+            flex:1, padding:"8px 0", borderRadius:8, border:"none",
+            background:C.primary, color:"#fff",
+            fontFamily:"inherit", fontSize:"0.78rem", fontWeight:700, cursor:"pointer"
+          }}>Save</button>
+          <button onClick={onClose} style={{
+            flex:1, padding:"8px 0", borderRadius:8,
+            border:`1px solid ${C.surface2}`, background:C.surface,
+            color:C.muted, fontFamily:"inherit", fontSize:"0.78rem", cursor:"pointer"
+          }}>Cancel</button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ─── Import Schedule ──────────────────────────────────────────────────────────
 function ImportSchedule({ subjects, onImport }) {
-  const [open, setOpen] = useState(false);
-  const [json, setJson] = useState("");
+  const [open,  setOpen]  = useState(false);
+  const [json,  setJson]  = useState("");
   const [error, setError] = useState("");
 
   const handle = () => {
@@ -24,12 +92,8 @@ function ImportSchedule({ subjects, onImport }) {
         if (!Array.isArray(d.tasks)) throw new Error(`Day ${i} missing "tasks" array`);
       });
       onImport(data);
-      setOpen(false);
-      setJson("");
-      setError("");
-    } catch (e) {
-      setError(e.message);
-    }
+      setOpen(false); setJson(""); setError("");
+    } catch (e) { setError(e.message); }
   };
 
   if (!open) return (
@@ -42,13 +106,8 @@ function ImportSchedule({ subjects, onImport }) {
   );
 
   return (
-    <div style={{
-      background:C.surface, borderRadius:10, padding:12,
-      border:`2px solid ${C.primary}`, marginBottom:8
-    }}>
-      <div style={{ fontSize:"0.72rem", fontWeight:700, color:C.text, marginBottom:6 }}>
-        Paste your schedule JSON
-      </div>
+    <div style={{ background:C.surface, borderRadius:10, padding:12, border:`2px solid ${C.primary}`, marginBottom:8 }}>
+      <div style={{ fontSize:"0.72rem", fontWeight:700, color:C.text, marginBottom:6 }}>Paste your schedule JSON</div>
       <textarea
         value={json} onChange={e => setJson(e.target.value)}
         placeholder={`[\n  {\n    "date": "Mon Mar 23",\n    "group": "Week 1",\n    "tasks": [\n      { "subject": "Lin. Alg.", "label": "3.5 Notes Pt.1" }\n    ]\n  }\n]`}
@@ -77,7 +136,7 @@ function ImportSchedule({ subjects, onImport }) {
 }
 
 // ─── TasksTab ─────────────────────────────────────────────────────────────────
-function TasksTab({ days, subjects, checked, onToggle, onAddTask, onDeleteTask, onDeleteDay, onImport }) {
+function TasksTab({ days, subjects, checked, onToggle, onAddTask, onDeleteTask, onDeleteDay, onImport, onEditSubjects }) {
   const [filter,    setFilter]    = useState("all");
   const [collapsed, setCollapsed] = useState({});
   const [newTask,   setNewTask]   = useState({ subject:"", label:"" });
@@ -90,26 +149,26 @@ function TasksTab({ days, subjects, checked, onToggle, onAddTask, onDeleteTask, 
   return (
     <div>
       <ImportSchedule subjects={subjects} onImport={onImport} />
+      <button onClick={onEditSubjects} style={{
+        width:"100%", padding:"8px 0", borderRadius:10, marginBottom:8,
+        border:`2px dashed ${C.surface2}`, background:"none",
+        color:C.muted, fontFamily:"inherit", fontSize:"0.75rem",
+        fontWeight:700, cursor:"pointer"
+      }}>⚙️ Edit Subjects</button>
+
       {subjects.length > 0 && (
         <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:5, marginBottom:10 }}>
           {subjects.map(s => {
             const st = allTasks.filter(t => t.subject === s.name);
             const sd = st.filter(t => checked[t.id]).length;
             return (
-              <div key={s.name} style={{
-                background:C.surface, borderRadius:8, padding:"6px 9px",
-                borderLeft:`3px solid ${s.color}`
-              }}>
+              <div key={s.name} style={{ background:C.surface, borderRadius:8, padding:"6px 9px", borderLeft:`3px solid ${s.color}` }}>
                 <div style={{ display:"flex", justifyContent:"space-between", marginBottom:3 }}>
                   <span style={{ fontSize:"0.65rem", fontWeight:700, color:C.text }}>{s.name}</span>
                   <span style={{ fontSize:"0.62rem", color:s.color }}>{sd}/{st.length}</span>
                 </div>
                 <div style={{ background:C.surface2, borderRadius:4, height:4, overflow:"hidden" }}>
-                  <div style={{
-                    background:s.color,
-                    width:`${st.length ? (sd / st.length) * 100 : 0}%`,
-                    height:"100%", transition:"width 0.3s"
-                  }} />
+                  <div style={{ background:s.color, width:`${st.length?(sd/st.length)*100:0}%`, height:"100%", transition:"width 0.3s" }} />
                 </div>
               </div>
             );
@@ -121,15 +180,15 @@ function TasksTab({ days, subjects, checked, onToggle, onAddTask, onDeleteTask, 
         <div style={{ display:"flex", gap:4, marginBottom:10 }}>
           <button onClick={() => setFilter("all")} style={{
             flex:1, padding:"4px 0", borderRadius:6, border:"none",
-            background: filter === "all" ? C.text : C.surface2,
-            color: filter === "all" ? "#fff" : C.muted,
+            background: filter==="all"?C.text:C.surface2,
+            color: filter==="all"?"#fff":C.muted,
             fontFamily:"inherit", fontSize:"0.68rem", fontWeight:700, cursor:"pointer"
           }}>All</button>
           {groups.map(g => (
             <button key={g} onClick={() => setFilter(g)} style={{
               flex:1, padding:"4px 0", borderRadius:6, border:"none",
-              background: filter === g ? C.text : C.surface2,
-              color: filter === g ? "#fff" : C.muted,
+              background: filter===g?C.text:C.surface2,
+              color: filter===g?"#fff":C.muted,
               fontFamily:"inherit", fontSize:"0.68rem", fontWeight:700, cursor:"pointer"
             }}>{g}</button>
           ))}
@@ -144,30 +203,19 @@ function TasksTab({ days, subjects, checked, onToggle, onAddTask, onDeleteTask, 
         const subjectMap = Object.fromEntries(subjects.map(s => [s.name, s]));
 
         return (
-          <div key={date} style={{
-            background:C.surface, borderRadius:10, marginBottom:7,
-            overflow:"hidden", border:`1px solid ${C.surface2}`
-          }}>
+          <div key={date} style={{ background:C.surface, borderRadius:10, marginBottom:7, overflow:"hidden", border:`1px solid ${C.surface2}` }}>
             <div
               onClick={() => setCollapsed(c => ({ ...c, [date]: !c[date] }))}
-              style={{
-                display:"flex", alignItems:"center", gap:8,
-                padding:"8px 11px", cursor:"pointer",
-                background: allDone ? "#d4edd4" : C.surface,
-              }}
+              style={{ display:"flex", alignItems:"center", gap:8, padding:"8px 11px", cursor:"pointer", background: allDone?"#d4edd4":C.surface }}
             >
-              <span style={{ flex:1, fontSize:"0.78rem", fontWeight:700, color: allDone ? C.green : C.text }}>
-                {allDone ? "✅ " : ""}{date}
+              <span style={{ flex:1, fontSize:"0.78rem", fontWeight:700, color: allDone?C.green:C.text }}>
+                {allDone?"✅ ":""}{date}
               </span>
               <span style={{ fontSize:"0.65rem", color:C.muted }}>{d}/{safeTasks.length}</span>
-              <button
-                onClick={e => { e.stopPropagation(); onDeleteDay(date); }}
-                style={{
-                  background:"none", border:"none", color:C.muted,
-                  fontSize:"0.7rem", cursor:"pointer", padding:"0 4px"
-                }}
-              >🗑️</button>
-              <span style={{ fontSize:"0.6rem", color:C.muted }}>{isCol ? "▶" : "▼"}</span>
+              <button onClick={e => { e.stopPropagation(); onDeleteDay(date); }} style={{
+                background:"none", border:"none", color:C.muted, fontSize:"0.7rem", cursor:"pointer", padding:"0 4px"
+              }}>🗑️</button>
+              <span style={{ fontSize:"0.6rem", color:C.muted }}>{isCol?"▶":"▼"}</span>
             </div>
 
             {!isCol && (
@@ -177,33 +225,26 @@ function TasksTab({ days, subjects, checked, onToggle, onAddTask, onDeleteTask, 
                   return (
                     <label key={task.id} style={{
                       display:"flex", alignItems:"flex-start", gap:7,
-                      padding:"4px 7px", borderRadius:6, marginBottom:2,
-                      cursor:"pointer",
-                      background: checked[task.id] ? s.bg : "#fafaf8",
-                      opacity: checked[task.id] ? 0.6 : 1,
+                      padding:"4px 7px", borderRadius:6, marginBottom:2, cursor:"pointer",
+                      background: checked[task.id]?s.bg:"#fafaf8",
+                      opacity: checked[task.id]?0.6:1,
                       borderLeft:`3px solid ${s.color}`,
                     }}>
-                      <input
-                        type="checkbox" checked={!!checked[task.id]}
-                        onChange={() => onToggle(task.id)}
-                        style={{ marginTop:2, accentColor:s.color, width:12, height:12, flexShrink:0 }}
-                      />
+                      <input type="checkbox" checked={!!checked[task.id]} onChange={() => onToggle(task.id)}
+                        style={{ marginTop:2, accentColor:s.color, width:12, height:12, flexShrink:0 }} />
                       <div style={{ flex:1 }}>
-                        <span style={{
-                          fontSize:"0.75rem", color:C.text,
-                          textDecoration: checked[task.id] ? "line-through" : "none"
-                        }}>{task.label}</span>
+                        <span style={{ fontSize:"0.75rem", color:C.text, textDecoration: checked[task.id]?"line-through":"none" }}>
+                          {task.label}
+                        </span>
                         {task.subject && (
                           <span style={{
                             display:"inline-block", fontSize:"0.58rem", fontWeight:700,
-                            background:s.bg, color:s.color,
-                            borderRadius:3, padding:"0px 4px", marginLeft:4
+                            background:s.bg, color:s.color, borderRadius:3, padding:"0px 4px", marginLeft:4
                           }}>{task.subject}</span>
                         )}
                       </div>
                       <button onClick={e => { e.preventDefault(); onDeleteTask(date, task.id); }} style={{
-                        background:"none", border:"none", color:C.muted,
-                        fontSize:"0.7rem", cursor:"pointer", padding:"0 2px"
+                        background:"none", border:"none", color:C.muted, fontSize:"0.7rem", cursor:"pointer", padding:"0 2px"
                       }}>✕</button>
                     </label>
                   );
@@ -211,65 +252,26 @@ function TasksTab({ days, subjects, checked, onToggle, onAddTask, onDeleteTask, 
 
                 {addingTo === date ? (
                   <div style={{ display:"flex", gap:5, marginTop:6 }}>
-                    <select
-                      value={newTask.subject}
-                      onChange={e => setNewTask(t => ({ ...t, subject:e.target.value }))}
-                      style={{
-                        padding:"4px 6px", borderRadius:6,
-                        border:`1px solid ${C.surface2}`, background:C.surface,
-                        color:C.text, fontFamily:"inherit", fontSize:"0.7rem"
-                      }}
-                    >
+                    <select value={newTask.subject} onChange={e => setNewTask(t => ({ ...t, subject:e.target.value }))}
+                      style={{ padding:"4px 6px", borderRadius:6, border:`1px solid ${C.surface2}`, background:C.surface, color:C.text, fontFamily:"inherit", fontSize:"0.7rem" }}>
                       <option value="">No subject</option>
                       {subjects.map(s => <option key={s.name} value={s.name}>{s.name}</option>)}
                     </select>
-                    <input
-                      value={newTask.label}
-                      onChange={e => setNewTask(t => ({ ...t, label:e.target.value }))}
-                      onKeyDown={e => {
-                        if (e.key === "Enter" && newTask.label.trim()) {
-                          onAddTask(date, newTask.label.trim(), newTask.subject);
-                          setNewTask({ subject:"", label:"" });
-                          setAddingTo(null);
-                        }
-                      }}
+                    <input value={newTask.label} onChange={e => setNewTask(t => ({ ...t, label:e.target.value }))}
+                      onKeyDown={e => { if(e.key==="Enter"&&newTask.label.trim()){onAddTask(date,newTask.label.trim(),newTask.subject);setNewTask({subject:"",label:""});setAddingTo(null);}}}
                       placeholder="task name..."
-                      style={{
-                        flex:1, padding:"4px 8px", borderRadius:6,
-                        border:`1px solid ${C.surface2}`, background:C.surface,
-                        color:C.text, fontFamily:"inherit", fontSize:"0.7rem"
-                      }}
-                      autoFocus
-                    />
-                    <button
-                      onClick={() => {
-                        if (newTask.label.trim()) {
-                          onAddTask(date, newTask.label.trim(), newTask.subject);
-                          setNewTask({ subject:"", label:"" });
-                          setAddingTo(null);
-                        }
-                      }}
-                      style={{
-                        padding:"4px 8px", borderRadius:6, border:"none",
-                        background:C.primary, color:"#fff",
-                        fontFamily:"inherit", fontSize:"0.7rem", cursor:"pointer"
-                      }}
-                    >+</button>
-                    <button
-                      onClick={() => { setAddingTo(null); setNewTask({ subject:"", label:"" }); }}
-                      style={{
-                        padding:"4px 8px", borderRadius:6,
-                        border:`1px solid ${C.surface2}`, background:C.surface,
-                        color:C.muted, fontFamily:"inherit", fontSize:"0.7rem", cursor:"pointer"
-                      }}
-                    >✕</button>
+                      style={{ flex:1, padding:"4px 8px", borderRadius:6, border:`1px solid ${C.surface2}`, background:C.surface, color:C.text, fontFamily:"inherit", fontSize:"0.7rem" }}
+                      autoFocus />
+                    <button onClick={() => { if(newTask.label.trim()){onAddTask(date,newTask.label.trim(),newTask.subject);setNewTask({subject:"",label:""});setAddingTo(null);}}}
+                      style={{ padding:"4px 8px", borderRadius:6, border:"none", background:C.primary, color:"#fff", fontFamily:"inherit", fontSize:"0.7rem", cursor:"pointer" }}>+</button>
+                    <button onClick={() => { setAddingTo(null); setNewTask({subject:"",label:""}); }}
+                      style={{ padding:"4px 8px", borderRadius:6, border:`1px solid ${C.surface2}`, background:C.surface, color:C.muted, fontFamily:"inherit", fontSize:"0.7rem", cursor:"pointer" }}>✕</button>
                   </div>
                 ) : (
                   <button onClick={() => setAddingTo(date)} style={{
-                    background:"none", border:`1px dashed ${C.surface2}`,
-                    borderRadius:6, padding:"3px 10px", width:"100%",
-                    color:C.muted, fontFamily:"inherit", fontSize:"0.68rem",
-                    cursor:"pointer", marginTop:4
+                    background:"none", border:`1px dashed ${C.surface2}`, borderRadius:6,
+                    padding:"3px 10px", width:"100%", color:C.muted,
+                    fontFamily:"inherit", fontSize:"0.68rem", cursor:"pointer", marginTop:4
                   }}>+ add task</button>
                 )}
               </div>
@@ -303,37 +305,14 @@ function AddDayButton({ subjects, onAdd, existingDates }) {
   );
 
   return (
-    <div style={{
-      background:C.surface, borderRadius:10, padding:12,
-      border:`1px solid ${C.surface2}`, marginBottom:8
-    }}>
-      <input value={date} onChange={e => setDate(e.target.value)}
-        placeholder="Date label (e.g. Mon Apr 14)"
-        style={{
-          width:"100%", padding:"6px 10px", borderRadius:7, marginBottom:6,
-          border:`1px solid ${C.surface2}`, background:C.bg,
-          color:C.text, fontFamily:"inherit", fontSize:"0.75rem", boxSizing:"border-box"
-        }}
-      />
-      <input value={group} onChange={e => setGroup(e.target.value)}
-        placeholder="Week/group label (optional, e.g. Week 2)"
-        style={{
-          width:"100%", padding:"6px 10px", borderRadius:7, marginBottom:6,
-          border:`1px solid ${C.surface2}`, background:C.bg,
-          color:C.text, fontFamily:"inherit", fontSize:"0.75rem", boxSizing:"border-box"
-        }}
-      />
+    <div style={{ background:C.surface, borderRadius:10, padding:12, border:`1px solid ${C.surface2}`, marginBottom:8 }}>
+      <input value={date} onChange={e => setDate(e.target.value)} placeholder="Date label (e.g. Mon Apr 14)"
+        style={{ width:"100%", padding:"6px 10px", borderRadius:7, marginBottom:6, border:`1px solid ${C.surface2}`, background:C.bg, color:C.text, fontFamily:"inherit", fontSize:"0.75rem", boxSizing:"border-box" }} />
+      <input value={group} onChange={e => setGroup(e.target.value)} placeholder="Week/group label (optional)"
+        style={{ width:"100%", padding:"6px 10px", borderRadius:7, marginBottom:6, border:`1px solid ${C.surface2}`, background:C.bg, color:C.text, fontFamily:"inherit", fontSize:"0.75rem", boxSizing:"border-box" }} />
       <div style={{ display:"flex", gap:6 }}>
-        <button onClick={handleAdd} style={{
-          flex:1, padding:"6px 0", borderRadius:7, border:"none",
-          background:C.primary, color:"#fff",
-          fontFamily:"inherit", fontSize:"0.75rem", fontWeight:700, cursor:"pointer"
-        }}>Add</button>
-        <button onClick={() => setOpen(false)} style={{
-          flex:1, padding:"6px 0", borderRadius:7,
-          border:`1px solid ${C.surface2}`, background:C.surface,
-          color:C.muted, fontFamily:"inherit", fontSize:"0.75rem", cursor:"pointer"
-        }}>Cancel</button>
+        <button onClick={handleAdd} style={{ flex:1, padding:"6px 0", borderRadius:7, border:"none", background:C.primary, color:"#fff", fontFamily:"inherit", fontSize:"0.75rem", fontWeight:700, cursor:"pointer" }}>Add</button>
+        <button onClick={() => setOpen(false)} style={{ flex:1, padding:"6px 0", borderRadius:7, border:`1px solid ${C.surface2}`, background:C.surface, color:C.muted, fontFamily:"inherit", fontSize:"0.75rem", cursor:"pointer" }}>Cancel</button>
       </div>
     </div>
   );
@@ -343,31 +322,19 @@ function AddDayButton({ subjects, onAdd, existingDates }) {
 function PetTab({ petId, petName, mood, happiness, level, title, equipped, owned, onEquip }) {
   return (
     <div style={{ textAlign:"center" }}>
-      <div style={{
-        background:C.surface, borderRadius:16, padding:20, marginBottom:10,
-        border:`2px solid ${C.surface2}`, display:"inline-block"
-      }}>
-        <PixelCat mood={mood} hat={equipped.hat} outfit={equipped.outfit}
-          bg={equipped.bg} comp={equipped.comp} petId={petId} size={140} />
+      <div style={{ background:C.surface, borderRadius:16, padding:20, marginBottom:10, border:`2px solid ${C.surface2}`, display:"inline-block" }}>
+        <PixelCat mood={mood} hat={equipped.hat} outfit={equipped.outfit} bg={equipped.bg} comp={equipped.comp} petId={petId} size={140} />
       </div>
-      <div style={{ fontSize:"0.9rem", fontWeight:700, color:C.text, marginBottom:2 }}>
-        {petName} — Lv.{level} {title}
-      </div>
-      <div style={{
-        background:C.surface, borderRadius:10, padding:"8px 14px",
-        marginBottom:10, border:`1px solid ${C.surface2}`
-      }}>
+      <div style={{ fontSize:"0.9rem", fontWeight:700, color:C.text, marginBottom:2 }}>{petName} — Lv.{level} {title}</div>
+      <div style={{ background:C.surface, borderRadius:10, padding:"8px 14px", marginBottom:10, border:`1px solid ${C.surface2}` }}>
         <div style={{ display:"flex", justifyContent:"space-between", marginBottom:4 }}>
           <span style={{ fontSize:"0.68rem", fontWeight:700, color:C.pink }}>
-            {happiness > 70 ? "😸 Happy!" : happiness > 40 ? "😺 Content" : "😿 Needs tasks!"}
+            {happiness>70?"😸 Happy!":happiness>40?"😺 Content":"😿 Needs tasks!"}
           </span>
           <span style={{ fontSize:"0.65rem", color:C.muted }}>{happiness}/100</span>
         </div>
         <div style={{ background:C.surface2, borderRadius:4, height:6, overflow:"hidden" }}>
-          <div style={{
-            background: happiness > 70 ? C.green : happiness > 40 ? C.yellow : C.red,
-            width:`${happiness}%`, height:"100%", transition:"width 0.5s"
-          }} />
+          <div style={{ background:happiness>70?C.green:happiness>40?C.yellow:C.red, width:`${happiness}%`, height:"100%", transition:"width 0.5s" }} />
         </div>
       </div>
       {owned.length > 0 && (
@@ -377,9 +344,9 @@ function PetTab({ petId, petName, mood, happiness, level, title, equipped, owned
             {SHOP.filter(s => owned.includes(s.id)).map(item => (
               <button key={item.id} onClick={() => onEquip(item.type, item.id)} style={{
                 padding:"4px 8px", borderRadius:7, fontSize:"0.68rem", fontWeight:700,
-                border:`2px solid ${equipped[item.type] === item.id ? C.primary : C.surface2}`,
-                background: equipped[item.type] === item.id ? C.primary : C.bg,
-                color: equipped[item.type] === item.id ? "#fff" : C.text,
+                border:`2px solid ${equipped[item.type]===item.id?C.primary:C.surface2}`,
+                background: equipped[item.type]===item.id?C.primary:C.bg,
+                color: equipped[item.type]===item.id?"#fff":C.text,
                 cursor:"pointer", fontFamily:"inherit"
               }}>{item.emoji} {item.label}{item.rare?" ✨":""}</button>
             ))}
@@ -394,19 +361,14 @@ function PetTab({ petId, petName, mood, happiness, level, title, equipped, owned
 function QuestsTab({ coins, achievements, onSpin, dailyQuests, questDone }) {
   return (
     <div>
-      <div style={{
-        background:C.surface, borderRadius:12, padding:12,
-        marginBottom:12, border:`1px solid ${C.surface2}`, textAlign:"center"
-      }}>
+      <div style={{ background:C.surface, borderRadius:12, padding:12, marginBottom:12, border:`1px solid ${C.surface2}`, textAlign:"center" }}>
         <div style={{ fontSize:"0.78rem", fontWeight:700, color:C.text, marginBottom:4 }}>🎰 Spin the Wheel</div>
         <div style={{ fontSize:"0.68rem", color:C.muted, marginBottom:8 }}>Costs 5 coins · Win coins, free time, or rare items!</div>
         <button onClick={onSpin} style={{
           padding:"8px 20px", borderRadius:10, border:"none",
-          background: coins >= 5 ? C.primary : C.surface2,
-          color: coins >= 5 ? "#fff" : C.muted,
-          fontFamily:"inherit", fontSize:"0.78rem", fontWeight:700,
-          cursor: coins >= 5 ? "pointer" : "default"
-        }}>{coins >= 5 ? "Spin! (5 coins)" : "Need 5 coins to spin"}</button>
+          background:coins>=5?C.primary:C.surface2, color:coins>=5?"#fff":C.muted,
+          fontFamily:"inherit", fontSize:"0.78rem", fontWeight:700, cursor:coins>=5?"pointer":"default"
+        }}>{coins>=5?"Spin! (5 coins)":"Need 5 coins to spin"}</button>
       </div>
 
       <div style={{ background:C.surface, borderRadius:12, padding:12, marginBottom:12, border:`1px solid ${C.surface2}` }}>
@@ -415,16 +377,14 @@ function QuestsTab({ coins, achievements, onSpin, dailyQuests, questDone }) {
           const isDone = questDone[q.id];
           return (
             <div key={q.id} style={{
-              background: isDone ? "#d4edd4" : C.bg, borderRadius:8,
-              padding:"8px 10px", marginBottom:6,
-              border:`1px solid ${isDone ? C.green : C.surface2}`,
-              display:"flex", alignItems:"center", gap:8,
+              background:isDone?"#d4edd4":C.bg, borderRadius:8, padding:"8px 10px", marginBottom:6,
+              border:`1px solid ${isDone?C.green:C.surface2}`, display:"flex", alignItems:"center", gap:8,
             }}>
               <div style={{ flex:1 }}>
-                <div style={{ fontSize:"0.75rem", fontWeight:700, color: isDone ? C.green : C.text, textDecoration: isDone ? "line-through" : "none" }}>{q.label}</div>
+                <div style={{ fontSize:"0.75rem", fontWeight:700, color:isDone?C.green:C.text, textDecoration:isDone?"line-through":"none" }}>{q.label}</div>
                 <div style={{ fontSize:"0.62rem", color:C.muted }}>+{q.reward} coins</div>
               </div>
-              {isDone ? <span>✅</span> : <span style={{ fontSize:"0.68rem", color:C.muted }}>+{q.reward}</span>}
+              {isDone?<span>✅</span>:<span style={{ fontSize:"0.68rem", color:C.muted }}>+{q.reward}</span>}
             </div>
           );
         })}
@@ -432,16 +392,15 @@ function QuestsTab({ coins, achievements, onSpin, dailyQuests, questDone }) {
 
       <div style={{ background:C.surface, borderRadius:12, padding:12, border:`1px solid ${C.surface2}` }}>
         <div style={{ fontSize:"0.78rem", fontWeight:700, color:C.text, marginBottom:8 }}>
-          Achievements ({achievements.filter(a => a.unlocked).length}/10)
+          Achievements ({achievements.filter(a=>a.unlocked).length}/10)
         </div>
         <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:6 }}>
           {achievements.map(({ ach, unlocked }) => (
             <div key={ach.id} style={{
-              background: unlocked ? C.bg : C.surface2, borderRadius:10,
-              padding:"8px 10px", opacity: unlocked ? 1 : 0.5,
-              border:`1px solid ${unlocked ? C.yellow : C.surface2}`
+              background:unlocked?C.bg:C.surface2, borderRadius:10, padding:"8px 10px",
+              opacity:unlocked?1:0.5, border:`1px solid ${unlocked?C.yellow:C.surface2}`
             }}>
-              <div style={{ fontSize:"1.2rem", textAlign:"center" }}>{unlocked ? ach.emoji : "🔒"}</div>
+              <div style={{ fontSize:"1.2rem", textAlign:"center" }}>{unlocked?ach.emoji:"🔒"}</div>
               <div style={{ fontSize:"0.68rem", fontWeight:700, color:C.text, textAlign:"center" }}>{ach.label}</div>
               <div style={{ fontSize:"0.6rem", color:C.muted, textAlign:"center" }}>{ach.desc}</div>
             </div>
@@ -467,40 +426,33 @@ function ShopTab({ coins, owned, equipped, onBuy, onEquip }) {
               {labels[type].toUpperCase()}
             </div>
             <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:5 }}>
-              {SHOP.filter(s => s.type === type).map(item => {
+              {SHOP.filter(s=>s.type===type).map(item => {
                 const isOwned = owned.includes(item.id);
-                const canBuy  = coins >= item.cost && !isOwned && !item.rare;
+                const canBuy  = coins>=item.cost && !isOwned && !item.rare;
                 return (
                   <div key={item.id} style={{
-                    background: isOwned ? "#d4edd4" : item.rare ? "#f5f0ff" : C.surface,
+                    background:isOwned?"#d4edd4":item.rare?"#f5f0ff":C.surface,
                     borderRadius:10, padding:"9px 10px",
-                    border:`1px solid ${isOwned ? C.green : item.rare ? C.purple : C.surface2}`,
+                    border:`1px solid ${isOwned?C.green:item.rare?C.purple:C.surface2}`,
                     display:"flex", flexDirection:"column", gap:3,
                   }}>
                     <div style={{ fontSize:"1.3rem", textAlign:"center" }}>{item.emoji}</div>
                     <div style={{ fontSize:"0.7rem", fontWeight:700, color:C.text, textAlign:"center" }}>
                       {item.label}{item.rare?" ✨":""}
                     </div>
-                    {item.rare && !isOwned && (
-                      <div style={{ fontSize:"0.6rem", color:C.purple, textAlign:"center" }}>Win from wheel!</div>
-                    )}
-                    {isOwned && (
-                      <button onClick={() => onEquip(item.type, item.id)} style={{
-                        padding:"3px 0", borderRadius:6, border:"none",
-                        fontSize:"0.65rem", fontWeight:700,
-                        background: equipped[item.type] === item.id ? C.primary : C.green,
+                    {item.rare&&!isOwned&&<div style={{ fontSize:"0.6rem", color:C.purple, textAlign:"center" }}>Win from wheel!</div>}
+                    {isOwned&&(
+                      <button onClick={() => onEquip(item.type,item.id)} style={{
+                        padding:"3px 0", borderRadius:6, border:"none", fontSize:"0.65rem", fontWeight:700,
+                        background:equipped[item.type]===item.id?C.primary:C.green,
                         color:"#fff", cursor:"pointer", fontFamily:"inherit"
-                      }}>
-                        {equipped[item.type] === item.id ? "✓ Equipped" : "Equip"}
-                      </button>
+                      }}>{equipped[item.type]===item.id?"✓ Equipped":"Equip"}</button>
                     )}
-                    {!item.rare && !isOwned && (
+                    {!item.rare&&!isOwned&&(
                       <button onClick={() => onBuy(item)} disabled={!canBuy} style={{
-                        padding:"3px 0", borderRadius:6, border:"none",
-                        fontSize:"0.65rem", fontWeight:700,
-                        background: canBuy ? C.primary : C.surface2,
-                        color: canBuy ? "#fff" : C.muted,
-                        cursor: canBuy ? "pointer" : "default", fontFamily:"inherit"
+                        padding:"3px 0", borderRadius:6, border:"none", fontSize:"0.65rem", fontWeight:700,
+                        background:canBuy?C.primary:C.surface2, color:canBuy?"#fff":C.muted,
+                        cursor:canBuy?"pointer":"default", fontFamily:"inherit"
                       }}>{item.cost} coins</button>
                     )}
                   </div>
@@ -516,27 +468,22 @@ function ShopTab({ coins, owned, equipped, onBuy, onEquip }) {
 
 // ─── Root App ─────────────────────────────────────────────────────────────────
 export default function App() {
-  const [authReady,    setAuthReady]    = useState(false);
-  const [uid,          setUid]          = useState(null);
-  const [username,     setUsername]     = useState(localStorage.getItem("sq-username") || "");
-  const [petId,        setPetId]        = useState(localStorage.getItem("sq-petId")    || "tabby");
-  const [petName,      setPetName]      = useState(localStorage.getItem("sq-petName")  || "");
-  const [subjects,     setSubjects]     = useState([]);
-  const [days,         setDays]         = useState([]);
-  const [tab,          setTab]          = useState("tasks");
-  const [popup,        setPopup]        = useState(null);
-  const [newAch,       setNewAch]       = useState(null);
-  const [showSpin,     setShowSpin]     = useState(false);
-  const [dailyQuests,  setDailyQuests]  = useState([]);
+  const [authReady,         setAuthReady]         = useState(false);
+  const [uid,               setUid]               = useState(null);
+  const [username,          setUsername]          = useState(localStorage.getItem("sq-username") || "");
+  const [petId,             setPetId]             = useState(localStorage.getItem("sq-petId")    || "tabby");
+  const [petName,           setPetName]           = useState(localStorage.getItem("sq-petName")  || "");
+  const [subjects,          setSubjects]          = useState([]);
+  const [days,              setDays]              = useState([]);
+  const [tab,               setTab]               = useState("tasks");
+  const [popup,             setPopup]             = useState(null);
+  const [newAch,            setNewAch]            = useState(null);
+  const [showSpin,          setShowSpin]          = useState(false);
+  const [dailyQuests,       setDailyQuests]       = useState([]);
+  const [showSubjectEditor, setShowSubjectEditor] = useState(false);
 
   const allTasks = days.flatMap(d => d.tasks || []).filter(Boolean);
-
-  const {
-    state, done,
-    toggleTask, handleSpin, buyItem, equipItem, cashOut,
-    tickHappiness, incrementCheers, setState,
-  } = useGameState(allTasks.length);
-
+  const { state, done, toggleTask, handleSpin, buyItem, equipItem, cashOut, tickHappiness, incrementCheers, setState } = useGameState(allTasks.length);
   const actualDone = allTasks.filter(t => state.checked[t.id]).length;
 
   // ── Auth listener ─────────────────────────────────────────────────────────
@@ -556,9 +503,7 @@ export default function App() {
           setSubjects(meta.subjects || []);
         }
         const stateSnap = await get(ref(db, `users/${user.uid}/gameState`));
-        if (stateSnap.exists()) {
-          setState(prev => ({ ...prev, ...stateSnap.val() }));
-        }
+        if (stateSnap.exists()) setState(prev => ({ ...prev, ...stateSnap.val() }));
         const daysSnap = await get(ref(db, `users/${user.uid}/days`));
         if (daysSnap.exists()) {
           setDays(daysSnap.val());
@@ -621,63 +566,52 @@ export default function App() {
   const handleOnboardingDone = (newUid, uname, pid, pname, subs) => {
     setUid(newUid);
     if (uname) {
-      setUsername(uname);
-      localStorage.setItem("sq-username", uname);
-      setPetId(pid);
-      localStorage.setItem("sq-petId", pid);
-      setPetName(pname);
-      localStorage.setItem("sq-petName", pname);
+      setUsername(uname); localStorage.setItem("sq-username", uname);
+      setPetId(pid);      localStorage.setItem("sq-petId", pid);
+      setPetName(pname);  localStorage.setItem("sq-petName", pname);
       setSubjects(subs || []);
     }
   };
 
-  const showPopup      = msg => { setPopup(msg);   setTimeout(() => setPopup(null),   1800); };
-  const showAchievement = ach => { setNewAch(ach); setTimeout(() => setNewAch(null),  3000); };
+  const showPopup       = msg => { setPopup(msg);  setTimeout(() => setPopup(null),  1800); };
+  const showAchievement = ach => { setNewAch(ach); setTimeout(() => setNewAch(null), 3000); };
 
-  // ── Task mutations ────────────────────────────────────────────────────────
   const handleToggle = id => toggleTask(id, showPopup, showAchievement);
 
   const handleAddTask = (date, label, subject, group = null) => {
     setDays(prev => {
       const existing = prev.find(d => d.date === date);
       const newTask = label
-        ? { id:`t_${Date.now()}_${Math.random().toString(36).substr(2,9)}`, label, subject: subject || "", done:false }
+        ? { id:`t_${Date.now()}_${Math.random().toString(36).substr(2,9)}`, label, subject:subject||"", done:false }
         : null;
       if (existing) {
-        return prev.map(d => d.date === date
-          ? { ...d, tasks: newTask ? [...(d.tasks || []), newTask] : (d.tasks || []) }
-          : d
-        );
+        return prev.map(d => d.date===date ? { ...d, tasks: newTask?[...(d.tasks||[]),newTask]:(d.tasks||[]) } : d);
       }
-      return [...prev, { date, group: group || null, tasks: newTask ? [newTask] : [] }];
+      return [...prev, { date, group:group||null, tasks:newTask?[newTask]:[] }];
     });
   };
 
   const handleDeleteTask = (date, taskId) => {
     setDays(prev => prev.map(d =>
-      d.date === date ? { ...d, tasks: (d.tasks || []).filter(t => t && t.id !== taskId) } : d
+      d.date===date ? { ...d, tasks:(d.tasks||[]).filter(t=>t&&t.id!==taskId) } : d
     ));
-    setState(prev => {
-      const checked = { ...prev.checked };
-      delete checked[taskId];
-      return { ...prev, checked };
-    });
+    setState(prev => { const checked={...prev.checked}; delete checked[taskId]; return {...prev,checked}; });
   };
 
   const handleDeleteDay = (date) => {
-    const dayToDelete = days.find(d => d.date === date);
+    const dayToDelete = days.find(d => d.date===date);
     if (dayToDelete) {
       setState(prev => {
-        const checked = { ...prev.checked };
-        (dayToDelete.tasks || []).filter(Boolean).forEach(t => delete checked[t.id]);
-        return { ...prev, checked };
+        const checked={...prev.checked};
+        (dayToDelete.tasks||[]).filter(Boolean).forEach(t => delete checked[t.id]);
+        return {...prev,checked};
       });
     }
-    setDays(prev => prev.filter(d => d.date !== date));
+    setDays(prev => prev.filter(d => d.date!==date));
   };
 
   const handleImport = (data) => {
-    const imported = data.map(d => ({
+    setDays(data.map(d => ({
       date:  d.date,
       group: d.group || null,
       tasks: d.tasks.map(t => ({
@@ -686,21 +620,31 @@ export default function App() {
         subject: t.subject || "",
         done:    false,
       }))
-    }));
-    setDays(imported);
+    })));
+  };
+
+  const handleSaveSubjects = async (updated) => {
+    setSubjects(updated);
+    setShowSubjectEditor(false);
+    if (uid) {
+      const snap = await get(ref(db, `users/${uid}/meta`));
+      if (snap.exists()) {
+        set(ref(db, `users/${uid}/meta`), { ...snap.val(), subjects: updated });
+      }
+    }
   };
 
   // ── Derived display ───────────────────────────────────────────────────────
   const { level, title, mood: rawMood } = getLevel(actualDone, allTasks.length);
-  const mood       = state.happiness < 30 ? "sleepy" : state.happiness > 70 ? rawMood : "neutral";
-  const lvlThresh  = [0, 0.08, 0.22, 0.40, 0.60, 0.80, 1.0];
-  const pct        = allTasks.length > 0 ? actualDone / allTasks.length : 0;
-  const lvlStart   = lvlThresh[level - 1] || 0;
-  const lvlEnd     = lvlThresh[level]     || 1;
-  const lvlPct     = lvlEnd > lvlStart ? ((pct - lvlStart) / (lvlEnd - lvlStart)) * 100 : 100;
+  const mood      = state.happiness<30?"sleepy":state.happiness>70?rawMood:"neutral";
+  const lvlThresh = [0,0.08,0.22,0.40,0.60,0.80,1.0];
+  const pct       = allTasks.length>0 ? actualDone/allTasks.length : 0;
+  const lvlStart  = lvlThresh[level-1]||0;
+  const lvlEnd    = lvlThresh[level]  ||1;
+  const lvlPct    = lvlEnd>lvlStart ? ((pct-lvlStart)/(lvlEnd-lvlStart))*100 : 100;
 
   const { ACHIEVEMENTS: ACH_LIST } = require("./data/constants");
-  const achDisplay = ACH_LIST.map(a => ({ ach: a, unlocked: state.achievements.includes(a.id) }));
+  const achDisplay = ACH_LIST.map(a => ({ ach:a, unlocked:state.achievements.includes(a.id) }));
 
   if (!authReady) return (
     <div style={{ ...px, background:C.bg, minHeight:"100vh", display:"flex", alignItems:"center", justifyContent:"center", color:C.muted, fontSize:"0.85rem" }}>
@@ -714,21 +658,13 @@ export default function App() {
     <div style={{ ...px, background:C.bg, minHeight:"100vh", padding:16, maxWidth:480, margin:"0 auto" }}>
 
       {popup && (
-        <div style={{
-          position:"fixed", top:60, right:16,
-          background:C.primary, color:"#fff",
-          borderRadius:20, padding:"6px 14px",
-          fontSize:"0.82rem", fontWeight:700, zIndex:999
-        }}>{popup}</div>
+        <div style={{ position:"fixed", top:60, right:16, background:C.primary, color:"#fff", borderRadius:20, padding:"6px 14px", fontSize:"0.82rem", fontWeight:700, zIndex:999 }}>
+          {popup}
+        </div>
       )}
 
       {newAch && (
-        <div style={{
-          position:"fixed", top:100, left:"50%", transform:"translateX(-50%)",
-          background:"#fff", borderRadius:16, padding:"12px 20px",
-          boxShadow:"0 4px 20px rgba(0,0,0,0.2)", zIndex:1000, textAlign:"center",
-          border:`2px solid ${C.yellow}`
-        }}>
+        <div style={{ position:"fixed", top:100, left:"50%", transform:"translateX(-50%)", background:"#fff", borderRadius:16, padding:"12px 20px", boxShadow:"0 4px 20px rgba(0,0,0,0.2)", zIndex:1000, textAlign:"center", border:`2px solid ${C.yellow}` }}>
           <div style={{ fontSize:"1.5rem" }}>{newAch.emoji}</div>
           <div style={{ fontSize:"0.8rem", fontWeight:700, color:C.text }}>Achievement Unlocked!</div>
           <div style={{ fontSize:"0.72rem", color:C.muted }}>{newAch.label}</div>
@@ -736,11 +672,11 @@ export default function App() {
       )}
 
       {showSpin && (
-        <SpinWheel
-          coins={state.coins}
-          onSpin={r => handleSpin(r, showPopup, showAchievement)}
-          onClose={() => setShowSpin(false)}
-        />
+        <SpinWheel coins={state.coins} onSpin={r => handleSpin(r,showPopup,showAchievement)} onClose={() => setShowSpin(false)} />
+      )}
+
+      {showSubjectEditor && (
+        <SubjectEditor subjects={subjects} onSave={handleSaveSubjects} onClose={() => setShowSubjectEditor(false)} />
       )}
 
       {/* Header */}
@@ -750,119 +686,79 @@ export default function App() {
           <span style={{ fontSize:"0.65rem", color:C.muted, marginLeft:6 }}>Lv.{level} {title}</span>
         </div>
         <div style={{ display:"flex", gap:5, alignItems:"center" }}>
-          {state.streak > 0 && (
-            <span style={{ fontSize:"0.7rem", fontWeight:700, color:C.red }}>🔥{state.streak}</span>
-          )}
-          <div style={{
-            background:C.surface, borderRadius:20, padding:"3px 10px",
-            fontSize:"0.75rem", fontWeight:700, color:C.primary,
-            border:`2px solid ${C.primary}`
-          }}>🪙 {state.coins}</div>
+          {state.streak>0&&<span style={{ fontSize:"0.7rem", fontWeight:700, color:C.red }}>🔥{state.streak}</span>}
+          <div style={{ background:C.surface, borderRadius:20, padding:"3px 10px", fontSize:"0.75rem", fontWeight:700, color:C.primary, border:`2px solid ${C.primary}` }}>
+            🪙 {state.coins}
+          </div>
         </div>
       </div>
 
       {/* XP bar */}
-      <div style={{
-        background:C.surface, borderRadius:4, height:7, marginBottom:4,
-        overflow:"hidden", border:`1px solid ${C.surface2}`
-      }}>
-        <div style={{ background:C.primary, width:`${Math.min(100, Math.max(0, lvlPct))}%`, height:"100%", transition:"width 0.4s" }} />
+      <div style={{ background:C.surface, borderRadius:4, height:7, marginBottom:4, overflow:"hidden", border:`1px solid ${C.surface2}` }}>
+        <div style={{ background:C.primary, width:`${Math.min(100,Math.max(0,lvlPct))}%`, height:"100%", transition:"width 0.4s" }} />
       </div>
       <div style={{ display:"flex", justifyContent:"space-between", fontSize:"0.6rem", color:C.muted, marginBottom:10 }}>
         <span>Lv.{level}</span>
         <span>{actualDone}/{allTasks.length} tasks</span>
-        <span>Lv.{Math.min(level + 1, 6)}</span>
+        <span>Lv.{Math.min(level+1,6)}</span>
       </div>
 
       {/* Free time bar */}
-      <div style={{
-        background:C.surface, borderRadius:10, padding:"8px 12px",
-        marginBottom:12, border:`1px solid ${C.surface2}`,
-        display:"flex", alignItems:"center", gap:8
-      }}>
+      <div style={{ background:C.surface, borderRadius:10, padding:"8px 12px", marginBottom:12, border:`1px solid ${C.surface2}`, display:"flex", alignItems:"center", gap:8 }}>
         <div style={{ flex:1 }}>
           <div style={{ display:"flex", justifyContent:"space-between", marginBottom:3 }}>
             <span style={{ fontSize:"0.68rem", fontWeight:700, color:C.green }}>Free Time</span>
             <span style={{ fontSize:"0.68rem", color:C.muted }}>{state.freeTime} min earned</span>
           </div>
           <div style={{ background:C.surface2, borderRadius:4, height:6, overflow:"hidden" }}>
-            <div style={{
-              background:C.green,
-              width:`${Math.min(100, (state.freeTime / 120) * 100)}%`,
-              height:"100%", transition:"width 0.3s"
-            }} />
+            <div style={{ background:C.green, width:`${Math.min(100,(state.freeTime/120)*100)}%`, height:"100%", transition:"width 0.3s" }} />
           </div>
         </div>
-        <button
-          onClick={() => cashOut(showPopup)}
-          disabled={state.freeTime < 15}
-          style={{
-            padding:"4px 10px", borderRadius:8, border:"none",
-            fontSize:"0.68rem", fontWeight:700,
-            background: state.freeTime >= 15 ? C.green : C.surface2,
-            color: state.freeTime >= 15 ? "#fff" : C.muted,
-            fontFamily:"inherit", cursor: state.freeTime >= 15 ? "pointer" : "default"
-          }}
-        >Cash out!</button>
+        <button onClick={() => cashOut(showPopup)} disabled={state.freeTime<15} style={{
+          padding:"4px 10px", borderRadius:8, border:"none", fontSize:"0.68rem", fontWeight:700,
+          background:state.freeTime>=15?C.green:C.surface2,
+          color:state.freeTime>=15?"#fff":C.muted,
+          fontFamily:"inherit", cursor:state.freeTime>=15?"pointer":"default"
+        }}>Cash out!</button>
       </div>
 
       {/* Tab bar */}
       <div style={{ display:"flex", gap:4, marginBottom:14 }}>
-        {[["tasks","📋"],["pet","🐱"],["quests","⚡"],["friend","👯"],["shop","🛍️"]].map(([v, l]) => (
+        {[["tasks","📋"],["pet","🐱"],["quests","⚡"],["friend","👯"],["shop","🛍️"]].map(([v,l]) => (
           <button key={v} onClick={() => setTab(v)} style={{
             flex:1, padding:"6px 0", borderRadius:6,
-            border:`2px solid ${tab === v ? C.primary : C.surface2}`,
-            background: tab === v ? C.primary : C.surface,
-            color: tab === v ? "#fff" : C.text,
+            border:`2px solid ${tab===v?C.primary:C.surface2}`,
+            background:tab===v?C.primary:C.surface,
+            color:tab===v?"#fff":C.text,
             fontFamily:"inherit", fontSize:"0.7rem", fontWeight:700, cursor:"pointer"
           }}>{l}</button>
         ))}
       </div>
 
-      {tab === "tasks" && (
+      {tab==="tasks" && (
         <TasksTab
-          days={days} subjects={subjects}
-          checked={state.checked}
-          onToggle={handleToggle}
-          onAddTask={handleAddTask}
-          onDeleteTask={handleDeleteTask}
-          onDeleteDay={handleDeleteDay}
-          onImport={handleImport}
+          days={days} subjects={subjects} checked={state.checked}
+          onToggle={handleToggle} onAddTask={handleAddTask}
+          onDeleteTask={handleDeleteTask} onDeleteDay={handleDeleteDay}
+          onImport={handleImport} onEditSubjects={() => setShowSubjectEditor(true)}
         />
       )}
-
-      {tab === "pet" && (
-        <PetTab
-          petId={petId} petName={petName} mood={mood}
+      {tab==="pet" && (
+        <PetTab petId={petId} petName={petName} mood={mood}
           happiness={state.happiness} level={level} title={title}
-          equipped={state.equipped} owned={state.owned}
-          onEquip={equipItem}
-        />
+          equipped={state.equipped} owned={state.owned} onEquip={equipItem} />
       )}
-
-      {tab === "quests" && (
-        <QuestsTab
-          coins={state.coins}
-          achievements={achDisplay}
-          onSpin={() => setShowSpin(true)}
-          dailyQuests={dailyQuests}
-          questDone={state.questDone}
-        />
+      {tab==="quests" && (
+        <QuestsTab coins={state.coins} achievements={achDisplay}
+          onSpin={() => setShowSpin(true)} dailyQuests={dailyQuests} questDone={state.questDone} />
       )}
-
-      {tab === "friend" && (
-        <FriendsTab
-          uid={uid} username={username}
-          myTasks={allTasks.map(t => ({ ...t, done: !!state.checked[t.id] }))}
-        />
+      {tab==="friend" && (
+        <FriendsTab uid={uid} username={username}
+          myTasks={allTasks.map(t => ({ ...t, done:!!state.checked[t.id] }))} />
       )}
-
-      {tab === "shop" && (
-        <ShopTab
-          coins={state.coins} owned={state.owned} equipped={state.equipped}
-          onBuy={item => buyItem(item, showAchievement)}
-          onEquip={equipItem}
-        />
+      {tab==="shop" && (
+        <ShopTab coins={state.coins} owned={state.owned} equipped={state.equipped}
+          onBuy={item => buyItem(item,showAchievement)} onEquip={equipItem} />
       )}
     </div>
   );
