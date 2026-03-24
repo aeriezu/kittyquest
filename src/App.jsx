@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import { onAuthStateChanged } from "firebase/auth";
-import { ref, get } from "firebase/database";
+import { ref, get, set } from "firebase/database";
 import { auth, db } from "./firebase";
 import { C, px, EMPTY_EQ, SHOP, QUEST_TEMPLATES, getLevel, SUBJECT_PALETTE } from "./data/constants";
 import { useGameState } from "./hooks/useGameState";
