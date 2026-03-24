@@ -1,14 +1,15 @@
 import { useRef } from "react";
 import { SHOP } from "../data/constants";
 
-const PET_STYLES = {
-  tabby:  { fur:"#9aa0a0", furDark:"#5a6565", skin:"#ffb0c0", whisker:"#888"    },
-  orange: { fur:"#e89050", furDark:"#b85e20", skin:"#ffa080", whisker:"#c87840" },
-  black:  { fur:"#111318", furDark:"#080a0c", skin:"#ff9ab0", whisker:"#333"    },
-  white:  { fur:"#f5f5f8", furDark:"#c8ccd0", skin:"#ffb8cc", whisker:"#bbb"   },
-  calico: { fur:"#e8c888", furDark:"#a06828", skin:"#ffb090", whisker:"#c8a060" },
-  tuxedo: { fur:"#1a1a20", furDark:"#0a0a10", skin:"#f0f0f0", whisker:"#444"   },
-};
+export const PET_OPTIONS = [
+  { id:"tabby",  label:"Gray Tabby",  color:"#9aa0a0" },
+  { id:"orange", label:"Orange Cat",  color:"#e89050" },
+  { id:"black",  label:"Black Cat",   color:"#111318" },
+  { id:"white",  label:"White Cat",   color:"#f5f5f8" },
+  { id:"calico", label:"Calico",      color:"#e8c888" },
+  { id:"tuxedo", label:"Tuxedo",      color:"#1a1a20" },
+  { id:"dragon", label:"Dragon Cat",  color:"#4a8a5a" },
+];
 
 // ─── Background Scene Components ─────────────────────────────────────────────
 
@@ -333,6 +334,10 @@ export default function PixelCat({ mood, hat, outfit, bg, comp, petId="tabby", s
   const moodCls  = mood === "sleepy" ? "m-sleepy" : mood === "excited" ? "m-excited" : "m-neutral";
 
   const css = `
+.${id}.dragon .head{background:radial-gradient(30% 25% at 25% 35%,#3a8a4a 50%,transparent 65%),radial-gradient(25% 20% at 72% 25%,#2a6a3a 45%,transparent 60%),linear-gradient(#0003 0%,#0001 20%,#0000 50%),var(--fur);}
+.${id}.dragon .body{background:repeating-linear-gradient(170deg,var(--fur-dark) 0,var(--fur-dark) 4%,transparent 4%,transparent 14%),radial-gradient(100% 80% at 50% 0,var(--fur-dark) 48%,transparent 52%),var(--fur);}
+.${id}.dragon .ear{border-color:var(--fur);background:var(--skin);clip-path:polygon(50% 0%,100% 100%,0% 100%);}
+.${id}.dragon .ear+.ear{scale:-1 1;right:0;}
 .${id}{--fur:${p.fur};--fur-dark:${p.furDark};--skin:${p.skin};--wh:${p.whisker};font-size:${fs}px;width:80em;aspect-ratio:1;position:relative;}
 .${id} *,.${id} *::before,.${id} *::after{position:absolute;box-sizing:border-box;}
 .${id} .shadow{width:80%;height:5%;background:#0002;border-radius:50%/0 0 100% 100%;top:99%;left:50%;translate:-50%;}
@@ -350,8 +355,8 @@ export default function PixelCat({ mood, hat, outfit, bg, comp, petId="tabby", s
 .${id} .ear{width:40%;aspect-ratio:1;border:4em solid var(--fur);border-radius:5% 90% 10% 80%;background:var(--skin);}
 .${id} .ear+.ear{scale:-1 1;right:0;}
 .${id} .head{width:80%;aspect-ratio:1.1;background:linear-gradient(#0003 0%,#0001 20%,#0000 50%),var(--fur);left:50%;translate:-50%;border-radius:100%/125% 125% 80% 75%;}
-.${id}.tuxedo .head{background:radial-gradient(55% 40% at 50% 85%,#f0f0f0 50%,#e8e8e8 65%,transparent 75%),linear-gradient(#0003 0%,#0001 20%,#0000 50%),var(--fur);}
-.${id}.calico .head{background:radial-gradient(30% 25% at 25% 35%,#c97040 55%,transparent 70%),radial-gradient(25% 20% at 72% 25%,#222 50%,transparent 65%),linear-gradient(#0003 0%,#0001 20%,#0000 50%),var(--fur);}
+.${id}.tuxedo .head{background:radial-gradient(40% 35% at 50% 90%,#f0f0f0 55%,#e0e0e0 70%,transparent 80%),linear-gradient(#0003 0%,#0001 20%,#0000 50%),var(--fur);}
+.${id}.calico .head{background:radial-gradient(25% 20% at 20% 30%,#c97040 50%,transparent 65%),radial-gradient(20% 15% at 78% 20%,#5a3010 45%,transparent 60%),linear-gradient(#0003 0%,#0001 20%,#0000 50%),var(--fur);}
 .${id}.white .head{background:linear-gradient(#0001 0%,#0000 30%),var(--fur);}
 .${id} .whisker{width:30%;height:30%;border-radius:50%;border:2em solid #0000;border-top-color:var(--wh);border-left-color:var(--wh);clip-path:polygon(100% 0,100% 100%,0 30%,0 0);}
 .${id} .whisker:nth-child(1){top:70%;translate:-65%;}
@@ -373,10 +378,10 @@ export default function PixelCat({ mood, hat, outfit, bg, comp, petId="tabby", s
 .${id} .hat-grad::before{content:"";width:70%;height:100%;background:#1a1a2e;border-radius:2em 2em 0 0;bottom:100%;left:50%;translate:-50%;}
 .${id} .hat-grad::after{content:"";width:35%;height:6%;background:#c9a84e;border-radius:1em;top:-22%;left:50%;translate:-50%;}
 .${id} .hat-halo{width:68%;height:10%;border:0.4em solid #c9a84e;border-radius:50%;top:-14%;left:50%;translate:-50%;background:transparent;z-index:10;box-shadow:0 0 8px #c9a84e66;}
-.${id} .scarf{width:40%;height:7%;background:#c84a3a;border-radius:2em;top:62%;left:50%;translate:-50%;z-index:10;}
-.${id} .bowtie-l{width:9%;height:6%;background:#4a7fa0;clip-path:polygon(0 0,100% 20%,100% 80%,0 100%);top:64%;left:38%;z-index:10;}
-.${id} .bowtie-r{width:9%;height:6%;background:#4a7fa0;clip-path:polygon(0 20%,100% 0,100% 100%,0 80%);top:64%;left:53%;z-index:10;}
-.${id} .bowtie-c{width:4%;height:4%;background:#3a6a90;border-radius:50%;top:65%;left:50%;translate:-50%;z-index:10;}
+.${id} .scarf{width:40%;height:7%;background:#c84a3a;border-radius:2em;top:72%;left:50%;translate:-50%;z-index:10;}
+.${id} .bowtie-l{width:9%;height:6%;background:#4a7fa0;clip-path:polygon(0 0,100% 20%,100% 80%,0 100%);top:68%;left:38%;z-index:10;}
+.${id} .bowtie-r{width:9%;height:6%;background:#4a7fa0;clip-path:polygon(0 20%,100% 0,100% 100%,0 80%);top:68%;left:53%;z-index:10;}
+.${id} .bowtie-c{width:4%;height:4%;background:#3a6a90;border-radius:50%;top:69%;left:50%;translate:-50%;z-index:10;}
 .${id} .cape-l{width:60%;height:80%;background:#3a2060;border-radius:0 0 0 8em;top:10%;left:0;z-index:0;opacity:0.5;}
 .${id} .cape-r{width:60%;height:80%;background:#3a2060;border-radius:0 0 8em 0;top:10%;right:0;z-index:0;opacity:0.5;}
 .${id} .robe{width:130%;height:90%;background:linear-gradient(180deg,#4a1a6f,#2a0a4f);border-radius:0 0 4em 4em;bottom:0;left:50%;translate:-50%;z-index:0;opacity:0.55;}
