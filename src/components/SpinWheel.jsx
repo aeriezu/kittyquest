@@ -13,8 +13,10 @@ export default function SpinWheel({ coins, onSpin, onClose }) {
     const idx = Math.floor(Math.random() * SPIN_REWARDS.length);
     const sa = 360 / SPIN_REWARDS.length;
     const spins = (5 + Math.floor(Math.random() * 3)) * 360;
-    // aim so the CENTER of the winning segment lands under the pointer
-    const target = angle + spins + (SPIN_REWARDS.length - idx) * sa - sa / 2;
+    // Each segment i starts at (i * sa - 90) degrees
+    // We want segment idx centered under the top pointer (▼)
+    // So we need the wheel rotated so that -(idx * sa + sa/2) is at the top
+    const target = angle + spins + (360 - (idx * sa + sa / 2));
     setAngle(target);
     setTimeout(() => {
       setSpinning(false);
