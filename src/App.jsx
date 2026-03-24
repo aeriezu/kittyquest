@@ -677,7 +677,7 @@ export default function App() {
       date:  d.date,
       group: d.group || null,
       tasks: d.tasks.map((t, i) => ({
-        id: `imported_${i}_${Date.now()}`,
+        id: `imported_${Date.now()}_${Math.random().toString(36).substr(2,9)}`,
         label:   t.label,
         subject: t.subject || "",
         done:    false,
