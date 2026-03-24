@@ -686,7 +686,7 @@ export default function App() {
     </div>
   );
 
-  if (!uid) return <Onboarding onDone={handleOnboardingDone} />;
+  if (!uid || !username) return <Onboarding onDone={handleOnboardingDone} />;
 
   return (
     <div style={{ ...px, background:C.bg, minHeight:"100vh", padding:16, maxWidth:480, margin:"0 auto" }}>
