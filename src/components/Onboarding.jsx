@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { createUserWithEmailAndPassword, signInWithEmailAndPassword } from "firebase/auth";
-import { ref, set } from "firebase/database";
+import { ref, set, get } from "firebase/database";
 import { auth, db } from "../firebase";
 import PixelCat from "./PixelCat";
 import { C, px, PET_OPTIONS, SUBJECT_PALETTE } from "../data/constants";
@@ -12,8 +12,8 @@ const DEFAULT_SUBJECTS = [
 ];
 
 export default function Onboarding({ onDone }) {
-  const [step,     setStep]     = useState(1); // 1=invite, 2=account, 3=cat, 4=subjects
-  const [mode,     setMode]     = useState("signup"); // signup | login
+  const [step,     setStep]     = useState(1);
+  const [mode,     setMode]     = useState("signup");
   const [invite,   setInvite]   = useState("");
   const [email,    setEmail]    = useState("");
   const [password, setPassword] = useState("");
@@ -24,67 +24,74 @@ export default function Onboarding({ onDone }) {
   const [error,    setError]    = useState("");
   const [loading,  setLoading]  = useState(false);
 
-  // ── Step 1: Invite code ────────────────────────────────────────────────────
   const checkInvite = () => {
     if (invite.trim().toLowerCase() === INVITE_CODE.toLowerCase()) {
-      setStep(2);
-      setError("");
+      setStep(2); setError("");
     } else {
       setError("Wrong invite code!");
     }
   };
 
-  // ── Step 2: Firebase auth ──────────────────────────────────────────────────
   const handleAuth = async () => {
     setError(""); setLoading(true);
     try {
-      let cred;
       if (mode === "signup") {
         if (!username.trim()) { setError("Username required"); setLoading(false); return; }
-        cred = await createUserWithEmailAndPassword(auth, email, password);
-        // Save username to DB (check uniqueness via security rules or just store it)
+        const cred = await createUserWithEmailAndPassword(auth, email, password);
         await set(ref(db, `usernames/${username.trim().toLowerCase()}`), cred.user.uid);
+        setLoading(false);
+        setStep(3);
       } else {
-        cred = await signInWithEmailAndPassword(auth, email, password);
-        // On login, skip cat setup — go straight to app
-        onDone(cred.user.uid, null, null, null, null);
-        return;
+        // ── Login: load meta from Firebase then call onDone ──
+        const cred = await signInWithEmailAndPassword(auth, email, password);
+        const uid  = cred.user.uid;
+        const snap = await get(ref(db, `users/${uid}/meta`));
+        if (snap.exists()) {
+          const meta = snap.val();
+          // Cache username to localStorage so it's available immediately on next load
+          localStorage.setItem("sq-username", meta.username || "");
+          localStorage.setItem("sq-petId",    meta.petId    || "tabby");
+          localStorage.setItem("sq-petName",  meta.petName  || "");
+          onDone(uid, meta.username, meta.petId, meta.petName, meta.subjects || []);
+        } else {
+          // No meta found — send to cat setup
+          setLoading(false);
+          setStep(3);
+        }
       }
-      setLoading(false);
-      setStep(3);
     } catch (e) {
       setError(e.message.replace("Firebase: ", "").replace(/ \(auth\/.*\)/, ""));
       setLoading(false);
     }
   };
 
-  // ── Step 4: Subjects setup then done ──────────────────────────────────────
   const handleFinish = async () => {
     if (!petName.trim()) { setError("Name your cat!"); return; }
     const validSubjects = subjects.filter(s => s.name.trim());
     if (validSubjects.length === 0) { setError("Add at least one subject!"); return; }
     const uid = auth.currentUser?.uid;
-    // Save profile to Firebase
+    const uname = username.trim();
     await set(ref(db, `users/${uid}/meta`), {
-      username: username.trim(),
-      petId, petName: petName.trim(),
+      username: uname,
+      petId,
+      petName: petName.trim(),
       subjects: validSubjects,
     });
-    onDone(uid, username.trim(), petId, petName.trim(), validSubjects);
+    // Cache to localStorage
+    localStorage.setItem("sq-username", uname);
+    localStorage.setItem("sq-petId",    petId);
+    localStorage.setItem("sq-petName",  petName.trim());
+    onDone(uid, uname, petId, petName.trim(), validSubjects);
   };
 
   const addSubject = () => {
     const idx = subjects.length % SUBJECT_PALETTE.length;
     setSubjects(prev => [...prev, { name:"", ...SUBJECT_PALETTE[idx] }]);
   };
-
-  const updateSubject = (i, name) => {
+  const updateSubject = (i, name) =>
     setSubjects(prev => prev.map((s, idx) => idx === i ? { ...s, name } : s));
-  };
-
-  const removeSubject = (i) => {
+  const removeSubject = (i) =>
     setSubjects(prev => prev.filter((_, idx) => idx !== i));
-  };
 
   const inputStyle = {
     padding:"8px 14px", borderRadius:8,
@@ -109,25 +116,19 @@ export default function Onboarding({ onDone }) {
         🐱 Study Quest
       </div>
 
-      {/* ── Step 1: Invite ── */}
       {step === 1 && <>
         <div style={{ fontSize:"0.85rem", color:C.muted }}>Enter your invite code</div>
-        <input
-          value={invite} onChange={e => setInvite(e.target.value)}
+        <input value={invite} onChange={e => setInvite(e.target.value)}
           onKeyDown={e => e.key === "Enter" && checkInvite()}
-          placeholder="invite code..." style={inputStyle}
-        />
+          placeholder="invite code..." style={inputStyle} />
         {error && <div style={{ fontSize:"0.72rem", color:C.red }}>{error}</div>}
         <button onClick={checkInvite} style={btnPrimary}>Enter</button>
-        <button
-          onClick={() => { setMode("login"); setStep(2); }}
-          style={{ background:"none", border:"none", color:C.muted, fontFamily:"inherit", fontSize:"0.72rem", cursor:"pointer" }}
-        >
+        <button onClick={() => { setMode("login"); setStep(2); }}
+          style={{ background:"none", border:"none", color:C.muted, fontFamily:"inherit", fontSize:"0.72rem", cursor:"pointer" }}>
           Already have an account? Log in
         </button>
       </>}
 
-      {/* ── Step 2: Account ── */}
       {step === 2 && <>
         <div style={{ fontSize:"0.9rem", fontWeight:700, color:C.text }}>
           {mode === "signup" ? "Create your account" : "Welcome back!"}
@@ -142,12 +143,12 @@ export default function Onboarding({ onDone }) {
           onKeyDown={e => e.key === "Enter" && handleAuth()}
           placeholder="password" style={inputStyle} />
         {error && <div style={{ fontSize:"0.72rem", color:C.red, maxWidth:280, textAlign:"center" }}>{error}</div>}
-        <button onClick={handleAuth} disabled={loading} style={{ ...btnPrimary, opacity:loading ? 0.7 : 1 }}>
+        <button onClick={handleAuth} disabled={loading}
+          style={{ ...btnPrimary, opacity:loading ? 0.7 : 1 }}>
           {loading ? "..." : mode === "signup" ? "Create Account" : "Log In"}
         </button>
       </>}
 
-      {/* ── Step 3: Pick cat ── */}
       {step === 3 && <>
         <div style={{ fontSize:"0.9rem", fontWeight:700, color:C.text }}>Pick your cat!</div>
         <PixelCat mood="neutral" petId={petId} size={120} />
@@ -161,9 +162,8 @@ export default function Onboarding({ onDone }) {
               fontFamily:"inherit", fontSize:"0.68rem", fontWeight:700, cursor:"pointer",
             }}>
               <div style={{
-                width:14, height:14, borderRadius:"50%",
-                background:opt.color, margin:"0 auto 3px",
-                border:"2px solid rgba(0,0,0,0.15)"
+                width:14, height:14, borderRadius:"50%", background:opt.color,
+                margin:"0 auto 3px", border:"2px solid rgba(0,0,0,0.15)"
               }} />
               {opt.label}
             </button>
@@ -177,7 +177,6 @@ export default function Onboarding({ onDone }) {
         {error && <div style={{ fontSize:"0.72rem", color:C.red }}>{error}</div>}
       </>}
 
-      {/* ── Step 4: Subjects ── */}
       {step === 4 && <>
         <div style={{ fontSize:"0.9rem", fontWeight:700, color:C.text }}>Add your subjects</div>
         <div style={{ fontSize:"0.72rem", color:C.muted, textAlign:"center", maxWidth:280 }}>
@@ -187,15 +186,11 @@ export default function Onboarding({ onDone }) {
           {subjects.map((s, i) => (
             <div key={i} style={{ display:"flex", gap:6, alignItems:"center" }}>
               <div style={{
-                width:12, height:12, borderRadius:"50%",
-                background:s.color, flexShrink:0,
-                border:"2px solid rgba(0,0,0,0.15)"
+                width:12, height:12, borderRadius:"50%", background:s.color,
+                flexShrink:0, border:"2px solid rgba(0,0,0,0.15)"
               }} />
-              <input
-                value={s.name} onChange={e => updateSubject(i, e.target.value)}
-                placeholder={`Subject ${i + 1}...`}
-                style={{ ...inputStyle, flex:1 }}
-              />
+              <input value={s.name} onChange={e => updateSubject(i, e.target.value)}
+                placeholder={`Subject ${i + 1}...`} style={{ ...inputStyle, flex:1 }} />
               {subjects.length > 1 && (
                 <button onClick={() => removeSubject(i)} style={{
                   background:"none", border:"none", color:C.muted,
@@ -206,12 +201,9 @@ export default function Onboarding({ onDone }) {
           ))}
         </div>
         <button onClick={addSubject} style={{
-          padding:"6px 16px", borderRadius:8,
-          border:`2px dashed ${C.surface2}`, background:"none",
-          color:C.muted, fontFamily:"inherit", fontSize:"0.75rem", cursor:"pointer"
-        }}>
-          + Add Subject
-        </button>
+          padding:"6px 16px", borderRadius:8, border:`2px dashed ${C.surface2}`,
+          background:"none", color:C.muted, fontFamily:"inherit", fontSize:"0.75rem", cursor:"pointer"
+        }}>+ Add Subject</button>
         {error && <div style={{ fontSize:"0.72rem", color:C.red }}>{error}</div>}
         <button onClick={handleFinish} style={btnPrimary}>Start studying!</button>
       </>}

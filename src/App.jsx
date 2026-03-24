@@ -519,8 +519,8 @@ export default function App() {
   const [username, setUsername] = useState(
     localStorage.getItem("sq-username") || ""
   );
-  const [petId,      setPetId]      = useState("tabby");
-  const [petName,    setPetName]    = useState("");
+  const [petId,   setPetId]   = useState(localStorage.getItem("sq-petId")   || "tabby");
+  const [petName, setPetName] = useState(localStorage.getItem("sq-petName") || "");
   const [subjects,   setSubjects]   = useState([]);
   const [days,       setDays]       = useState([]); // [{ date, group, tasks: [{id,label,subject,done}] }]
   const [tab,        setTab]        = useState("tasks");
