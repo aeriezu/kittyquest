@@ -549,7 +549,7 @@ export default function App() {
           setSubjects(meta.subjects || []);
         }
        // after loading meta, also load days
-       const daysSnap = await get(ref(db, `users/${uid}/days`));
+       const daysSnap = await get(ref(db, `users/${user.uid}/days`));
          if (daysSnap.exists()) {
            setDays(daysSnap.val());
          } else {
@@ -600,8 +600,8 @@ export default function App() {
   usePublishTodayDone(uid, todayDone, state.streak);
 
   // ── Onboarding done ───────────────────────────────────────────────────────
-  const handleOnboardingDone = (uid, uname, pid, pname, subs) => {
-    setUid(uid);
+  const handleOnboardingDone = (newUid, uname, pid, pname, subs) => {
+    setUid(newUid);
     if (uname) { setUsername(uname); setPetId(pid); setPetName(pname); setSubjects(subs || []); }
   };
 
