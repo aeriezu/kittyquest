@@ -1,7 +1,8 @@
 {
-  "name": "studyquest",
+  "name": "kittyquest",
   "version": "1.0.0",
   "private": true,
+  "homepage": "https://aeriezu.github.io/kittyquest",
   "dependencies": {
     "firebase": "^10.7.0",
     "react": "^18.2.0",
@@ -11,16 +12,14 @@
   "scripts": {
     "start": "react-scripts start",
     "build": "react-scripts build",
-    "deploy": "npm run build && firebase deploy"
+    "deploy": "npm run build && firebase deploy",
+    "predeploy": "npm run build"
+  },
+  "devDependencies": {
+    "gh-pages": "^6.0.0"
   },
   "browserslist": {
-    "production": [
-      ">0.2%",
-      "not dead",
-      "not op_mini all"
-    ],
-    "development": [
-      "last 1 chrome version"
-    ]
+    "production": [">0.2%", "not dead", "not op_mini all"],
+    "development": ["last 1 chrome version"]
   }
 }
