@@ -10,8 +10,11 @@ export default function SpinWheel({ coins, onSpin, onClose }) {
     if (spinning || coins < 5) return;
     setSpinning(true);
     setResult(null);
-    const idx    = Math.floor(Math.random() * SPIN_REWARDS.length);
-    const target = angle + (5 + Math.random() * 3) * 360 + (idx / SPIN_REWARDS.length) * 360;
+    const idx = Math.floor(Math.random() * SPIN_REWARDS.length);
+    const sa = 360 / SPIN_REWARDS.length;
+    const spins = (5 + Math.floor(Math.random() * 3)) * 360;
+    // aim so the CENTER of the winning segment lands under the pointer
+    const target = angle + spins + (SPIN_REWARDS.length - idx) * sa - sa / 2;
     setAngle(target);
     setTimeout(() => {
       setSpinning(false);
