@@ -669,6 +669,15 @@ export default function App() {
   };
 
   const handleDeleteDay = (date) => {
+    const dayToDelete = days.find(d => d.date === date);
+    if (dayToDelete) {
+      // clean up checked state for deleted tasks
+      setState(prev => {
+        const checked = { ...prev.checked };
+        dayToDelete.tasks.forEach(t => delete checked[t.id]);
+        return { ...prev, checked };
+      });
+    }
     setDays(prev => prev.filter(d => d.date !== date));
   };
 
