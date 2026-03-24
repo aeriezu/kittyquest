@@ -548,20 +548,27 @@ export default function App() {
           setPetName(meta.petName || "");
           setSubjects(meta.subjects || []);
         }
-        // Load saved days/tasks from localStorage
-        const savedDays = JSON.parse(localStorage.getItem("studyquest-days") || "null");
-        if (savedDays) setDays(savedDays);
-      } else {
-        setUid(null);
-      }
+       // after loading meta, also load days
+       const daysSnap = await get(ref(db, `users/${uid}/days`));
+         if (daysSnap.exists()) {
+           setDays(daysSnap.val());
+         } else {
+         // fall back to localStorage
+           const savedDays = JSON.parse(localStorage.getItem("studyquest-days") || "null");
+           if (savedDays) setDays(savedDays);
+         }
       setAuthReady(true);
     });
   }, []);
 
   // ── Persist days whenever they change ────────────────────────────────────
   useEffect(() => {
-    if (days.length > 0) localStorage.setItem("studyquest-days", JSON.stringify(days));
-  }, [days]);
+    if (days.length > 0) {
+      localStorage.setItem("studyquest-days", JSON.stringify(days));
+      // also save to Firebase
+      if (uid) set(ref(db, `users/${uid}/days`), days);
+    }
+  }, [days, uid]);
 
   // ── Happiness decay ───────────────────────────────────────────────────────
   useEffect(() => {
