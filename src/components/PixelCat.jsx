@@ -350,8 +350,8 @@ export default function PixelCat({ mood, hat, outfit, bg, comp, petId="tabby", s
 .${id} .ear{width:40%;aspect-ratio:1;border:4em solid var(--fur);border-radius:5% 90% 10% 80%;background:var(--skin);}
 .${id} .ear+.ear{scale:-1 1;right:0;}
 .${id} .head{width:80%;aspect-ratio:1.1;background:linear-gradient(#0003 0%,#0001 20%,#0000 50%),var(--fur);left:50%;translate:-50%;border-radius:100%/125% 125% 80% 75%;}
-.${id}.tuxedo .head{background:radial-gradient(55% 40% at 50% 85%,#f0f0f0 50%,#e8e8e8 65%,transparent 75%),linear-gradient(#0003 0%,#0001 20%,#0000 50%),var(--fur);}
-.${id}.calico .head{background:radial-gradient(30% 25% at 25% 35%,#c97040 55%,transparent 70%),radial-gradient(25% 20% at 72% 25%,#222 50%,transparent 65%),linear-gradient(#0003 0%,#0001 20%,#0000 50%),var(--fur);}
+.${id}.tuxedo .head{background:radial-gradient(40% 35% at 50% 90%,#f0f0f0 55%,#e0e0e0 70%,transparent 80%),linear-gradient(#0003 0%,#0001 20%,#0000 50%),var(--fur);}
+.${id}.calico .head{background:radial-gradient(25% 20% at 20% 30%,#c97040 50%,transparent 65%),radial-gradient(20% 15% at 78% 20%,#5a3010 45%,transparent 60%),linear-gradient(#0003 0%,#0001 20%,#0000 50%),var(--fur);}
 .${id}.white .head{background:linear-gradient(#0001 0%,#0000 30%),var(--fur);}
 .${id} .whisker{width:30%;height:30%;border-radius:50%;border:2em solid #0000;border-top-color:var(--wh);border-left-color:var(--wh);clip-path:polygon(100% 0,100% 100%,0 30%,0 0);}
 .${id} .whisker:nth-child(1){top:70%;translate:-65%;}
