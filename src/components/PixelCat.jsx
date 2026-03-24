@@ -409,10 +409,14 @@ export default function PixelCat({ mood, hat, outfit, bg, comp, petId="tabby", s
           <div className="leg" />
           <div className="paw" />
           <div className="paw" />
-          {outfitEl}
+          {outfit === "out3" && <><div className="cape-l" /><div className="cape-r" /></>}
+          {outfit === "out4" && <div className="robe" />}
+          {outfit === "out5" && <div className="cloak" />}
         </div>
         <div className="ear" />
         <div className="ear" />
+        {outfit === "out1" && <div className="scarf" />}
+        {outfit === "out2" && <><div className="bowtie-l" /><div className="bowtie-r" /><div className="bowtie-c" /></>}
         <div className="head">
           <div className="whisker" />
           <div className="whisker" />
