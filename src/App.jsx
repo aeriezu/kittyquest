@@ -537,6 +537,8 @@ export default function App() {
     tickHappiness, incrementCheers, setState,
   } = useGameState(allTasks.length);
 
+  const actualDone = allTasks.filter(t => state.checked[t.id]).length;
+
   // ── Auth listener ─────────────────────────────────────────────────────────
   useEffect(() => {
     return onAuthStateChanged(auth, async user => {
@@ -612,7 +614,7 @@ export default function App() {
     return state.checked[t.id] && state.lastDate === today;
   }).length;
 
-  usePublishProfile(uid, username, petId, petName, done, allTasks.length, state.coins, state.equipped);
+  usePublishProfile(uid, username, petId, petName, actualDone, allTasks.length, state.coins, state.equipped);
   usePublishTasks(uid, allTasks.map(t => ({ ...t, done: !!state.checked[t.id] })));
   usePublishTodayDone(uid, todayDone, state.streak);
 
@@ -673,10 +675,10 @@ export default function App() {
   };
 
   // ── Derived display ───────────────────────────────────────────────────────
-  const { level, title, mood: rawMood } = getLevel(done, allTasks.length);
+  const { level, title, mood: rawMood } = getLevel(actualDone, allTasks.length);
   const mood = state.happiness < 30 ? "sleepy" : state.happiness > 70 ? rawMood : "neutral";
   const lvlThresholds = [0, 0.08, 0.22, 0.40, 0.60, 0.80, 1.0];
-  const pct = allTasks.length > 0 ? done / allTasks.length : 0;
+  const pct = allTasks.length > 0 ? actualDone / allTasks.length : 0;
   const lvlStart = lvlThresholds[level - 1] || 0;
   const lvlEnd   = lvlThresholds[level]     || 1;
   const lvlPct   = lvlEnd > lvlStart ? ((pct - lvlStart) / (lvlEnd - lvlStart)) * 100 : 100;
@@ -752,7 +754,7 @@ export default function App() {
       </div>
       <div style={{ display:"flex", justifyContent:"space-between", fontSize:"0.6rem", color:C.muted, marginBottom:10 }}>
         <span>Lv.{level}</span>
-        <span>{done}/{allTasks.length} tasks</span>
+        <span>{actualDone}/{allTasks.length} tasks</span>
         <span>Lv.{Math.min(level + 1, 6)}</span>
       </div>
 
