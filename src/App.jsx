@@ -581,7 +581,11 @@ export default function App() {
 
   useEffect(() => {
     if (!uid || !state) return;
-    set(ref(db, `users/${uid}/gameState`), state);
+    // Strip any checked keys with invalid Firebase characters
+    const safeChecked = Object.fromEntries(
+      Object.entries(state.checked || {}).filter(([k]) => !k.includes("."))
+    );
+    set(ref(db, `users/${uid}/gameState`), { ...state, checked: safeChecked });
   }, [uid, state]);
 
   // ── Happiness decay ───────────────────────────────────────────────────────
