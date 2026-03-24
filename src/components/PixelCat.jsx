@@ -373,10 +373,10 @@ export default function PixelCat({ mood, hat, outfit, bg, comp, petId="tabby", s
 .${id} .hat-grad::before{content:"";width:70%;height:100%;background:#1a1a2e;border-radius:2em 2em 0 0;bottom:100%;left:50%;translate:-50%;}
 .${id} .hat-grad::after{content:"";width:35%;height:6%;background:#c9a84e;border-radius:1em;top:-22%;left:50%;translate:-50%;}
 .${id} .hat-halo{width:68%;height:10%;border:0.4em solid #c9a84e;border-radius:50%;top:-14%;left:50%;translate:-50%;background:transparent;z-index:10;box-shadow:0 0 8px #c9a84e66;}
-.${id} .scarf{width:130%;height:14%;background:#c84a3a;border-radius:2em;top:-8%;left:50%;translate:-50%;z-index:5;}
-.${id} .bowtie-l{width:18%;height:14%;background:#4a7fa0;clip-path:polygon(0 0,100% 20%,100% 80%,0 100%);top:3%;left:34%;z-index:5;}
-.${id} .bowtie-r{width:18%;height:14%;background:#4a7fa0;clip-path:polygon(0 20%,100% 0,100% 100%,0 80%);top:3%;left:52%;z-index:5;}
-.${id} .bowtie-c{width:8%;height:8%;background:#3a6a90;border-radius:50%;top:6%;left:50%;translate:-50%;z-index:5;}
+.${id} .scarf{width:40%;height:7%;background:#c84a3a;border-radius:2em;top:62%;left:50%;translate:-50%;z-index:10;}
+.${id} .bowtie-l{width:9%;height:6%;background:#4a7fa0;clip-path:polygon(0 0,100% 20%,100% 80%,0 100%);top:64%;left:38%;z-index:10;}
+.${id} .bowtie-r{width:9%;height:6%;background:#4a7fa0;clip-path:polygon(0 20%,100% 0,100% 100%,0 80%);top:64%;left:53%;z-index:10;}
+.${id} .bowtie-c{width:4%;height:4%;background:#3a6a90;border-radius:50%;top:65%;left:50%;translate:-50%;z-index:10;}
 .${id} .cape-l{width:60%;height:80%;background:#3a2060;border-radius:0 0 0 8em;top:10%;left:0;z-index:0;opacity:0.5;}
 .${id} .cape-r{width:60%;height:80%;background:#3a2060;border-radius:0 0 8em 0;top:10%;right:0;z-index:0;opacity:0.5;}
 .${id} .robe{width:130%;height:90%;background:linear-gradient(180deg,#4a1a6f,#2a0a4f);border-radius:0 0 4em 4em;bottom:0;left:50%;translate:-50%;z-index:0;opacity:0.55;}
