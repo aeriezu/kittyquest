@@ -36,7 +36,7 @@ function defaultState() {
 
 export function useGameState(totalTasks) {
   const saved = load() || defaultState();
-  const [state, setStateRaw] = useState(saved);
+  const [state, setStateRaw] = useState(defaultState());
 
   const setState = useCallback(updater => {
     setStateRaw(prev => {

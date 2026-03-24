@@ -526,6 +526,7 @@ export default function App() {
   const [newAch,     setNewAch]     = useState(null);
   const [showSpin,   setShowSpin]   = useState(false);
   const [dailyQuests, setDailyQuests] = useState([]);
+  const safeUsername = username || "";
 
   const allTasks = days.flatMap(d => d.tasks);
   const {
