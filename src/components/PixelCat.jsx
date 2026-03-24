@@ -328,7 +328,7 @@ function Background({ bgId, size }) {
 // ─── PixelCat ─────────────────────────────────────────────────────────────────
 export default function PixelCat({ mood, hat, outfit, bg, comp, petId="tabby", size=140 }) {
   const id  = useRef("c" + Math.random().toString(36).substr(2, 6)).current;
-  const p   = PET_STYLES[petId] || PET_STYLES.tabby;
+  const p   = PET_OPTIONS[petId] || PET_OPTIONS.tabby;
   const fs  = size / 80;
   const compItem = SHOP.find(i => i.id === comp);
   const moodCls  = mood === "sleepy" ? "m-sleepy" : mood === "excited" ? "m-excited" : "m-neutral";
