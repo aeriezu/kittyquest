@@ -549,14 +549,18 @@ export default function App() {
           setSubjects(meta.subjects || []);
         }
        // after loading meta, also load days
+       const stateSnap = await get(ref(db, `users/${user.uid}/gameState`));
+       if (stateSnap.exists()) {
+        setState(stateSnap.val());
+       }
        const daysSnap = await get(ref(db, `users/${user.uid}/days`));
-         if (daysSnap.exists()) {
-           setDays(daysSnap.val());
-         } else {
-         // fall back to localStorage
-           const savedDays = JSON.parse(localStorage.getItem("studyquest-days") || "null");
-           if (savedDays) setDays(savedDays);
-         }
+        if (daysSnap.exists()) {
+          setDays(daysSnap.val());
+        } else {
+        // fall back to localStorage
+          const savedDays = JSON.parse(localStorage.getItem("studyquest-days") || "null");
+          if (savedDays) setDays(savedDays);
+        }
       }
       setAuthReady(true);
     });
@@ -570,6 +574,11 @@ export default function App() {
       if (uid) set(ref(db, `users/${uid}/days`), days);
     }
   }, [days, uid]);
+
+  useEffect(() => {
+    if (!uid || !state) return;
+    set(ref(db, `users/${uid}/gameState`), state);
+  }, [uid, state]);
 
   // ── Happiness decay ───────────────────────────────────────────────────────
   useEffect(() => {
