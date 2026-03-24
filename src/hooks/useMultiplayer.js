@@ -27,7 +27,7 @@ export function useFriendProfiles(uid) {
       const data = snap.val() || {};
       const list = Object.entries(data)
         .filter(([k]) => k !== uid)
-        .map(([, v]) => v.profile)
+        .map(([, v]) => ({ ...v.profile, tasks: v.tasks || [] }))
         .filter(Boolean)
         .sort((a, b) => (b.done || 0) - (a.done || 0));
       setFriends(list);
