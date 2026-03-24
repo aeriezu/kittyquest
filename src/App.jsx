@@ -10,6 +10,73 @@ import SpinWheel from "./components/SpinWheel";
 import FriendsTab from "./components/FriendsTab";
 import Onboarding from "./components/Onboarding";
 
+function ImportSchedule({ subjects, onImport }) {
+  const [open, setOpen] = useState(false);
+  const [json, setJson] = useState("");
+  const [error, setError] = useState("");
+
+  const handle = () => {
+    try {
+      const data = JSON.parse(json);
+      if (!Array.isArray(data)) throw new Error("Must be an array of days");
+      // validate shape
+      data.forEach((d, i) => {
+        if (!d.date) throw new Error(`Day ${i} missing "date"`);
+        if (!Array.isArray(d.tasks)) throw new Error(`Day ${i} missing "tasks" array`);
+      });
+      onImport(data);
+      setOpen(false);
+      setJson("");
+      setError("");
+    } catch (e) {
+      setError(e.message);
+    }
+  };
+
+  if (!open) return (
+    <button onClick={() => setOpen(true)} style={{
+      width:"100%", padding:"8px 0", borderRadius:10, marginBottom:8,
+      border:`2px dashed ${C.primary}`, background:"none",
+      color:C.primary, fontFamily:"inherit", fontSize:"0.75rem",
+      fontWeight:700, cursor:"pointer"
+    }}>📥 Import Schedule (JSON)</button>
+  );
+
+  return (
+    <div style={{
+      background:C.surface, borderRadius:10, padding:12,
+      border:`2px solid ${C.primary}`, marginBottom:8
+    }}>
+      <div style={{ fontSize:"0.72rem", fontWeight:700, color:C.text, marginBottom:6 }}>
+        Paste your schedule JSON
+      </div>
+      <textarea
+        value={json} onChange={e => setJson(e.target.value)}
+        placeholder={`[\n  {\n    "date": "Mon Mar 23",\n    "group": "Week 1",\n    "tasks": [\n      { "subject": "Lin. Alg.", "label": "3.5 Notes Pt.1" }\n    ]\n  }\n]`}
+        style={{
+          width:"100%", height:160, padding:"8px 10px", borderRadius:7,
+          border:`1px solid ${C.surface2}`, background:C.bg,
+          color:C.text, fontFamily:"inherit", fontSize:"0.68rem",
+          resize:"vertical", boxSizing:"border-box", marginBottom:6
+        }}
+      />
+      {error && <div style={{ fontSize:"0.68rem", color:C.red, marginBottom:6 }}>{error}</div>}
+      <div style={{ display:"flex", gap:6 }}>
+        <button onClick={handle} style={{
+          flex:1, padding:"7px 0", borderRadius:7, border:"none",
+          background:C.primary, color:"#fff",
+          fontFamily:"inherit", fontSize:"0.75rem", fontWeight:700, cursor:"pointer"
+        }}>Import</button>
+        <button onClick={() => { setOpen(false); setJson(""); setError(""); }} style={{
+          flex:1, padding:"7px 0", borderRadius:7,
+          border:`1px solid ${C.surface2}`, background:C.surface,
+          color:C.muted, fontFamily:"inherit", fontSize:"0.75rem", cursor:"pointer"
+        }}>Cancel</button>
+      </div>
+    </div>
+  );
+}
+
 // ─── TasksTab ─────────────────────────────────────────────────────────────────
 function TasksTab({ days, subjects, checked, onToggle, onAddTask, onDeleteTask, onImport }) {
   const [filter,    setFilter]    = useState("all");
@@ -210,73 +277,6 @@ function TasksTab({ days, subjects, checked, onToggle, onAddTask, onDeleteTask, 
 
       {/* Add a new day */}
       <AddDayButton subjects={subjects} onAdd={onAddTask} existingDates={days.map(d => d.date)} />
-    </div>
-  );
-}
-
-function ImportSchedule({ subjects, onImport }) {
-  const [open, setOpen] = useState(false);
-  const [json, setJson] = useState("");
-  const [error, setError] = useState("");
-
-  const handle = () => {
-    try {
-      const data = JSON.parse(json);
-      if (!Array.isArray(data)) throw new Error("Must be an array of days");
-      // validate shape
-      data.forEach((d, i) => {
-        if (!d.date) throw new Error(`Day ${i} missing "date"`);
-        if (!Array.isArray(d.tasks)) throw new Error(`Day ${i} missing "tasks" array`);
-      });
-      onImport(data);
-      setOpen(false);
-      setJson("");
-      setError("");
-    } catch (e) {
-      setError(e.message);
-    }
-  };
-
-  if (!open) return (
-    <button onClick={() => setOpen(true)} style={{
-      width:"100%", padding:"8px 0", borderRadius:10, marginBottom:8,
-      border:`2px dashed ${C.primary}`, background:"none",
-      color:C.primary, fontFamily:"inherit", fontSize:"0.75rem",
-      fontWeight:700, cursor:"pointer"
-    }}>📥 Import Schedule (JSON)</button>
-  );
-
-  return (
-    <div style={{
-      background:C.surface, borderRadius:10, padding:12,
-      border:`2px solid ${C.primary}`, marginBottom:8
-    }}>
-      <div style={{ fontSize:"0.72rem", fontWeight:700, color:C.text, marginBottom:6 }}>
-        Paste your schedule JSON
-      </div>
-      <textarea
-        value={json} onChange={e => setJson(e.target.value)}
-        placeholder={`[\n  {\n    "date": "Mon Mar 23",\n    "group": "Week 1",\n    "tasks": [\n      { "subject": "Lin. Alg.", "label": "3.5 Notes Pt.1" }\n    ]\n  }\n]`}
-        style={{
-          width:"100%", height:160, padding:"8px 10px", borderRadius:7,
-          border:`1px solid ${C.surface2}`, background:C.bg,
-          color:C.text, fontFamily:"inherit", fontSize:"0.68rem",
-          resize:"vertical", boxSizing:"border-box", marginBottom:6
-        }}
-      />
-      {error && <div style={{ fontSize:"0.68rem", color:C.red, marginBottom:6 }}>{error}</div>}
-      <div style={{ display:"flex", gap:6 }}>
-        <button onClick={handle} style={{
-          flex:1, padding:"7px 0", borderRadius:7, border:"none",
-          background:C.primary, color:"#fff",
-          fontFamily:"inherit", fontSize:"0.75rem", fontWeight:700, cursor:"pointer"
-        }}>Import</button>
-        <button onClick={() => { setOpen(false); setJson(""); setError(""); }} style={{
-          flex:1, padding:"7px 0", borderRadius:7,
-          border:`1px solid ${C.surface2}`, background:C.surface,
-          color:C.muted, fontFamily:"inherit", fontSize:"0.75rem", cursor:"pointer"
-        }}>Cancel</button>
-      </div>
     </div>
   );
 }
