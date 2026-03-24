@@ -1,10 +1,10 @@
 {
   "files": {
-    "main.js": "/kittyquest/static/js/main.c49b1916.js",
+    "main.js": "/kittyquest/static/js/main.6adeaffc.js",
     "index.html": "/kittyquest/index.html",
-    "main.c49b1916.js.map": "/kittyquest/static/js/main.c49b1916.js.map"
+    "main.6adeaffc.js.map": "/kittyquest/static/js/main.6adeaffc.js.map"
   },
   "entrypoints": [
-    "static/js/main.c49b1916.js"
+    "static/js/main.6adeaffc.js"
   ]
 }
