@@ -632,7 +632,7 @@ export default function App() {
   const handleAddTask = (date, label, subject, group = null) => {
     setDays(prev => {
       const existing = prev.find(d => d.date === date);
-      const newTask  = label ? { id:`t_${Date.now()}_${Math.random()}`, label, subject: subject || "", done:false } : null;
+      const newTask = label ? { id:`t_${Date.now()}_${Math.random().toString(36).substr(2,9)}`, label, subject: subject || "", done:false } : null;
       if (existing) {
         return prev.map(d => d.date === date
           ? { ...d, tasks: newTask ? [...d.tasks, newTask] : d.tasks }
@@ -659,7 +659,7 @@ export default function App() {
       date:  d.date,
       group: d.group || null,
       tasks: d.tasks.map((t, i) => ({
-        id:      `imported_${d.date}_${i}_${Date.now()}`,
+        id: `imported_${i}_${Date.now()}`,
         label:   t.label,
         subject: t.subject || "",
         done:    false,
