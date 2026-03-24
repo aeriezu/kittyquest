@@ -20,7 +20,7 @@ function CatSelector({ currentPetId, onSelect, onClose }) {
           Choose your cat
         </div>
         <div style={{ display:"flex", justifyContent:"center", marginBottom:14 }}>
-          <PixelCat mood="neutral" petId={preview} size={110} />
+          <PixelCat key={preview} mood="neutral" petId={preview} size={110} />
         </div>
         <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr 1fr", gap:7, marginBottom:14 }}>
           {PET_OPTIONS.map(opt => (
