@@ -136,7 +136,7 @@ function ImportSchedule({ subjects, onImport }) {
 }
 
 // ─── TasksTab ─────────────────────────────────────────────────────────────────
-function TasksTab({ days, subjects, checked, onToggle, onAddTask, onDeleteTask, onDeleteDay, onImport, onEditSubjects }) {
+function TasksTab({ days, subjects, checked, onToggle, onAddTask, onDeleteTask, onDeleteDay, onImport, onEditSubjects, petInfo }) {
   const [filter,    setFilter]    = useState("all");
   const [collapsed, setCollapsed] = useState({});
   const [newTask,   setNewTask]   = useState({ subject:"", label:"" });
@@ -657,6 +657,43 @@ export default function App() {
   return (
     <div style={{ ...px, background:C.bg, minHeight:"100vh", padding:16, maxWidth:480, margin:"0 auto" }}>
 
+      {petInfo && (
+        <div style={{
+          background: C.surface, borderRadius: 14, padding: "10px 14px",
+          marginBottom: 10, border: `1px solid ${C.surface2}`,
+          display: "flex", alignItems: "center", gap: 12,
+          overflow: "hidden", position: "relative",
+        }}>
+          {/* background tint */}
+          {petInfo.bg && (
+            <div style={{
+              position: "absolute", inset: 0, borderRadius: 14,
+              background: {bg1:"#c4b49a",bg2:"#a0b8c8",bg3:"#c8a870",bg4:"#3a2820",bg5:"#f0d8e8"}[petInfo.bg] || "transparent",
+              opacity: 0.25, pointerEvents: "none",
+            }} />
+          )}
+          {/* bobbing cat */}
+          <div style={{
+            animation: "catBob 2.8s ease-in-out infinite",
+            flexShrink: 0, position: "relative", zIndex: 1,
+          }}>
+            <style>{`@keyframes catBob { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-5px)} }`}</style>
+            <PixelCat
+              mood={petInfo.mood} hat={petInfo.equipped.hat}
+              outfit={petInfo.equipped.outfit} bg={null}
+              comp={petInfo.equipped.comp} petId={petInfo.petId} size={64}
+            />
+          </div>
+          {/* name + status */}
+          <div style={{ zIndex: 1 }}>
+            <div style={{ fontSize: "0.78rem", fontWeight: 700, color: C.text }}>{petInfo.petName}</div>
+            <div style={{ fontSize: "0.65rem", color: C.muted }}>
+              {petInfo.happiness > 70 ? "😸 Happy & studying!" : petInfo.happiness > 40 ? "😺 Getting there..." : "😿 Check some tasks off!"}
+            </div>
+          </div>
+        </div>
+      )}
+
       {popup && (
         <div style={{ position:"fixed", top:60, right:16, background:C.primary, color:"#fff", borderRadius:20, padding:"6px 14px", fontSize:"0.82rem", fontWeight:700, zIndex:999 }}>
           {popup}
@@ -741,6 +778,7 @@ export default function App() {
           onToggle={handleToggle} onAddTask={handleAddTask}
           onDeleteTask={handleDeleteTask} onDeleteDay={handleDeleteDay}
           onImport={handleImport} onEditSubjects={() => setShowSubjectEditor(true)}
+          petInfo={{ petName, petId, equipped: state.equipped, mood, happiness: state.happiness }}
         />
       )}
       {tab==="pet" && (
