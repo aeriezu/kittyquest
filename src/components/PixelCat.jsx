@@ -334,10 +334,6 @@ export default function PixelCat({ mood, hat, outfit, bg, comp, petId="tabby", s
   const moodCls  = mood === "sleepy" ? "m-sleepy" : mood === "excited" ? "m-excited" : "m-neutral";
 
   const css = `
-.${id}.dragon .head{background:radial-gradient(30% 25% at 25% 35%,#3a8a4a 50%,transparent 65%),radial-gradient(25% 20% at 72% 25%,#2a6a3a 45%,transparent 60%),linear-gradient(#0003 0%,#0001 20%,#0000 50%),var(--fur);}
-.${id}.dragon .body{background:repeating-linear-gradient(170deg,var(--fur-dark) 0,var(--fur-dark) 4%,transparent 4%,transparent 14%),radial-gradient(100% 80% at 50% 0,var(--fur-dark) 48%,transparent 52%),var(--fur);}
-.${id}.dragon .ear{border-color:var(--fur);background:var(--skin);clip-path:polygon(50% 0%,100% 100%,0% 100%);}
-.${id}.dragon .ear+.ear{scale:-1 1;right:0;}
 .${id}{--fur:${p.fur};--fur-dark:${p.furDark};--skin:${p.skin};--wh:${p.whisker};font-size:${fs}px;width:80em;aspect-ratio:1;position:relative;}
 .${id} *,.${id} *::before,.${id} *::after{position:absolute;box-sizing:border-box;}
 .${id} .shadow{width:80%;height:5%;background:#0002;border-radius:50%/0 0 100% 100%;top:99%;left:50%;translate:-50%;}

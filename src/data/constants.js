@@ -24,7 +24,6 @@ export const PET_OPTIONS = [
   { id:"white",  label:"White Cat",   color:"#f5f5f8" },
   { id:"calico", label:"Calico",      color:"#e8c888" },
   { id:"tuxedo", label:"Tuxedo",      color:"#1a1a20" },
-  { id:"dragon", label:"Dragon",  color:"#4a8a5a" },
 ];
 
 // ─── Shop Items ──────────────────────────────────────────────────────────────
