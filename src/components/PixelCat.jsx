@@ -409,7 +409,6 @@ export default function PixelCat({ mood, hat, outfit, bg, comp, petId="tabby", s
           <div className="leg" />
           <div className="paw" />
           <div className="paw" />
-          {outfitEl}
         </div>
         <div className="ear" />
         <div className="ear" />
@@ -421,6 +420,7 @@ export default function PixelCat({ mood, hat, outfit, bg, comp, petId="tabby", s
           <div className="eye" />
           <div className="eye" />
           <div className="nose" />
+          {outfitEl}
           {hatEl}
         </div>
       </article>
