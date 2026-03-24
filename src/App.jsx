@@ -1,443 +1,625 @@
-import { useRef } from "react";
-import { SHOP } from "../data/constants";
+import { useState, useEffect, useCallback, useRef } from "react";
+import { onAuthStateChanged } from "firebase/auth";
+import { ref, get, set } from "firebase/database";
+import { auth, db } from "./firebase";
+import { C, px, EMPTY_EQ, SHOP, QUEST_TEMPLATES, getLevel, SUBJECT_PALETTE, PET_OPTIONS } from "./data/constants";
+import { useGameState } from "./hooks/useGameState";
+import { usePublishProfile, usePublishTasks, usePublishTodayDone } from "./hooks/useMultiplayer";
+import PixelCat from "./components/PixelCat";
+import SpinWheel from "./components/SpinWheel";
+import FriendsTab from "./components/FriendsTab";
+import Onboarding from "./components/Onboarding";
 
-export const PET_OPTIONS = [
-  { id:"tabby",  label:"Gray Tabby",  color:"#9aa0a0" },
-  { id:"orange", label:"Orange Cat",  color:"#e89050" },
-  { id:"black",  label:"Black Cat",   color:"#111318" },
-  { id:"white",  label:"White Cat",   color:"#f5f5f8" },
-  { id:"calico", label:"Calico",      color:"#e8c888" },
-  { id:"tuxedo", label:"Tuxedo",      color:"#1a1a20" },
-];
-
-// ─── Background Scene Components ─────────────────────────────────────────────
-
-function BgCozyLibrary({ size }) {
-  const s = size;
+// ─── Cat Selector Modal ───────────────────────────────────────────────────────
+function CatSelector({ currentPetId, onSelect, onClose }) {
+  const [preview, setPreview] = useState(currentPetId);
   return (
-    <svg width={s} height={s} viewBox="0 0 100 100" style={{ position:"absolute", inset:0, borderRadius:12 }}>
-      {/* warm room bg */}
-      <rect width="100" height="100" fill="#f5e6c8"/>
-      {/* floor */}
-      <rect y="78" width="100" height="22" fill="#c8a870"/>
-      {/* rug */}
-      <ellipse cx="50" cy="82" rx="35" ry="6" fill="#b85c3a" opacity="0.5"/>
-      <ellipse cx="50" cy="82" rx="28" ry="4" fill="#c97d4e" opacity="0.4"/>
-      {/* bookshelf */}
-      <rect x="5" y="20" width="22" height="58" fill="#8b6340" rx="1"/>
-      <rect x="5" y="20" width="22" height="3" fill="#6b4a28" rx="1"/>
-      {/* books */}
-      <rect x="7"  y="24" width="4" height="18" fill="#4a7fa0" rx="1"/>
-      <rect x="12" y="26" width="3" height="16" fill="#b85c3a" rx="1"/>
-      <rect x="16" y="25" width="5" height="17" fill="#4a8a5a" rx="1"/>
-      <rect x="7"  y="46" width="5" height="14" fill="#c9a84e" rx="1"/>
-      <rect x="13" y="44" width="3" height="16" fill="#7a4fa0" rx="1"/>
-      <rect x="17" y="45" width="5" height="15" fill="#c97d4e" rx="1"/>
-      <rect x="7"  y="64" width="4" height="12" fill="#4a7fa0" rx="1"/>
-      <rect x="12" y="65" width="5" height="11" fill="#b85c3a" rx="1"/>
-      <rect x="18" y="63" width="4" height="13" fill="#4a8a5a" rx="1"/>
-      {/* right bookshelf */}
-      <rect x="73" y="20" width="22" height="58" fill="#8b6340" rx="1"/>
-      <rect x="73" y="20" width="22" height="3" fill="#6b4a28" rx="1"/>
-      <rect x="75" y="24" width="4" height="16" fill="#7a4fa0" rx="1"/>
-      <rect x="80" y="25" width="5" height="15" fill="#c97d4e" rx="1"/>
-      <rect x="86" y="24" width="4" height="16" fill="#4a7fa0" rx="1"/>
-      <rect x="75" y="44" width="5" height="14" fill="#4a8a5a" rx="1"/>
-      <rect x="81" y="45" width="4" height="13" fill="#c9a84e" rx="1"/>
-      <rect x="86" y="43" width="5" height="15" fill="#b85c3a" rx="1"/>
-      {/* window with warm light */}
-      <rect x="35" y="10" width="30" height="28" fill="#f8e8b0" rx="3" opacity="0.9"/>
-      <rect x="35" y="10" width="30" height="28" fill="none" stroke="#8b6340" strokeWidth="2" rx="3"/>
-      <line x1="50" y1="10" x2="50" y2="38" stroke="#8b6340" strokeWidth="1.5"/>
-      <line x1="35" y1="24" x2="65" y2="24" stroke="#8b6340" strokeWidth="1.5"/>
-      {/* warm glow */}
-      <ellipse cx="50" cy="24" rx="12" ry="10" fill="#f8c840" opacity="0.15"/>
-      {/* small candle */}
-      <rect x="60" y="70" width="3" height="8" fill="#f5e8d0" rx="1"/>
-      <ellipse cx="61.5" cy="69" rx="1.5" ry="2" fill="#f8a820" opacity="0.9"/>
-      <ellipse cx="61.5" cy="68" rx="0.8" ry="1.5" fill="#fff" opacity="0.7"/>
-    </svg>
-  );
-}
-
-function BgRainyWindow({ size }) {
-  const s = size;
-  // animated rain keyframes injected once
-  return (
-    <div style={{ position:"absolute", inset:0, borderRadius:12, overflow:"hidden" }}>
-      <style>{`
-        @keyframes rainFall { 0%{transform:translateY(-20px) translateX(0)} 100%{transform:translateY(${s+10}px) translateX(-8px)} }
-        @keyframes rainFall2 { 0%{transform:translateY(-20px) translateX(0)} 100%{transform:translateY(${s+10}px) translateX(-6px)} }
-        .rain-drop { position:absolute; width:1.5px; border-radius:2px; background:rgba(160,190,220,0.7); animation:rainFall linear infinite; }
-        .rain-drop2 { position:absolute; width:1px; border-radius:2px; background:rgba(160,190,220,0.5); animation:rainFall2 linear infinite; }
-      `}</style>
-      <svg width={s} height={s} viewBox="0 0 100 100" style={{ position:"absolute", inset:0 }}>
-        {/* dark cloudy sky */}
-        <rect width="100" height="100" fill="#7a9ab0"/>
-        {/* darker sky top */}
-        <rect width="100" height="50" fill="#5a7a90"/>
-        {/* clouds */}
-        <ellipse cx="30" cy="18" rx="20" ry="10" fill="#8aabb8"/>
-        <ellipse cx="45" cy="14" rx="18" ry="9" fill="#9abbc8"/>
-        <ellipse cx="70" cy="20" rx="22" ry="11" fill="#7a9aac"/>
-        <ellipse cx="85" cy="15" rx="16" ry="8" fill="#8aaab5"/>
-        {/* window frame */}
-        <rect x="8" y="8" width="84" height="84" fill="none" stroke="#6b5040" strokeWidth="5" rx="3"/>
-        {/* window cross */}
-        <line x1="50" y1="8" x2="50" y2="92" stroke="#6b5040" strokeWidth="4"/>
-        <line x1="8" y1="50" x2="92" y2="50" stroke="#6b5040" strokeWidth="4"/>
-        {/* interior window sill */}
-        <rect x="5" y="88" width="90" height="10" fill="#c8a870" rx="2"/>
-        {/* rain streaks in SVG for base effect */}
-        <line x1="15" y1="0" x2="10" y2="40" stroke="#a0c8e0" strokeWidth="0.8" opacity="0.6"/>
-        <line x1="30" y1="0" x2="25" y2="50" stroke="#a0c8e0" strokeWidth="0.8" opacity="0.5"/>
-        <line x1="55" y1="0" x2="50" y2="45" stroke="#a0c8e0" strokeWidth="0.8" opacity="0.6"/>
-        <line x1="72" y1="0" x2="67" y2="40" stroke="#a0c8e0" strokeWidth="0.8" opacity="0.5"/>
-        <line x1="88" y1="0" x2="83" y2="48" stroke="#a0c8e0" strokeWidth="0.8" opacity="0.6"/>
-        <line x1="22" y1="0" x2="17" y2="35" stroke="#a0c8e0" strokeWidth="0.5" opacity="0.4"/>
-        <line x1="42" y1="0" x2="37" y2="42" stroke="#a0c8e0" strokeWidth="0.5" opacity="0.4"/>
-        <line x1="63" y1="0" x2="58" y2="38" stroke="#a0c8e0" strokeWidth="0.5" opacity="0.4"/>
-        <line x1="80" y1="0" x2="75" y2="44" stroke="#a0c8e0" strokeWidth="0.5" opacity="0.4"/>
-        {/* water droplets on glass */}
-        <ellipse cx="20" cy="30" rx="1.5" ry="2.5" fill="#c8e0f0" opacity="0.7"/>
-        <ellipse cx="35" cy="55" rx="1" ry="2" fill="#c8e0f0" opacity="0.6"/>
-        <ellipse cx="60" cy="25" rx="1.5" ry="2.5" fill="#c8e0f0" opacity="0.7"/>
-        <ellipse cx="75" cy="60" rx="1" ry="1.8" fill="#c8e0f0" opacity="0.6"/>
-        <ellipse cx="45" cy="40" rx="1.2" ry="2" fill="#c8e0f0" opacity="0.5"/>
-        {/* drop trails */}
-        <line x1="20" y1="32" x2="19" y2="42" stroke="#c8e0f0" strokeWidth="1" opacity="0.4"/>
-        <line x1="60" y1="27" x2="59" y2="38" stroke="#c8e0f0" strokeWidth="1" opacity="0.4"/>
-      </svg>
-      {/* animated rain drops */}
-      {[...Array(12)].map((_, i) => (
-        <div key={i} className={i%2===0?"rain-drop":"rain-drop2"} style={{
-          left: `${8 + i * 7.5}%`,
-          height: `${8 + (i%3)*4}px`,
-          animationDuration: `${0.6 + (i%4)*0.15}s`,
-          animationDelay: `${(i*0.13)%0.8}s`,
-          top: 0,
-        }}/>
-      ))}
-    </div>
-  );
-}
-
-function BgAutumnPark({ size }) {
-  const s = size;
-  return (
-    <svg width={s} height={s} viewBox="0 0 100 100" style={{ position:"absolute", inset:0, borderRadius:12 }}>
-      {/* sky */}
-      <rect width="100" height="100" fill="#e8c890"/>
-      {/* gradient sky */}
-      <rect width="100" height="55" fill="#d4a860" opacity="0.5"/>
-      {/* ground */}
-      <rect y="72" width="100" height="28" fill="#8b6830"/>
-      {/* grass patches */}
-      <ellipse cx="50" cy="72" rx="55" ry="6" fill="#a07840"/>
-      {/* path */}
-      <ellipse cx="50" cy="85" rx="15" ry="5" fill="#c8a060" opacity="0.5"/>
-      {/* left tree trunk */}
-      <rect x="14" y="40" width="7" height="32" fill="#6b4a20" rx="2"/>
-      {/* left tree canopy - autumn colors */}
-      <ellipse cx="17" cy="32" rx="16" ry="14" fill="#c85820"/>
-      <ellipse cx="10" cy="28" rx="12" ry="10" fill="#d4780a"/>
-      <ellipse cx="24" cy="26" rx="13" ry="11" fill="#e8940a"/>
-      <ellipse cx="17" cy="22" rx="14" ry="12" fill="#c84a10"/>
-      {/* right tree trunk */}
-      <rect x="79" y="38" width="7" height="34" fill="#6b4a20" rx="2"/>
-      {/* right tree canopy */}
-      <ellipse cx="83" cy="30" rx="15" ry="13" fill="#d4780a"/>
-      <ellipse cx="76" cy="26" rx="12" ry="10" fill="#c85820"/>
-      <ellipse cx="90" cy="28" rx="12" ry="11" fill="#e8940a"/>
-      <ellipse cx="83" cy="22" rx="13" ry="11" fill="#b83a08"/>
-      {/* falling leaves */}
-      <ellipse cx="35" cy="45" rx="3" ry="2" fill="#e8940a" opacity="0.9" transform="rotate(-30 35 45)"/>
-      <ellipse cx="55" cy="38" rx="2.5" ry="1.8" fill="#c85820" opacity="0.8" transform="rotate(20 55 38)"/>
-      <ellipse cx="68" cy="52" rx="2.5" ry="1.8" fill="#d4780a" opacity="0.9" transform="rotate(-15 68 52)"/>
-      <ellipse cx="42" cy="60" rx="3" ry="2" fill="#e8940a" opacity="0.7" transform="rotate(25 42 60)"/>
-      <ellipse cx="60" cy="65" rx="2" ry="1.5" fill="#c84a10" opacity="0.8" transform="rotate(-10 60 65)"/>
-      <ellipse cx="28" cy="62" rx="2.5" ry="1.8" fill="#d4780a" opacity="0.7" transform="rotate(15 28 62)"/>
-      {/* ground leaves */}
-      <ellipse cx="40" cy="74" rx="4" ry="2" fill="#c85820" opacity="0.6" transform="rotate(5 40 74)"/>
-      <ellipse cx="62" cy="76" rx="3.5" ry="1.8" fill="#e8940a" opacity="0.5" transform="rotate(-8 62 76)"/>
-      <ellipse cx="25" cy="77" rx="3" ry="1.5" fill="#d4780a" opacity="0.6"/>
-      <ellipse cx="75" cy="75" rx="3" ry="1.5" fill="#c84a10" opacity="0.5"/>
-      {/* bench */}
-      <rect x="38" y="66" width="24" height="3" fill="#8b6340" rx="1"/>
-      <rect x="40" y="69" width="2" height="5" fill="#6b4a20" rx="1"/>
-      <rect x="58" y="69" width="2" height="5" fill="#6b4a20" rx="1"/>
-      {/* sun */}
-      <circle cx="78" cy="14" r="8" fill="#f8b820" opacity="0.8"/>
-      <circle cx="78" cy="14" r="6" fill="#fcd840" opacity="0.9"/>
-    </svg>
-  );
-}
-
-function BgNightCafe({ size }) {
-  const s = size;
-  return (
-    <svg width={s} height={s} viewBox="0 0 100 100" style={{ position:"absolute", inset:0, borderRadius:12 }}>
-      {/* dark night bg */}
-      <rect width="100" height="100" fill="#1a100a"/>
-      {/* floor */}
-      <rect y="80" width="100" height="20" fill="#2a1a10"/>
-      {/* table */}
-      <rect x="25" y="68" width="50" height="4" fill="#4a2e18" rx="2"/>
-      <rect x="35" y="72" width="4" height="10" fill="#3a2010" rx="1"/>
-      <rect x="61" y="72" width="4" height="10" fill="#3a2010" rx="1"/>
-      {/* coffee cup */}
-      <rect x="43" y="56" width="14" height="12" fill="#f5e8d0" rx="2"/>
-      <rect x="43" y="56" width="14" height="3" fill="#d4b890" rx="2"/>
-      <ellipse cx="50" cy="59" rx="5" ry="1.5" fill="#6b3a10" opacity="0.8"/>
-      {/* cup handle */}
-      <path d="M57 59 Q62 59 62 63 Q62 67 57 67" fill="none" stroke="#f5e8d0" strokeWidth="2"/>
-      {/* steam */}
-      <path d="M47 55 Q46 51 47 47" fill="none" stroke="#f5e8d0" strokeWidth="1" opacity="0.5" strokeLinecap="round"/>
-      <path d="M50 54 Q49 50 50 46" fill="none" stroke="#f5e8d0" strokeWidth="1" opacity="0.4" strokeLinecap="round"/>
-      <path d="M53 55 Q54 51 53 47" fill="none" stroke="#f5e8d0" strokeWidth="1" opacity="0.5" strokeLinecap="round"/>
-      {/* window */}
-      <rect x="8" y="10" width="35" height="45" fill="#0a1a2a" rx="3"/>
-      <rect x="8" y="10" width="35" height="45" fill="none" stroke="#4a3020" strokeWidth="3" rx="3"/>
-      <line x1="25" y1="10" x2="25" y2="55" stroke="#4a3020" strokeWidth="2"/>
-      <line x1="8" y1="32" x2="43" y2="32" stroke="#4a3020" strokeWidth="2"/>
-      {/* night sky through window */}
-      <circle cx="18" cy="20" r="1" fill="#fff" opacity="0.8"/>
-      <circle cx="30" cy="16" r="0.8" fill="#fff" opacity="0.6"/>
-      <circle cx="35" cy="24" r="0.8" fill="#fff" opacity="0.7"/>
-      <circle cx="14" cy="28" r="0.6" fill="#fff" opacity="0.5"/>
-      <circle cx="38" cy="18" r="0.6" fill="#fff" opacity="0.6"/>
-      {/* moon */}
-      <circle cx="22" cy="18" r="5" fill="#f8e890" opacity="0.3"/>
-      <circle cx="24" cy="16" r="4" fill="#1a2a3a"/>
-      {/* warm lamp */}
-      <rect x="70" y="8" width="3" height="30" fill="#4a3020" rx="1"/>
-      <polygon points="65,8 80,8 77,22 68,22" fill="#c8a040" opacity="0.9"/>
-      <ellipse cx="72" cy="22" rx="9" ry="3" fill="#f8c840" opacity="0.3"/>
-      {/* lamp glow on table */}
-      <ellipse cx="72" cy="50" rx="20" ry="12" fill="#f8c840" opacity="0.08"/>
-      {/* bookshelf on right */}
-      <rect x="80" y="10" width="18" height="55" fill="#3a2010" rx="1"/>
-      <rect x="82" y="14" width="3" height="12" fill="#4a7fa0" rx="1"/>
-      <rect x="86" y="15" width="4" height="11" fill="#c85820" rx="1"/>
-      <rect x="82" y="30" width="4" height="10" fill="#4a8a5a" rx="1"/>
-      <rect x="87" y="29" width="3" height="11" fill="#c9a84e" rx="1"/>
-      <rect x="82" y="45" width="5" height="9" fill="#7a4fa0" rx="1"/>
-      <rect x="88" y="44" width="4" height="10" fill="#c97d4e" rx="1"/>
-      {/* cozy warm overlay */}
-      <rect width="100" height="100" fill="#c87020" opacity="0.05"/>
-    </svg>
-  );
-}
-
-function BgCherryBlossoms({ size }) {
-  const s = size;
-  return (
-    <div style={{ position:"absolute", inset:0, borderRadius:12, overflow:"hidden" }}>
-      <style>{`
-        @keyframes petalFall {
-          0%   { transform: translateY(-10px) translateX(0px) rotate(0deg); opacity:0.9; }
-          50%  { transform: translateY(${s*0.5}px) translateX(${s*0.08}px) rotate(180deg); opacity:0.8; }
-          100% { transform: translateY(${s+10}px) translateX(-${s*0.05}px) rotate(360deg); opacity:0; }
-        }
-        @keyframes petalFall2 {
-          0%   { transform: translateY(-10px) translateX(0px) rotate(45deg); opacity:0.8; }
-          50%  { transform: translateY(${s*0.55}px) translateX(-${s*0.06}px) rotate(200deg); opacity:0.7; }
-          100% { transform: translateY(${s+10}px) translateX(${s*0.04}px) rotate(380deg); opacity:0; }
-        }
-        .blossom-petal { position:absolute; width:6px; height:5px; border-radius:50% 50% 50% 0; background:#f4b8c8; animation: petalFall ease-in infinite; }
-        .blossom-petal2 { position:absolute; width:5px; height:4px; border-radius:50% 0 50% 50%; background:#f8d0dc; animation: petalFall2 ease-in infinite; }
-      `}</style>
-      <svg width={s} height={s} viewBox="0 0 100 100" style={{ position:"absolute", inset:0 }}>
-        {/* soft spring sky */}
-        <rect width="100" height="100" fill="#fce8f0"/>
-        <rect width="100" height="60" fill="#f8d8e8" opacity="0.6"/>
-        {/* ground */}
-        <rect y="78" width="100" height="22" fill="#e8d0b0"/>
-        {/* grass */}
-        <ellipse cx="50" cy="78" rx="55" ry="5" fill="#c8d890" opacity="0.8"/>
-        {/* left tree trunk */}
-        <rect x="8" y="35" width="8" height="45" fill="#6b4a30" rx="3"/>
-        {/* left branches */}
-        <line x1="12" y1="38" x2="25" y2="25" stroke="#6b4a30" strokeWidth="3" strokeLinecap="round"/>
-        <line x1="12" y1="45" x2="2" y2="28" stroke="#6b4a30" strokeWidth="2.5" strokeLinecap="round"/>
-        <line x1="12" y1="40" x2="30" y2="35" stroke="#6b4a30" strokeWidth="2" strokeLinecap="round"/>
-        {/* left blossom clusters */}
-        <ellipse cx="25" cy="22" rx="14" ry="12" fill="#f4a8b8" opacity="0.85"/>
-        <ellipse cx="18" cy="18" rx="12" ry="10" fill="#f8c0cc" opacity="0.8"/>
-        <ellipse cx="32" cy="20" rx="11" ry="9" fill="#f4a0b4" opacity="0.75"/>
-        <ellipse cx="22" cy="14" rx="10" ry="8" fill="#f8d0dc" opacity="0.8"/>
-        <ellipse cx="3" cy="25" rx="10" ry="9" fill="#f4b8c8" opacity="0.8"/>
-        <ellipse cx="30" cy="32" rx="10" ry="8" fill="#f8c8d4" opacity="0.7"/>
-        {/* right tree trunk */}
-        <rect x="84" y="30" width="8" height="50" fill="#7a5535" rx="3"/>
-        {/* right branches */}
-        <line x1="88" y1="33" x2="75" y2="20" stroke="#7a5535" strokeWidth="3" strokeLinecap="round"/>
-        <line x1="88" y1="40" x2="98" y2="25" stroke="#7a5535" strokeWidth="2.5" strokeLinecap="round"/>
-        <line x1="88" y1="38" x2="70" y2="30" stroke="#7a5535" strokeWidth="2" strokeLinecap="round"/>
-        {/* right blossom clusters */}
-        <ellipse cx="75" cy="18" rx="13" ry="11" fill="#f8c0cc" opacity="0.85"/>
-        <ellipse cx="82" cy="14" rx="11" ry="9" fill="#f4a8b8" opacity="0.8"/>
-        <ellipse cx="68" cy="22" rx="11" ry="9" fill="#f8d0dc" opacity="0.75"/>
-        <ellipse cx="97" cy="23" rx="10" ry="9" fill="#f4b8c8" opacity="0.8"/>
-        <ellipse cx="70" cy="30" rx="9" ry="7" fill="#f8c0cc" opacity="0.7"/>
-        {/* small blossom flowers on trees */}
-        {[
-          [20,20],[28,14],[14,16],[35,22],[8,22],
-          [78,16],[84,12],[70,20],[96,20],[72,28]
-        ].map(([cx,cy],i) => (
-          <g key={i}>
-            <circle cx={cx} cy={cy} r="2.5" fill="#f8e0e8"/>
-            <circle cx={cx} cy={cy} r="1" fill="#f4a0b0"/>
-          </g>
-        ))}
-        {/* petals on ground */}
-        <ellipse cx="35" cy="80" rx="3" ry="2" fill="#f4b8c8" opacity="0.6" transform="rotate(-15 35 80)"/>
-        <ellipse cx="55" cy="82" rx="2.5" ry="1.8" fill="#f8c8d4" opacity="0.5" transform="rotate(10 55 82)"/>
-        <ellipse cx="70" cy="79" rx="2.5" ry="1.8" fill="#f4a8b8" opacity="0.6" transform="rotate(-5 70 79)"/>
-        <ellipse cx="20" cy="81" rx="3" ry="2" fill="#f8d0dc" opacity="0.5" transform="rotate(20 20 81)"/>
-        {/* soft sun */}
-        <circle cx="50" cy="20" r="10" fill="#fce8a0" opacity="0.4"/>
-        <circle cx="50" cy="20" r="6" fill="#fce890" opacity="0.5"/>
-      </svg>
-      {/* animated falling petals */}
-      {[...Array(10)].map((_, i) => (
-        <div key={i} className={i%2===0?"blossom-petal":"blossom-petal2"} style={{
-          left: `${5 + i * 9}%`,
-          animationDuration: `${2.5 + (i%4)*0.6}s`,
-          animationDelay: `${(i*0.35)%2.5}s`,
-          top: 0,
-        }}/>
-      ))}
-    </div>
-  );
-}
-
-// ─── Background renderer ──────────────────────────────────────────────────────
-function Background({ bgId, size }) {
-  if (!bgId) return null;
-  const props = { size };
-  if (bgId === "bg1") return <BgCozyLibrary {...props} />;
-  if (bgId === "bg2") return <BgRainyWindow {...props} />;
-  if (bgId === "bg3") return <BgAutumnPark {...props} />;
-  if (bgId === "bg4") return <BgNightCafe {...props} />;
-  if (bgId === "bg5") return <BgCherryBlossoms {...props} />;
-  return null;
-}
-
-// ─── PixelCat ─────────────────────────────────────────────────────────────────
-export default function PixelCat({ mood, hat, outfit, bg, comp, petId="tabby", size=140 }) {
-  const id  = useRef("c" + Math.random().toString(36).substr(2, 6)).current;
-  const p   = PET_OPTIONS[petId] || PET_OPTIONS.tabby;
-  const fs  = size / 80;
-  const compItem = SHOP.find(i => i.id === comp);
-  const moodCls  = mood === "sleepy" ? "m-sleepy" : mood === "excited" ? "m-excited" : "m-neutral";
-
-  const css = `
-.${id}.dragon .head{background:radial-gradient(30% 25% at 25% 35%,#3a8a4a 50%,transparent 65%),radial-gradient(25% 20% at 72% 25%,#2a6a3a 45%,transparent 60%),linear-gradient(#0003 0%,#0001 20%,#0000 50%),var(--fur);}
-.${id}.dragon .body{background:repeating-linear-gradient(170deg,var(--fur-dark) 0,var(--fur-dark) 4%,transparent 4%,transparent 14%),radial-gradient(100% 80% at 50% 0,var(--fur-dark) 48%,transparent 52%),var(--fur);}
-.${id}.dragon .ear{border-color:var(--fur);background:var(--skin);clip-path:polygon(50% 0%,100% 100%,0% 100%);}
-.${id}.dragon .ear+.ear{scale:-1 1;right:0;}
-.${id}{--fur:${p.fur};--fur-dark:${p.furDark};--skin:${p.skin};--wh:${p.whisker};font-size:${fs}px;width:80em;aspect-ratio:1;position:relative;}
-.${id} *,.${id} *::before,.${id} *::after{position:absolute;box-sizing:border-box;}
-.${id} .shadow{width:80%;height:5%;background:#0002;border-radius:50%/0 0 100% 100%;top:99%;left:50%;translate:-50%;}
-.${id} .tail{width:50%;height:50%;border-radius:50%;border:7em solid #0000;border-top-color:var(--fur-dark);border-left-color:var(--fur-dark);clip-path:polygon(100% 0,100% 100%,0 30%,0 0);top:75%;left:52%;}
-.${id} .tail::before{content:"";width:7em;aspect-ratio:1;background:var(--fur-dark);border-radius:50%;left:81%;top:-9%;}
-.${id} .body{left:50%;translate:-50%;bottom:0;width:35%;height:40%;background:radial-gradient(100% 80% at 50% 0,var(--fur-dark) 48%,transparent 52%),var(--fur);border-radius:100%/200% 200% 20% 20%;}
-.${id}.tuxedo .body{background:radial-gradient(60% 70% at 50% 60%,#f0f0f0 40%,#e0e0e0 55%,transparent 70%),radial-gradient(100% 80% at 50% 0,var(--fur-dark) 48%,transparent 52%),var(--fur);}
-.${id}.calico .body{background:radial-gradient(40% 50% at 30% 40%,#c97040 60%,transparent 70%),radial-gradient(35% 40% at 70% 60%,#333 50%,transparent 65%),radial-gradient(100% 80% at 50% 0,var(--fur-dark) 48%,transparent 52%),var(--fur);}
-.${id}.tabby .body{background:repeating-linear-gradient(175deg,var(--fur-dark) 0,var(--fur-dark) 3%,transparent 3%,transparent 12%),radial-gradient(100% 80% at 50% 0,var(--fur-dark) 48%,transparent 52%),var(--fur);}
-.${id} .leg{width:165%;height:38%;background:var(--fur);bottom:0;left:50%;translate:-50%;border-radius:8em 8em 100% 100%/10em 10em 16em 16em;scale:1 -1;}
-.${id} .paw{width:35%;height:49%;border:0.75em solid #fff;border-top:0;border-radius:0 0 5em 5em;border-bottom:1em solid #fff;top:48%;rotate:-10deg;left:10%;clip-path:polygon(0 20%,100% 30%,100% 100%,0 100%);}
-.${id} .paw+.paw{right:7%;height:50%;left:auto;rotate:13deg;scale:-1 1;clip-path:polygon(0 25%,100% 15%,100% 100%,0 100%);}
-.${id}.black .paw{border-color:#333;}
-.${id}.white .paw{border-color:#ddd;}
-.${id} .ear{width:40%;aspect-ratio:1;border:4em solid var(--fur);border-radius:5% 90% 10% 80%;background:var(--skin);}
-.${id} .ear+.ear{scale:-1 1;right:0;}
-.${id} .head{width:80%;aspect-ratio:1.1;background:linear-gradient(#0003 0%,#0001 20%,#0000 50%),var(--fur);left:50%;translate:-50%;border-radius:100%/125% 125% 80% 75%;}
-.${id}.tuxedo .head{background:radial-gradient(40% 35% at 50% 90%,#f0f0f0 55%,#e0e0e0 70%,transparent 80%),linear-gradient(#0003 0%,#0001 20%,#0000 50%),var(--fur);}
-.${id}.calico .head{background:radial-gradient(25% 20% at 20% 30%,#c97040 50%,transparent 65%),radial-gradient(20% 15% at 78% 20%,#5a3010 45%,transparent 60%),linear-gradient(#0003 0%,#0001 20%,#0000 50%),var(--fur);}
-.${id}.white .head{background:linear-gradient(#0001 0%,#0000 30%),var(--fur);}
-.${id} .whisker{width:30%;height:30%;border-radius:50%;border:2em solid #0000;border-top-color:var(--wh);border-left-color:var(--wh);clip-path:polygon(100% 0,100% 100%,0 30%,0 0);}
-.${id} .whisker:nth-child(1){top:70%;translate:-65%;}
-.${id} .whisker:nth-child(2){top:80%;translate:-40%;rotate:-20deg;}
-.${id} .whisker:nth-child(3){right:0;top:70%;translate:65%;rotate:10deg;}
-.${id} .whisker:nth-child(4){right:0;top:80%;translate:40%;rotate:24deg;}
-.${id} .nose{width:10%;height:7%;background:var(--skin);border-radius:50%;left:50%;translate:-50% -50%;top:78%;}
-.${id} .eye{--pos:25%;--x1:50%;--x2:42%;width:35%;aspect-ratio:1;border-radius:50%;background:radial-gradient(50% 50% at var(--x1) 47%,#fff 23%,#fff4 26%,#0000 28%),radial-gradient(50% 50% at var(--x2) 65%,#fff 10%,#fff4 13%,#0000 15%),radial-gradient(circle at 60% 55%,#000 33%,#0002 36%,#0000 38%),white;top:63%;left:var(--pos);translate:-50% -50%;}
-.${id} .eye+.eye{--x1:70%;--x2:78%;left:calc(100% - var(--pos));scale:-1 1;}
-.${id}.m-sleepy .eye{clip-path:ellipse(50% 32% at 50% 68%);}
-.${id}.m-excited .eye{scale:1.18;}
-.${id}.m-excited .eye+.eye{scale:-1.18 1.18;}
-.${id} .hat-beanie{width:55%;height:22%;background:#c97d4e;border-radius:5em 5em 0 0;top:-8%;left:50%;translate:-50%;z-index:10;}
-.${id} .hat-beanie::before{content:"";width:120%;height:40%;background:#b86d3e;border-radius:2em;bottom:0;left:50%;translate:-50%;}
-.${id} .hat-witch{width:38%;height:46%;background:#2a1a3a;border-radius:4em 4em 0 0;top:-40%;left:50%;translate:-50%;z-index:10;}
-.${id} .hat-witch::before{content:"";width:170%;height:18%;background:#2a1a3a;border-radius:3em;bottom:-18%;left:50%;translate:-50%;}
-.${id} .hat-crown{width:55%;height:22%;background:#c9a84e;top:-15%;left:50%;translate:-50%;z-index:10;clip-path:polygon(0 100%,0 40%,18% 0,50% 55%,82% 0,100% 40%,100% 100%);}
-.${id} .hat-grad{width:52%;height:18%;background:#1a1a2e;border-radius:1em;top:-8%;left:50%;translate:-50%;z-index:10;}
-.${id} .hat-grad::before{content:"";width:70%;height:100%;background:#1a1a2e;border-radius:2em 2em 0 0;bottom:100%;left:50%;translate:-50%;}
-.${id} .hat-grad::after{content:"";width:35%;height:6%;background:#c9a84e;border-radius:1em;top:-22%;left:50%;translate:-50%;}
-.${id} .hat-halo{width:68%;height:10%;border:0.4em solid #c9a84e;border-radius:50%;top:-14%;left:50%;translate:-50%;background:transparent;z-index:10;box-shadow:0 0 8px #c9a84e66;}
-.${id} .scarf{width:40%;height:7%;background:#c84a3a;border-radius:2em;top:72%;left:50%;translate:-50%;z-index:10;}
-.${id} .bowtie-l{width:9%;height:6%;background:#4a7fa0;clip-path:polygon(0 0,100% 20%,100% 80%,0 100%);top:68%;left:38%;z-index:10;}
-.${id} .bowtie-r{width:9%;height:6%;background:#4a7fa0;clip-path:polygon(0 20%,100% 0,100% 100%,0 80%);top:68%;left:53%;z-index:10;}
-.${id} .bowtie-c{width:4%;height:4%;background:#3a6a90;border-radius:50%;top:69%;left:50%;translate:-50%;z-index:10;}
-.${id} .cape-l{width:60%;height:80%;background:#3a2060;border-radius:0 0 0 8em;top:10%;left:0;z-index:0;opacity:0.5;}
-.${id} .cape-r{width:60%;height:80%;background:#3a2060;border-radius:0 0 8em 0;top:10%;right:0;z-index:0;opacity:0.5;}
-.${id} .robe{width:130%;height:90%;background:linear-gradient(180deg,#4a1a6f,#2a0a4f);border-radius:0 0 4em 4em;bottom:0;left:50%;translate:-50%;z-index:0;opacity:0.55;}
-.${id} .cloak{width:130%;height:90%;background:linear-gradient(135deg,#0a0a3f,#3a0a6f);border-radius:0 0 4em 4em;bottom:0;left:50%;translate:-50%;z-index:0;opacity:0.45;}
-  `;
-
-  const hatEl = hat === "hat1" ? <div className="hat-beanie" />
-    : hat === "hat2" ? <div className="hat-witch" />
-    : hat === "hat3" ? <div className="hat-crown" />
-    : hat === "hat4" ? <div className="hat-grad" />
-    : hat === "hat5" ? <div className="hat-halo" />
-    : null;
-
-  const outfitEl = outfit === "out1" ? <div className="scarf" />
-    : outfit === "out2" ? <><div className="bowtie-l" /><div className="bowtie-r" /><div className="bowtie-c" /></>
-    : outfit === "out3" ? <><div className="cape-l" /><div className="cape-r" /></>
-    : outfit === "out4" ? <div className="robe" />
-    : outfit === "out5" ? <div className="cloak" />
-    : null;
-
-  return (
-    <div style={{ position:"relative", display:"inline-block", width:size, height:size }}>
-      <Background bgId={bg} size={size} />
-      <style>{css}</style>
-      <article className={`${id} ${moodCls} ${petId}`} style={{ position:"relative", zIndex:1 }}>
-      <div className="shadow" />
-      <div className="tail" />
-      <div className="body">
-        <div className="leg" />
-        <div className="leg" />
-        <div className="paw" />
-        <div className="paw" />
-        {/* capes/robes stay in body */}
-        {outfit === "out3" && <><div className="cape-l" /><div className="cape-r" /></>}
-        {outfit === "out4" && <div className="robe" />}
-        {outfit === "out5" && <div className="cloak" />}
-      </div>
-      <div className="ear" />
-      <div className="ear" />
-      {/* scarf and bowtie render between body and head */}
-      {outfit === "out1" && <div className="scarf" />}
-      {outfit === "out2" && <><div className="bowtie-l" /><div className="bowtie-r" /><div className="bowtie-c" /></>}
-      <div className="head">
-        <div className="whisker" />
-        <div className="whisker" />
-        <div className="whisker" />
-        <div className="whisker" />
-        <div className="eye" />
-        <div className="eye" />
-        <div className="nose" />
-        {hatEl}
-      </div>
-    </article>
-      {comp && (
-        <div style={{ position:"absolute", bottom:0, right:0, fontSize:size * 0.15, zIndex:10 }}>
-          {compItem?.emoji}
+    <div style={{ position:"fixed", inset:0, background:"rgba(0,0,0,0.5)", display:"flex", alignItems:"center", justifyContent:"center", zIndex:1000 }}>
+      <div style={{ background:C.bg, borderRadius:16, padding:20, maxWidth:340, width:"90%", ...px }}>
+        <div style={{ fontSize:"0.85rem", fontWeight:700, color:C.text, marginBottom:12, textAlign:"center" }}>
+          Choose your cat
         </div>
+        <div style={{ display:"flex", justifyContent:"center", marginBottom:14 }}>
+          <PixelCat key={preview} mood="neutral" petId={preview} size={110} />
+        </div>
+        <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr 1fr", gap:7, marginBottom:14 }}>
+          {PET_OPTIONS.map(opt => (
+            <button key={opt.id} onClick={() => setPreview(opt.id)} style={{
+              padding:"8px 6px", borderRadius:10,
+              border:`2px solid ${preview===opt.id?C.primary:C.surface2}`,
+              background: preview===opt.id?C.primary:C.surface,
+              color: preview===opt.id?"#fff":C.text,
+              fontFamily:"inherit", fontSize:"0.68rem", fontWeight:700, cursor:"pointer",
+            }}>
+              <div style={{ width:14, height:14, borderRadius:"50%", background:opt.color, margin:"0 auto 3px", border:"2px solid rgba(0,0,0,0.15)" }}/>
+              {opt.label}
+            </button>
+          ))}
+        </div>
+        <div style={{ display:"flex", gap:6 }}>
+          <button onClick={() => onSelect(preview)} style={{
+            flex:1, padding:"8px 0", borderRadius:8, border:"none",
+            background:C.primary, color:"#fff",
+            fontFamily:"inherit", fontSize:"0.78rem", fontWeight:700, cursor:"pointer"
+          }}>Save</button>
+          <button onClick={onClose} style={{
+            flex:1, padding:"8px 0", borderRadius:8,
+            border:`1px solid ${C.surface2}`, background:C.surface,
+            color:C.muted, fontFamily:"inherit", fontSize:"0.78rem", cursor:"pointer"
+          }}>Cancel</button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ─── Subject Editor Modal ─────────────────────────────────────────────────────
+function SubjectEditor({ subjects, onSave, onClose }) {
+  const [local, setLocal] = useState(subjects.map(s => ({ ...s })));
+  const updateName  = (i, name)  => setLocal(prev => prev.map((s, idx) => idx === i ? { ...s, name } : s));
+  const updateColor = (i, color) => setLocal(prev => prev.map((s, idx) => idx === i ? { ...s, color, bg: color + "22" } : s));
+  const addSubject  = () => { const idx = local.length % SUBJECT_PALETTE.length; setLocal(prev => [...prev, { name:"", ...SUBJECT_PALETTE[idx] }]); };
+  const removeSubject = (i) => setLocal(prev => prev.filter((_, idx) => idx !== i));
+  return (
+    <div style={{ position:"fixed", inset:0, background:"rgba(0,0,0,0.5)", display:"flex", alignItems:"center", justifyContent:"center", zIndex:1000 }}>
+      <div style={{ background:C.bg, borderRadius:16, padding:20, maxWidth:340, width:"90%", ...px }}>
+        <div style={{ fontSize:"0.85rem", fontWeight:700, color:C.text, marginBottom:12 }}>Edit Subjects</div>
+        <div style={{ display:"flex", flexDirection:"column", gap:7, marginBottom:12, maxHeight:300, overflowY:"auto" }}>
+          {local.map((s, i) => (
+            <div key={i} style={{ display:"flex", gap:6, alignItems:"center" }}>
+              <input type="color" value={s.color} onChange={e => updateColor(i, e.target.value)}
+                style={{ width:28, height:28, borderRadius:6, border:"none", cursor:"pointer", padding:0 }} />
+              <input value={s.name} onChange={e => updateName(i, e.target.value)} placeholder={`Subject ${i + 1}...`}
+                style={{ flex:1, padding:"6px 10px", borderRadius:7, border:`1px solid ${C.surface2}`, background:C.surface, color:C.text, fontFamily:"inherit", fontSize:"0.78rem" }} />
+              <button onClick={() => removeSubject(i)} style={{ background:"none", border:"none", color:C.muted, cursor:"pointer", fontSize:"0.9rem", padding:"0 4px" }}>✕</button>
+            </div>
+          ))}
+        </div>
+        <button onClick={addSubject} style={{ width:"100%", padding:"6px 0", borderRadius:8, marginBottom:10, border:`2px dashed ${C.surface2}`, background:"none", color:C.muted, fontFamily:"inherit", fontSize:"0.75rem", cursor:"pointer" }}>+ Add Subject</button>
+        <div style={{ display:"flex", gap:6 }}>
+          <button onClick={() => onSave(local.filter(s => s.name.trim()))} style={{ flex:1, padding:"8px 0", borderRadius:8, border:"none", background:C.primary, color:"#fff", fontFamily:"inherit", fontSize:"0.78rem", fontWeight:700, cursor:"pointer" }}>Save</button>
+          <button onClick={onClose} style={{ flex:1, padding:"8px 0", borderRadius:8, border:`1px solid ${C.surface2}`, background:C.surface, color:C.muted, fontFamily:"inherit", fontSize:"0.78rem", cursor:"pointer" }}>Cancel</button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ─── Import Schedule ──────────────────────────────────────────────────────────
+function ImportSchedule({ subjects, onImport }) {
+  const [open, setOpen] = useState(false);
+  const [json, setJson] = useState("");
+  const [error, setError] = useState("");
+  const handle = () => {
+    try {
+      const data = JSON.parse(json);
+      if (!Array.isArray(data)) throw new Error("Must be an array of days");
+      data.forEach((d, i) => {
+        if (!d.date) throw new Error(`Day ${i} missing "date"`);
+        if (!Array.isArray(d.tasks)) throw new Error(`Day ${i} missing "tasks" array`);
+      });
+      onImport(data); setOpen(false); setJson(""); setError("");
+    } catch (e) { setError(e.message); }
+  };
+  if (!open) return (
+    <button onClick={() => setOpen(true)} style={{ width:"100%", padding:"8px 0", borderRadius:10, marginBottom:8, border:`2px dashed ${C.primary}`, background:"none", color:C.primary, fontFamily:"inherit", fontSize:"0.75rem", fontWeight:700, cursor:"pointer" }}>📥 Import Schedule (JSON)</button>
+  );
+  return (
+    <div style={{ background:C.surface, borderRadius:10, padding:12, border:`2px solid ${C.primary}`, marginBottom:8 }}>
+      <div style={{ fontSize:"0.72rem", fontWeight:700, color:C.text, marginBottom:6 }}>Paste your schedule JSON</div>
+      <textarea value={json} onChange={e => setJson(e.target.value)}
+        placeholder={`[\n  {\n    "date": "Mon Mar 23",\n    "group": "Week 1",\n    "tasks": [\n      { "subject": "Lin. Alg.", "label": "3.5 Notes Pt.1" }\n    ]\n  }\n]`}
+        style={{ width:"100%", height:160, padding:"8px 10px", borderRadius:7, border:`1px solid ${C.surface2}`, background:C.bg, color:C.text, fontFamily:"inherit", fontSize:"0.68rem", resize:"vertical", boxSizing:"border-box", marginBottom:6 }} />
+      {error && <div style={{ fontSize:"0.68rem", color:C.red, marginBottom:6 }}>{error}</div>}
+      <div style={{ display:"flex", gap:6 }}>
+        <button onClick={handle} style={{ flex:1, padding:"7px 0", borderRadius:7, border:"none", background:C.primary, color:"#fff", fontFamily:"inherit", fontSize:"0.75rem", fontWeight:700, cursor:"pointer" }}>Import</button>
+        <button onClick={() => { setOpen(false); setJson(""); setError(""); }} style={{ flex:1, padding:"7px 0", borderRadius:7, border:`1px solid ${C.surface2}`, background:C.surface, color:C.muted, fontFamily:"inherit", fontSize:"0.75rem", cursor:"pointer" }}>Cancel</button>
+      </div>
+    </div>
+  );
+}
+
+// ─── TasksTab ─────────────────────────────────────────────────────────────────
+function TasksTab({ days, subjects, checked, onToggle, onAddTask, onDeleteTask, onDeleteDay, onImport, onEditSubjects, petInfo }) {
+  const [filter,    setFilter]    = useState("all");
+  const [collapsed, setCollapsed] = useState({});
+  const [newTask,   setNewTask]   = useState({ subject:"", label:"" });
+  const [addingTo,  setAddingTo]  = useState(null);
+
+  const allTasks = days.flatMap(d => d.tasks || []).filter(Boolean);
+  const visible  = filter === "all" ? days : days.filter(d => d.group === filter);
+  const groups   = [...new Set(days.map(d => d.group).filter(Boolean))];
+
+  return (
+    <div>
+      {/* Cat card */}
+      {petInfo && (
+        <div style={{ background:C.surface, borderRadius:14, marginBottom:10, border:`1px solid ${C.surface2}`, overflow:"hidden", position:"relative", display:"flex", alignItems:"center", gap:12, padding:"10px 14px" }}>
+          <div style={{ animation:"catBob 2.8s ease-in-out infinite", flexShrink:0, position:"relative", zIndex:1 }}>
+            <style>{`@keyframes catBob { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-5px)} }`}</style>
+            <PixelCat mood={petInfo.mood} hat={petInfo.equipped.hat} outfit={petInfo.equipped.outfit}
+              bg={petInfo.bg} comp={petInfo.equipped.comp} petId={petInfo.petId} size={90} />
+          </div>
+          <div style={{ zIndex:1 }}>
+            <div style={{ fontSize:"0.78rem", fontWeight:700, color:C.text }}>{petInfo.petName}</div>
+            <div style={{ fontSize:"0.65rem", color:C.muted }}>
+              {petInfo.happiness>70?"😸 Happy & studying!":petInfo.happiness>40?"😺 Getting there...":"😿 Check some tasks off!"}
+            </div>
+          </div>
+        </div>
+      )}
+
+      <ImportSchedule subjects={subjects} onImport={onImport} />
+      <button onClick={onEditSubjects} style={{ width:"100%", padding:"8px 0", borderRadius:10, marginBottom:8, border:`2px dashed ${C.surface2}`, background:"none", color:C.muted, fontFamily:"inherit", fontSize:"0.75rem", fontWeight:700, cursor:"pointer" }}>⚙️ Edit Subjects</button>
+
+      {subjects.length > 0 && (
+        <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:5, marginBottom:10 }}>
+          {subjects.map(s => {
+            const st = allTasks.filter(t => t.subject === s.name);
+            const sd = st.filter(t => checked[t.id]).length;
+            return (
+              <div key={s.name} style={{ background:C.surface, borderRadius:8, padding:"6px 9px", borderLeft:`3px solid ${s.color}` }}>
+                <div style={{ display:"flex", justifyContent:"space-between", marginBottom:3 }}>
+                  <span style={{ fontSize:"0.65rem", fontWeight:700, color:C.text }}>{s.name}</span>
+                  <span style={{ fontSize:"0.62rem", color:s.color }}>{sd}/{st.length}</span>
+                </div>
+                <div style={{ background:C.surface2, borderRadius:4, height:4, overflow:"hidden" }}>
+                  <div style={{ background:s.color, width:`${st.length?(sd/st.length)*100:0}%`, height:"100%", transition:"width 0.3s" }} />
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      )}
+
+      {groups.length > 0 && (
+        <div style={{ display:"flex", gap:4, marginBottom:10 }}>
+          <button onClick={() => setFilter("all")} style={{ flex:1, padding:"4px 0", borderRadius:6, border:"none", background:filter==="all"?C.text:C.surface2, color:filter==="all"?"#fff":C.muted, fontFamily:"inherit", fontSize:"0.68rem", fontWeight:700, cursor:"pointer" }}>All</button>
+          {groups.map(g => (
+            <button key={g} onClick={() => setFilter(g)} style={{ flex:1, padding:"4px 0", borderRadius:6, border:"none", background:filter===g?C.text:C.surface2, color:filter===g?"#fff":C.muted, fontFamily:"inherit", fontSize:"0.68rem", fontWeight:700, cursor:"pointer" }}>{g}</button>
+          ))}
+        </div>
+      )}
+
+      {visible.map(({ date, tasks }) => {
+        const safeTasks = (tasks || []).filter(Boolean);
+        const d = safeTasks.filter(t => checked[t.id]).length;
+        const allDone = d === safeTasks.length && safeTasks.length > 0;
+        const isCol = collapsed[date];
+        const subjectMap = Object.fromEntries(subjects.map(s => [s.name, s]));
+        return (
+          <div key={date} style={{ background:C.surface, borderRadius:10, marginBottom:7, overflow:"hidden", border:`1px solid ${C.surface2}` }}>
+            <div onClick={() => setCollapsed(c => ({ ...c, [date]: !c[date] }))}
+              style={{ display:"flex", alignItems:"center", gap:8, padding:"8px 11px", cursor:"pointer", background:allDone?"#d4edd4":C.surface }}>
+              <span style={{ flex:1, fontSize:"0.78rem", fontWeight:700, color:allDone?C.green:C.text }}>{allDone?"✅ ":""}{date}</span>
+              <span style={{ fontSize:"0.65rem", color:C.muted }}>{d}/{safeTasks.length}</span>
+              <button onClick={e => { e.stopPropagation(); onDeleteDay(date); }} style={{ background:"none", border:"none", color:C.muted, fontSize:"0.7rem", cursor:"pointer", padding:"0 4px" }}>🗑️</button>
+              <span style={{ fontSize:"0.6rem", color:C.muted }}>{isCol?"▶":"▼"}</span>
+            </div>
+            {!isCol && (
+              <div style={{ padding:"5px 9px 9px" }}>
+                {safeTasks.map(task => {
+                  const s = subjectMap[task.subject] || { color:C.muted, bg:C.surface };
+                  return (
+                    <label key={task.id} style={{ display:"flex", alignItems:"flex-start", gap:7, padding:"4px 7px", borderRadius:6, marginBottom:2, cursor:"pointer", background:checked[task.id]?s.bg:"#fafaf8", opacity:checked[task.id]?0.6:1, borderLeft:`3px solid ${s.color}` }}>
+                      <input type="checkbox" checked={!!checked[task.id]} onChange={() => onToggle(task.id)}
+                        style={{ marginTop:2, accentColor:s.color, width:12, height:12, flexShrink:0 }} />
+                      <div style={{ flex:1 }}>
+                        <span style={{ fontSize:"0.75rem", color:C.text, textDecoration:checked[task.id]?"line-through":"none" }}>{task.label}</span>
+                        {task.subject && <span style={{ display:"inline-block", fontSize:"0.58rem", fontWeight:700, background:s.bg, color:s.color, borderRadius:3, padding:"0px 4px", marginLeft:4 }}>{task.subject}</span>}
+                      </div>
+                      <button onClick={e => { e.preventDefault(); onDeleteTask(date, task.id); }} style={{ background:"none", border:"none", color:C.muted, fontSize:"0.7rem", cursor:"pointer", padding:"0 2px" }}>✕</button>
+                    </label>
+                  );
+                })}
+                {addingTo === date ? (
+                  <div style={{ display:"flex", gap:5, marginTop:6 }}>
+                    <select value={newTask.subject} onChange={e => setNewTask(t => ({ ...t, subject:e.target.value }))}
+                      style={{ padding:"4px 6px", borderRadius:6, border:`1px solid ${C.surface2}`, background:C.surface, color:C.text, fontFamily:"inherit", fontSize:"0.7rem" }}>
+                      <option value="">No subject</option>
+                      {subjects.map(s => <option key={s.name} value={s.name}>{s.name}</option>)}
+                    </select>
+                    <input value={newTask.label} onChange={e => setNewTask(t => ({ ...t, label:e.target.value }))}
+                      onKeyDown={e => { if(e.key==="Enter"&&newTask.label.trim()){onAddTask(date,newTask.label.trim(),newTask.subject);setNewTask({subject:"",label:""});setAddingTo(null);}}}
+                      placeholder="task name..."
+                      style={{ flex:1, padding:"4px 8px", borderRadius:6, border:`1px solid ${C.surface2}`, background:C.surface, color:C.text, fontFamily:"inherit", fontSize:"0.7rem" }} autoFocus />
+                    <button onClick={() => { if(newTask.label.trim()){onAddTask(date,newTask.label.trim(),newTask.subject);setNewTask({subject:"",label:""});setAddingTo(null);}}}
+                      style={{ padding:"4px 8px", borderRadius:6, border:"none", background:C.primary, color:"#fff", fontFamily:"inherit", fontSize:"0.7rem", cursor:"pointer" }}>+</button>
+                    <button onClick={() => { setAddingTo(null); setNewTask({subject:"",label:""}); }}
+                      style={{ padding:"4px 8px", borderRadius:6, border:`1px solid ${C.surface2}`, background:C.surface, color:C.muted, fontFamily:"inherit", fontSize:"0.7rem", cursor:"pointer" }}>✕</button>
+                  </div>
+                ) : (
+                  <button onClick={() => setAddingTo(date)} style={{ background:"none", border:`1px dashed ${C.surface2}`, borderRadius:6, padding:"3px 10px", width:"100%", color:C.muted, fontFamily:"inherit", fontSize:"0.68rem", cursor:"pointer", marginTop:4 }}>+ add task</button>
+                )}
+              </div>
+            )}
+          </div>
+        );
+      })}
+      <AddDayButton subjects={subjects} onAdd={onAddTask} existingDates={days.map(d => d.date)} />
+    </div>
+  );
+}
+
+function AddDayButton({ subjects, onAdd, existingDates }) {
+  const [open, setOpen] = useState(false);
+  const [date, setDate] = useState("");
+  const [group, setGroup] = useState("");
+  const handleAdd = () => { if (!date.trim()) return; onAdd(date.trim(), null, null, group.trim() || null); setOpen(false); setDate(""); setGroup(""); };
+  if (!open) return (
+    <button onClick={() => setOpen(true)} style={{ width:"100%", padding:"8px 0", borderRadius:10, border:`2px dashed ${C.surface2}`, background:"none", color:C.muted, fontFamily:"inherit", fontSize:"0.75rem", cursor:"pointer" }}>+ Add Day</button>
+  );
+  return (
+    <div style={{ background:C.surface, borderRadius:10, padding:12, border:`1px solid ${C.surface2}`, marginBottom:8 }}>
+      <input value={date} onChange={e => setDate(e.target.value)} placeholder="Date label (e.g. Mon Apr 14)"
+        style={{ width:"100%", padding:"6px 10px", borderRadius:7, marginBottom:6, border:`1px solid ${C.surface2}`, background:C.bg, color:C.text, fontFamily:"inherit", fontSize:"0.75rem", boxSizing:"border-box" }} />
+      <input value={group} onChange={e => setGroup(e.target.value)} placeholder="Week/group label (optional)"
+        style={{ width:"100%", padding:"6px 10px", borderRadius:7, marginBottom:6, border:`1px solid ${C.surface2}`, background:C.bg, color:C.text, fontFamily:"inherit", fontSize:"0.75rem", boxSizing:"border-box" }} />
+      <div style={{ display:"flex", gap:6 }}>
+        <button onClick={handleAdd} style={{ flex:1, padding:"6px 0", borderRadius:7, border:"none", background:C.primary, color:"#fff", fontFamily:"inherit", fontSize:"0.75rem", fontWeight:700, cursor:"pointer" }}>Add</button>
+        <button onClick={() => setOpen(false)} style={{ flex:1, padding:"6px 0", borderRadius:7, border:`1px solid ${C.surface2}`, background:C.surface, color:C.muted, fontFamily:"inherit", fontSize:"0.75rem", cursor:"pointer" }}>Cancel</button>
+      </div>
+    </div>
+  );
+}
+
+// ─── PetTab ───────────────────────────────────────────────────────────────────
+function PetTab({ petId, petName, mood, happiness, level, title, equipped, owned, onEquip, onChangeCat }) {
+  return (
+    <div style={{ textAlign:"center" }}>
+      <div style={{ background:C.surface, borderRadius:16, padding:20, marginBottom:10, border:`2px solid ${C.surface2}`, display:"inline-block" }}>
+        <PixelCat mood={mood} hat={equipped.hat} outfit={equipped.outfit} bg={equipped.bg} comp={equipped.comp} petId={petId} size={140} />
+      </div>
+      <div style={{ fontSize:"0.9rem", fontWeight:700, color:C.text, marginBottom:2 }}>{petName} — Lv.{level} {title}</div>
+      <button onClick={onChangeCat} style={{ padding:"5px 16px", borderRadius:8, marginBottom:10, border:`2px dashed ${C.surface2}`, background:"none", color:C.muted, fontFamily:"inherit", fontSize:"0.72rem", cursor:"pointer" }}>
+        🐱 Change Cat
+      </button>
+      <div style={{ background:C.surface, borderRadius:10, padding:"8px 14px", marginBottom:10, border:`1px solid ${C.surface2}` }}>
+        <div style={{ display:"flex", justifyContent:"space-between", marginBottom:4 }}>
+          <span style={{ fontSize:"0.68rem", fontWeight:700, color:C.pink }}>{happiness>70?"😸 Happy!":happiness>40?"😺 Content":"😿 Needs tasks!"}</span>
+          <span style={{ fontSize:"0.65rem", color:C.muted }}>{happiness}/100</span>
+        </div>
+        <div style={{ background:C.surface2, borderRadius:4, height:6, overflow:"hidden" }}>
+          <div style={{ background:happiness>70?C.green:happiness>40?C.yellow:C.red, width:`${happiness}%`, height:"100%", transition:"width 0.5s" }} />
+        </div>
+      </div>
+      {owned.length > 0 && (
+        <div style={{ background:C.surface, borderRadius:10, padding:10, border:`1px solid ${C.surface2}` }}>
+          <div style={{ fontSize:"0.68rem", fontWeight:700, color:C.muted, marginBottom:7 }}>YOUR ITEMS</div>
+          <div style={{ display:"flex", flexWrap:"wrap", gap:5, justifyContent:"center" }}>
+            {SHOP.filter(s => owned.includes(s.id)).map(item => (
+              <button key={item.id} onClick={() => onEquip(item.type, item.id)} style={{
+                padding:"4px 8px", borderRadius:7, fontSize:"0.68rem", fontWeight:700,
+                border:`2px solid ${equipped[item.type]===item.id?C.primary:C.surface2}`,
+                background:equipped[item.type]===item.id?C.primary:C.bg,
+                color:equipped[item.type]===item.id?"#fff":C.text,
+                cursor:"pointer", fontFamily:"inherit"
+              }}>{item.emoji} {item.label}{item.rare?" ✨":""}</button>
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ─── QuestsTab ────────────────────────────────────────────────────────────────
+function QuestsTab({ coins, achievements, onSpin, dailyQuests, questDone }) {
+  return (
+    <div>
+      <div style={{ background:C.surface, borderRadius:12, padding:12, marginBottom:12, border:`1px solid ${C.surface2}`, textAlign:"center" }}>
+        <div style={{ fontSize:"0.78rem", fontWeight:700, color:C.text, marginBottom:4 }}>🎰 Spin the Wheel</div>
+        <div style={{ fontSize:"0.68rem", color:C.muted, marginBottom:8 }}>Costs 5 coins · Win coins, free time, or rare items!</div>
+        <button onClick={onSpin} style={{ padding:"8px 20px", borderRadius:10, border:"none", background:coins>=5?C.primary:C.surface2, color:coins>=5?"#fff":C.muted, fontFamily:"inherit", fontSize:"0.78rem", fontWeight:700, cursor:coins>=5?"pointer":"default" }}>{coins>=5?"Spin! (5 coins)":"Need 5 coins to spin"}</button>
+      </div>
+      <div style={{ background:C.surface, borderRadius:12, padding:12, marginBottom:12, border:`1px solid ${C.surface2}` }}>
+        <div style={{ fontSize:"0.78rem", fontWeight:700, color:C.text, marginBottom:8 }}>Daily Quests</div>
+        {dailyQuests.map(q => {
+          const isDone = questDone[q.id];
+          return (
+            <div key={q.id} style={{ background:isDone?"#d4edd4":C.bg, borderRadius:8, padding:"8px 10px", marginBottom:6, border:`1px solid ${isDone?C.green:C.surface2}`, display:"flex", alignItems:"center", gap:8 }}>
+              <div style={{ flex:1 }}>
+                <div style={{ fontSize:"0.75rem", fontWeight:700, color:isDone?C.green:C.text, textDecoration:isDone?"line-through":"none" }}>{q.label}</div>
+                <div style={{ fontSize:"0.62rem", color:C.muted }}>+{q.reward} coins</div>
+              </div>
+              {isDone?<span>✅</span>:<span style={{ fontSize:"0.68rem", color:C.muted }}>+{q.reward}</span>}
+            </div>
+          );
+        })}
+      </div>
+      <div style={{ background:C.surface, borderRadius:12, padding:12, border:`1px solid ${C.surface2}` }}>
+        <div style={{ fontSize:"0.78rem", fontWeight:700, color:C.text, marginBottom:8 }}>Achievements ({achievements.filter(a=>a.unlocked).length}/10)</div>
+        <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:6 }}>
+          {achievements.map(({ ach, unlocked }) => (
+            <div key={ach.id} style={{ background:unlocked?C.bg:C.surface2, borderRadius:10, padding:"8px 10px", opacity:unlocked?1:0.5, border:`1px solid ${unlocked?C.yellow:C.surface2}` }}>
+              <div style={{ fontSize:"1.2rem", textAlign:"center" }}>{unlocked?ach.emoji:"🔒"}</div>
+              <div style={{ fontSize:"0.68rem", fontWeight:700, color:C.text, textAlign:"center" }}>{ach.label}</div>
+              <div style={{ fontSize:"0.6rem", color:C.muted, textAlign:"center" }}>{ach.desc}</div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ─── ShopTab ──────────────────────────────────────────────────────────────────
+function ShopTab({ coins, owned, equipped, onBuy, onEquip }) {
+  return (
+    <div>
+      <div style={{ fontSize:"0.7rem", color:C.muted, marginBottom:10, textAlign:"center" }}>Earn coins by completing tasks · ✨ = rare, win from wheel only</div>
+      {["hat","outfit","bg","comp"].map(type => {
+        const labels = { hat:"Hats", outfit:"Outfits", bg:"Backgrounds", comp:"Companions" };
+        return (
+          <div key={type} style={{ marginBottom:12 }}>
+            <div style={{ fontSize:"0.68rem", fontWeight:700, color:C.muted, marginBottom:5, letterSpacing:"0.08em" }}>{labels[type].toUpperCase()}</div>
+            <div style={{ display:"grid", gridTemplateColumns:"1fr 1fr", gap:5 }}>
+              {SHOP.filter(s=>s.type===type).map(item => {
+                const isOwned = owned.includes(item.id);
+                const canBuy  = coins>=item.cost && !isOwned && !item.rare;
+                return (
+                  <div key={item.id} style={{ background:isOwned?"#d4edd4":item.rare?"#f5f0ff":C.surface, borderRadius:10, padding:"9px 10px", border:`1px solid ${isOwned?C.green:item.rare?C.purple:C.surface2}`, display:"flex", flexDirection:"column", gap:3 }}>
+                    <div style={{ fontSize:"1.3rem", textAlign:"center" }}>{item.emoji}</div>
+                    <div style={{ fontSize:"0.7rem", fontWeight:700, color:C.text, textAlign:"center" }}>{item.label}{item.rare?" ✨":""}</div>
+                    {item.rare&&!isOwned&&<div style={{ fontSize:"0.6rem", color:C.purple, textAlign:"center" }}>Win from wheel!</div>}
+                    {isOwned&&<button onClick={() => onEquip(item.type,item.id)} style={{ padding:"3px 0", borderRadius:6, border:"none", fontSize:"0.65rem", fontWeight:700, background:equipped[item.type]===item.id?C.primary:C.green, color:"#fff", cursor:"pointer", fontFamily:"inherit" }}>{equipped[item.type]===item.id?"✓ Equipped":"Equip"}</button>}
+                    {!item.rare&&!isOwned&&<button onClick={() => onBuy(item)} disabled={!canBuy} style={{ padding:"3px 0", borderRadius:6, border:"none", fontSize:"0.65rem", fontWeight:700, background:canBuy?C.primary:C.surface2, color:canBuy?"#fff":C.muted, cursor:canBuy?"pointer":"default", fontFamily:"inherit" }}>{item.cost} coins</button>}
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
+// ─── Root App ─────────────────────────────────────────────────────────────────
+export default function App() {
+  const [authReady,         setAuthReady]         = useState(false);
+  const [uid,               setUid]               = useState(null);
+  const [username,          setUsername]          = useState(localStorage.getItem("sq-username") || "");
+  const [petId,             setPetId]             = useState(localStorage.getItem("sq-petId")    || "tabby");
+  const [petName,           setPetName]           = useState(localStorage.getItem("sq-petName")  || "");
+  const [subjects,          setSubjects]          = useState([]);
+  const [days,              setDays]              = useState([]);
+  const [daysLoaded,        setDaysLoaded]        = useState(false);
+  const [tab,               setTab]               = useState("tasks");
+  const [popup,             setPopup]             = useState(null);
+  const [newAch,            setNewAch]            = useState(null);
+  const [showSpin,          setShowSpin]          = useState(false);
+  const [dailyQuests,       setDailyQuests]       = useState([]);
+  const [showSubjectEditor, setShowSubjectEditor] = useState(false);
+  const [showCatSelector,   setShowCatSelector]   = useState(false);
+
+  const allTasks = days.flatMap(d => d.tasks || []).filter(Boolean);
+  const { state, done, toggleTask, handleSpin, buyItem, equipItem, cashOut, tickHappiness, incrementCheers, setState } = useGameState(allTasks.length);
+  const actualDone = allTasks.filter(t => state.checked[t.id]).length;
+
+  // ── Auth listener ─────────────────────────────────────────────────────────
+  useEffect(() => {
+    return onAuthStateChanged(auth, async user => {
+      if (user) {
+        setUid(user.uid);
+        const snap = await get(ref(db, `users/${user.uid}/meta`));
+        if (snap.exists()) {
+          const meta = snap.val();
+          setUsername(meta.username || "");
+          localStorage.setItem("sq-username", meta.username || "");
+          setPetId(meta.petId || "tabby");
+          localStorage.setItem("sq-petId", meta.petId || "tabby");
+          setPetName(meta.petName || "");
+          localStorage.setItem("sq-petName", meta.petName || "");
+          setSubjects(meta.subjects || []);
+        }
+        const stateSnap = await get(ref(db, `users/${user.uid}/gameState`));
+        if (stateSnap.exists()) setState(prev => ({ ...prev, ...stateSnap.val() }));
+        const daysSnap = await get(ref(db, `users/${user.uid}/days`));
+        if (daysSnap.exists()) {
+          setDays(daysSnap.val());
+          setDaysLoaded(true);
+        } else {
+          const savedDays = JSON.parse(localStorage.getItem("studyquest-days") || "null");
+          if (savedDays) setDays(savedDays);
+          setDaysLoaded(true);
+        }
+      }
+      setAuthReady(true);
+    });
+  }, []);
+
+  // ── Persist days ──────────────────────────────────────────────────────────
+  useEffect(() => {
+    if (!daysLoaded) return;
+    localStorage.setItem("studyquest-days", JSON.stringify(days));
+    if (uid) set(ref(db, `users/${uid}/days`), days);
+  }, [days, uid, daysLoaded]);
+
+  // ── Persist game state ────────────────────────────────────────────────────
+  useEffect(() => {
+    if (!uid || !state) return;
+    const safeChecked = Object.fromEntries(
+      Object.entries(state.checked || {}).filter(([k]) =>
+        k && !k.includes(".") && !k.includes("#") && !k.includes("$") &&
+        !k.includes("/") && !k.includes("[") && !k.includes("]")
+      )
+    );
+    set(ref(db, `users/${uid}/gameState`), { ...state, checked: safeChecked });
+  }, [uid, state]);
+
+  // ── Happiness decay ───────────────────────────────────────────────────────
+  useEffect(() => { const t = setInterval(tickHappiness, 60000); return () => clearInterval(t); }, [tickHappiness]);
+
+  // ── Daily quests ──────────────────────────────────────────────────────────
+  useEffect(() => {
+    const today = new Date().toDateString();
+    try {
+      const q = JSON.parse(localStorage.getItem("studyquest-quests") || "{}");
+      if (q.date === today) { setDailyQuests(q.quests || []); return; }
+    } catch {}
+    const quests = [...QUEST_TEMPLATES].sort(() => Math.random() - 0.5).slice(0, 3);
+    setDailyQuests(quests);
+    localStorage.setItem("studyquest-quests", JSON.stringify({ date:today, quests }));
+  }, []);
+
+  // ── Multiplayer publish ───────────────────────────────────────────────────
+  const todayDone = allTasks.filter(t => { const today = new Date().toDateString(); return state.checked[t.id] && state.lastDate === today; }).length;
+  usePublishProfile(uid, username, petId, petName, actualDone, allTasks.length, state.coins, state.equipped);
+  usePublishTasks(uid, allTasks.map(t => ({ ...t, done: !!state.checked[t.id] })));
+  usePublishTodayDone(uid, todayDone, state.streak);
+
+  // ── Handlers ─────────────────────────────────────────────────────────────
+  const handleOnboardingDone = (newUid, uname, pid, pname, subs) => {
+    setUid(newUid);
+    if (uname) {
+      setUsername(uname); localStorage.setItem("sq-username", uname);
+      setPetId(pid);      localStorage.setItem("sq-petId", pid);
+      setPetName(pname);  localStorage.setItem("sq-petName", pname);
+      setSubjects(subs || []);
+    }
+  };
+
+  const handleSelectCat = async (newPetId) => {
+    setPetId(newPetId);
+    localStorage.setItem("sq-petId", newPetId);
+    setShowCatSelector(false);
+    if (uid) {
+      const snap = await get(ref(db, `users/${uid}/meta`));
+      if (snap.exists()) set(ref(db, `users/${uid}/meta`), { ...snap.val(), petId: newPetId });
+    }
+  };
+
+  const showPopup       = msg => { setPopup(msg);  setTimeout(() => setPopup(null),  1800); };
+  const showAchievement = ach => { setNewAch(ach); setTimeout(() => setNewAch(null), 3000); };
+  const handleToggle    = id  => toggleTask(id, showPopup, showAchievement);
+
+  const handleAddTask = (date, label, subject, group = null) => {
+    setDays(prev => {
+      const existing = prev.find(d => d.date === date);
+      const newTask = label ? { id:`t_${Date.now()}_${Math.random().toString(36).substr(2,9)}`, label, subject:subject||"", done:false } : null;
+      if (existing) return prev.map(d => d.date===date ? { ...d, tasks: newTask?[...(d.tasks||[]),newTask]:(d.tasks||[]) } : d);
+      return [...prev, { date, group:group||null, tasks:newTask?[newTask]:[] }];
+    });
+  };
+
+  const handleDeleteTask = (date, taskId) => {
+    setDays(prev => prev.map(d => d.date===date ? { ...d, tasks:(d.tasks||[]).filter(t=>t&&t.id!==taskId) } : d));
+    setState(prev => { const checked={...prev.checked}; delete checked[taskId]; return {...prev,checked}; });
+  };
+
+  const handleDeleteDay = (date) => {
+    const dayToDelete = days.find(d => d.date===date);
+    if (dayToDelete) setState(prev => { const checked={...prev.checked}; (dayToDelete.tasks||[]).filter(Boolean).forEach(t => delete checked[t.id]); return {...prev,checked}; });
+    setDays(prev => prev.filter(d => d.date!==date));
+  };
+
+  const handleImport = (data) => {
+    setDays(data.map(d => ({ date:d.date, group:d.group||null, tasks:d.tasks.map(t => ({ id:`t_${Date.now()}_${Math.random().toString(36).substr(2,9)}`, label:t.label, subject:t.subject||"", done:false })) })));
+  };
+
+  const handleSaveSubjects = async (updated) => {
+    setSubjects(updated); setShowSubjectEditor(false);
+    if (uid) { const snap = await get(ref(db, `users/${uid}/meta`)); if (snap.exists()) set(ref(db, `users/${uid}/meta`), { ...snap.val(), subjects: updated }); }
+  };
+
+  // ── Derived display ───────────────────────────────────────────────────────
+  const { level, title, mood: rawMood } = getLevel(actualDone, allTasks.length);
+  const mood      = state.happiness<30?"sleepy":state.happiness>70?rawMood:"neutral";
+  const lvlThresh = [0,0.08,0.22,0.40,0.60,0.80,1.0];
+  const pct       = allTasks.length>0 ? actualDone/allTasks.length : 0;
+  const lvlStart  = lvlThresh[level-1]||0;
+  const lvlEnd    = lvlThresh[level]  ||1;
+  const lvlPct    = lvlEnd>lvlStart ? ((pct-lvlStart)/(lvlEnd-lvlStart))*100 : 100;
+
+  const { ACHIEVEMENTS: ACH_LIST } = require("./data/constants");
+  const achDisplay = ACH_LIST.map(a => ({ ach:a, unlocked:state.achievements.includes(a.id) }));
+
+  if (!authReady) return <div style={{ ...px, background:C.bg, minHeight:"100vh", display:"flex", alignItems:"center", justifyContent:"center", color:C.muted, fontSize:"0.85rem" }}>Loading...</div>;
+  if (!uid || !username) return <Onboarding onDone={handleOnboardingDone} />;
+
+  return (
+    <div style={{ ...px, background:C.bg, minHeight:"100vh", padding:16, maxWidth:480, margin:"0 auto" }}>
+
+      {popup && <div style={{ position:"fixed", top:60, right:16, background:C.primary, color:"#fff", borderRadius:20, padding:"6px 14px", fontSize:"0.82rem", fontWeight:700, zIndex:999 }}>{popup}</div>}
+
+      {newAch && (
+        <div style={{ position:"fixed", top:100, left:"50%", transform:"translateX(-50%)", background:"#fff", borderRadius:16, padding:"12px 20px", boxShadow:"0 4px 20px rgba(0,0,0,0.2)", zIndex:1000, textAlign:"center", border:`2px solid ${C.yellow}` }}>
+          <div style={{ fontSize:"1.5rem" }}>{newAch.emoji}</div>
+          <div style={{ fontSize:"0.8rem", fontWeight:700, color:C.text }}>Achievement Unlocked!</div>
+          <div style={{ fontSize:"0.72rem", color:C.muted }}>{newAch.label}</div>
+        </div>
+      )}
+
+      {showSpin && <SpinWheel coins={state.coins} onSpin={r => handleSpin(r,showPopup,showAchievement)} onClose={() => setShowSpin(false)} />}
+      {showSubjectEditor && <SubjectEditor subjects={subjects} onSave={handleSaveSubjects} onClose={() => setShowSubjectEditor(false)} />}
+      {showCatSelector && <CatSelector currentPetId={petId} onSelect={handleSelectCat} onClose={() => setShowCatSelector(false)} />}
+
+      {/* Header */}
+      <div style={{ display:"flex", justifyContent:"space-between", alignItems:"center", marginBottom:8 }}>
+        <div>
+          <span style={{ fontSize:"0.95rem", fontWeight:700, color:C.text }}>{username}</span>
+          <span style={{ fontSize:"0.65rem", color:C.muted, marginLeft:6 }}>Lv.{level} {title}</span>
+        </div>
+        <div style={{ display:"flex", gap:5, alignItems:"center" }}>
+          {state.streak>0&&<span style={{ fontSize:"0.7rem", fontWeight:700, color:C.red }}>🔥{state.streak}</span>}
+          <div style={{ background:C.surface, borderRadius:20, padding:"3px 10px", fontSize:"0.75rem", fontWeight:700, color:C.primary, border:`2px solid ${C.primary}` }}>🪙 {state.coins}</div>
+        </div>
+      </div>
+
+      {/* XP bar */}
+      <div style={{ background:C.surface, borderRadius:4, height:7, marginBottom:4, overflow:"hidden", border:`1px solid ${C.surface2}` }}>
+        <div style={{ background:C.primary, width:`${Math.min(100,Math.max(0,lvlPct))}%`, height:"100%", transition:"width 0.4s" }} />
+      </div>
+      <div style={{ display:"flex", justifyContent:"space-between", fontSize:"0.6rem", color:C.muted, marginBottom:10 }}>
+        <span>Lv.{level}</span><span>{actualDone}/{allTasks.length} tasks</span><span>Lv.{Math.min(level+1,6)}</span>
+      </div>
+
+      {/* Free time bar */}
+      <div style={{ background:C.surface, borderRadius:10, padding:"8px 12px", marginBottom:12, border:`1px solid ${C.surface2}`, display:"flex", alignItems:"center", gap:8 }}>
+        <div style={{ flex:1 }}>
+          <div style={{ display:"flex", justifyContent:"space-between", marginBottom:3 }}>
+            <span style={{ fontSize:"0.68rem", fontWeight:700, color:C.green }}>Free Time</span>
+            <span style={{ fontSize:"0.68rem", color:C.muted }}>{state.freeTime} min earned</span>
+          </div>
+          <div style={{ background:C.surface2, borderRadius:4, height:6, overflow:"hidden" }}>
+            <div style={{ background:C.green, width:`${Math.min(100,(state.freeTime/120)*100)}%`, height:"100%", transition:"width 0.3s" }} />
+          </div>
+        </div>
+        <button onClick={() => cashOut(showPopup)} disabled={state.freeTime<15} style={{ padding:"4px 10px", borderRadius:8, border:"none", fontSize:"0.68rem", fontWeight:700, background:state.freeTime>=15?C.green:C.surface2, color:state.freeTime>=15?"#fff":C.muted, fontFamily:"inherit", cursor:state.freeTime>=15?"pointer":"default" }}>Cash out!</button>
+      </div>
+
+      {/* Tab bar */}
+      <div style={{ display:"flex", gap:4, marginBottom:14 }}>
+        {[["tasks","📋"],["pet","🐱"],["quests","⚡"],["friend","👯"],["shop","🛍️"]].map(([v,l]) => (
+          <button key={v} onClick={() => setTab(v)} style={{ flex:1, padding:"6px 0", borderRadius:6, border:`2px solid ${tab===v?C.primary:C.surface2}`, background:tab===v?C.primary:C.surface, color:tab===v?"#fff":C.text, fontFamily:"inherit", fontSize:"0.7rem", fontWeight:700, cursor:"pointer" }}>{l}</button>
+        ))}
+      </div>
+
+      {tab==="tasks" && (
+        <TasksTab days={days} subjects={subjects} checked={state.checked}
+          onToggle={handleToggle} onAddTask={handleAddTask}
+          onDeleteTask={handleDeleteTask} onDeleteDay={handleDeleteDay}
+          onImport={handleImport} onEditSubjects={() => setShowSubjectEditor(true)}
+          petInfo={{ petName, petId, equipped:state.equipped, mood, happiness:state.happiness, bg:state.equipped?.bg }}
+        />
+      )}
+      {tab==="pet" && (
+        <PetTab petId={petId} petName={petName} mood={mood}
+          happiness={state.happiness} level={level} title={title}
+          equipped={state.equipped} owned={state.owned}
+          onEquip={equipItem} onChangeCat={() => setShowCatSelector(true)} />
+      )}
+      {tab==="quests" && (
+        <QuestsTab coins={state.coins} achievements={achDisplay}
+          onSpin={() => setShowSpin(true)} dailyQuests={dailyQuests} questDone={state.questDone} />
+      )}
+      {tab==="friend" && (
+        <FriendsTab uid={uid} username={username} myTasks={allTasks.map(t => ({ ...t, done:!!state.checked[t.id] }))} />
+      )}
+      {tab==="shop" && (
+        <ShopTab coins={state.coins} owned={state.owned} equipped={state.equipped}
+          onBuy={item => buyItem(item,showAchievement)} onEquip={equipItem} />
       )}
     </div>
   );
