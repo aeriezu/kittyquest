@@ -78,7 +78,7 @@ export default function FriendsTab({ uid, username, myTasks }) {
           return (
             <div key={f.username} style={{ borderRadius:14, border:`1px solid ${C.surface2}`, marginBottom:10, overflow:"hidden" }}>
               {/* Wide background banner */}
-              <div style={{ position:"relative", height:140, overflow:"hidden" }}>
+              <div style={{ position:"relative", height:150, overflow:"hidden" }}>
                 {/* full width bg scene */}
                 <div style={{ position:"absolute", inset:0, zIndex:0 }}>
                   <PixelCat mood={mood} hat={f.equipped?.hat} outfit={f.equipped?.outfit}
