@@ -135,13 +135,24 @@ function TasksTab({ days, subjects, checked, onToggle, onAddTask, onDeleteTask, 
     <div>
       {/* Cat card */}
       {petInfo && (
-        <div style={{ background:C.surface, borderRadius:14, marginBottom:10, border:`1px solid ${C.surface2}`, overflow:"hidden", position:"relative", display:"flex", alignItems:"center", gap:12, padding:"10px 14px" }}>
-          <div style={{ animation:"catBob 2.8s ease-in-out infinite", flexShrink:0, position:"relative", zIndex:1 }}>
+        <div style={{
+          borderRadius:14, marginBottom:10, border:`1px solid ${C.surface2}`,
+          overflow:"hidden", position:"relative", display:"flex", alignItems:"center", gap:12,
+        }}>
+          {/* full width background scene */}
+          <div style={{ position:"absolute", inset:0, zIndex:0 }}>
+            <PixelCat mood={petInfo.mood} hat={petInfo.equipped.hat} outfit={petInfo.equipped.outfit}
+              bg={petInfo.bg} comp={null} petId={petInfo.petId} size={0}
+              bgOnly={true} />
+          </div>
+          {/* cat with no bg */}
+          <div style={{ animation:"catBob 2.8s ease-in-out infinite", flexShrink:0, position:"relative", zIndex:1, padding:"10px 0 10px 14px" }}>
             <style>{`@keyframes catBob { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-5px)} }`}</style>
             <PixelCat mood={petInfo.mood} hat={petInfo.equipped.hat} outfit={petInfo.equipped.outfit}
-              bg={petInfo.bg} comp={petInfo.equipped.comp} petId={petInfo.petId} size={90} />
+              bg={null} comp={petInfo.equipped.comp} petId={petInfo.petId} size={90} />
           </div>
-          <div style={{ zIndex:1 }}>
+          {/* name + status */}
+          <div style={{ zIndex:1, padding:"10px 14px 10px 0" }}>
             <div style={{ fontSize:"0.78rem", fontWeight:700, color:C.text }}>{petInfo.petName}</div>
             <div style={{ fontSize:"0.65rem", color:C.muted }}>
               {petInfo.happiness>70?"😸 Happy & studying!":petInfo.happiness>40?"😺 Getting there...":"😿 Check some tasks off!"}
@@ -294,7 +305,7 @@ function AddDayButton({ onAdd, existingGroups }) {
   return (
     <div style={{ background:C.surface, borderRadius:10, padding:12, border:`1px solid ${C.surface2}`, marginBottom:8 }}>
       <input value={date} onChange={e => setDate(e.target.value)}
-        placeholder="Group/Day label (e.g. 'Mon Apr 14' or 'Math' )"
+        placeholder="Subject/Day label (e.g. 'Mon Apr 14' or 'Math' )"
         onKeyDown={e => { if(e.key==="Enter") handleAdd(); }}
         autoFocus
         style={{ width:"100%", padding:"6px 10px", borderRadius:7, marginBottom:6, border:`1px solid ${C.surface2}`, background:C.bg, color:C.text, fontFamily:"inherit", fontSize:"0.75rem", boxSizing:"border-box" }} />
