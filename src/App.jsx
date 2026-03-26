@@ -138,7 +138,7 @@ function TasksTab({ days, subjects, checked, onToggle, onAddTask, onDeleteTask, 
         <div style={{
           borderRadius:14, marginBottom:10, border:`1px solid ${C.surface2}`,
           overflow:"hidden", position:"relative", display:"flex", alignItems:"center", gap:12,
-          minHeight: 110,  // ← add this
+          minHeight: 160,
         }}>
           {/* full width background scene */}
           <div style={{ position:"absolute", inset:0, zIndex:0 }}>
