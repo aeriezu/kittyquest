@@ -345,14 +345,14 @@ function PetTab({ petId, petName, mood, happiness, level, title, equipped, owned
     <div style={{ textAlign:"center" }}>
       <div style={{
         borderRadius:16, marginBottom:10, border:`2px solid ${C.surface2}`,
-        overflow:"hidden", position:"relative", height: 240,
-        width: "100%", display:"flex", alignItems:"center", justifyContent:"center"
+        overflow:"hidden", position:"relative", height:280,
+        width:"100%"
       }}>
         <div style={{ position:"absolute", inset:0, zIndex:0 }}>
           <PixelCat mood={mood} hat={equipped.hat} outfit={equipped.outfit}
             bg={equipped.bg} comp={null} petId={petId} size={0} bgOnly={true} />
         </div>
-        <div style={{ position:"relative", zIndex:1 }}>
+        <div style={{ position:"absolute", bottom:0, left:"50%", transform:"translateX(-50%)", zIndex:1 }}>
           <PixelCat mood={mood} hat={equipped.hat} outfit={equipped.outfit}
             bg={null} comp={equipped.comp} petId={petId} size={130} />
         </div>
