@@ -209,18 +209,17 @@ function BgNightCafe() {
         ))}
         <circle cx="35" cy="25" r="7" fill="#f8e890" opacity="0.25"/>
         <circle cx="38" cy="23" r="6" fill="#08121a"/>
-        <rect x="245" y="5" width="4" height="38" fill="#4a3020"/>
-        <polygon points="238,5 258,5 254,22 242,22" fill="#c8a040" opacity="0.95"/>
-        <ellipse cx="248" cy="22" rx="14" ry="4" fill="#f8c840" opacity="0.35" className="lamp-glow-a"/>
-        <polygon points="238,22 258,22 270,82 226,82" fill="#f8c840" opacity="0.06" className="lamp-glow-a"/>
-        <rect x="180" y="70" width="100" height="5" fill="#4a2e18" rx="2"/>
-        <rect x="195" y="75" width="5" height="12" fill="#3a2010" rx="1"/>
-        <rect x="265" y="75" width="5" height="12" fill="#3a2010" rx="1"/>
-        <rect x="218" y="56" width="20" height="16" fill="#f5e8d0" rx="3"/>
-        <rect x="218" y="56" width="20" height="4" fill="#d4b890" rx="3"/>
-        <ellipse cx="228" cy="60" rx="7" ry="2" fill="#6b3a10" opacity="0.8"/>
-        <path d="M238 59 Q245 59 245 64 Q245 69 238 69" fill="none" stroke="#f5e8d0" strokeWidth="2.5"/>
-        <rect x="108" y="8" width="24" height="72" fill="#2a1508" rx="1"/>
+        <rect x="230" y="5" width="4" height="38" fill="#4a3020"/>
+        <polygon points="223,5 243,5 239,22 227,22" fill="#c8a040" opacity="0.95"/>
+        <ellipse cx="233" cy="22" rx="14" ry="4" fill="#f8c840" opacity="0.35" className="lamp-glow-a"/>
+        <polygon points="223,22 243,22 255,82 211,82" fill="#f8c840" opacity="0.06" className="lamp-glow-a"/>
+        <rect x="160" y="70" width="100" height="5" fill="#4a2e18" rx="2"/>
+        <rect x="175" y="75" width="5" height="12" fill="#3a2010" rx="1"/>
+        <rect x="245" y="75" width="5" height="12" fill="#3a2010" rx="1"/>
+        <rect x="198" y="56" width="20" height="16" fill="#f5e8d0" rx="3"/>
+        <rect x="198" y="56" width="20" height="4" fill="#d4b890" rx="3"/>
+        <ellipse cx="208" cy="60" rx="7" ry="2" fill="#6b3a10" opacity="0.8"/>
+        <path d="M218 59 Q225 59 225 64 Q225 69 218 69" fill="none" stroke="#f5e8d0" strokeWidth="2.5"/>
         <rect x="110" y="12" width="4" height="16" fill="#4a7fa0" rx="1"/>
         <rect x="115" y="13" width="5" height="15" fill="#c85820" rx="1"/>
         <rect x="121" y="12" width="4" height="16" fill="#4a8a5a" rx="1"/>
@@ -234,7 +233,7 @@ function BgNightCafe() {
       </svg>
       {[0,1,2].map(i => (
         <div key={i} className="steam-r" style={{
-          left:`${61+i*1.2}%`, height:`${12+i*4}px`,
+          left:`${55+i*1.2}%`, height:`${12+i*4}px`,
           animationDuration:`${1.2+i*0.3}s`, animationDelay:`${i*0.4}s`, bottom:"32%"
         }}/>
       ))}
