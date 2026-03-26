@@ -120,11 +120,12 @@ function ImportSchedule({ subjects, onImport }) {
 }
 
 // ─── TasksTab ─────────────────────────────────────────────────────────────────
-function TasksTab({ days, subjects, checked, onToggle, onAddTask, onDeleteTask, onDeleteDay, onImport, onEditSubjects, petInfo }) {
+function TasksTab({ days, subjects, checked, onToggle, onAddTask, onDeleteTask, onDeleteDay, onImport, onEditSubjects, petInfo, onEditTasks }) {
   const [filter,    setFilter]    = useState("all");
   const [collapsed, setCollapsed] = useState({});
   const [newTask,   setNewTask]   = useState({ subject:"", label:"" });
   const [addingTo,  setAddingTo]  = useState(null);
+  const [editingTask, setEditingTask] = useState(null); // { date, taskId, label, subject }
 
   const allTasks = days.flatMap(d => d.tasks || []).filter(Boolean);
   const visible  = filter === "all" ? days : days.filter(d => d.group === filter);
@@ -200,15 +201,42 @@ function TasksTab({ days, subjects, checked, onToggle, onAddTask, onDeleteTask, 
               <div style={{ padding:"5px 9px 9px" }}>
                 {safeTasks.map(task => {
                   const s = subjectMap[task.subject] || { color:C.muted, bg:C.surface };
+                  const isEditing = editingTask?.taskId === task.id;
+
+                  if (isEditing) return (
+                    <div key={task.id} style={{ display:"flex", gap:5, marginBottom:4, padding:"4px 7px", borderRadius:6, background:C.bg, border:`1px solid ${C.primary}` }}>
+                      <input value={editingTask.label} onChange={e => setEditingTask(t => ({ ...t, label:e.target.value }))}
+                        style={{ flex:1, padding:"3px 6px", borderRadius:5, border:`1px solid ${C.surface2}`, background:C.surface, color:C.text, fontFamily:"inherit", fontSize:"0.72rem" }}
+                        autoFocus onKeyDown={e => { if(e.key==="Enter") { onEditTask(date, task.id, editingTask.label, editingTask.subject); setEditingTask(null); }}} />
+                      <select value={editingTask.subject} onChange={e => setEditingTask(t => ({ ...t, subject:e.target.value }))}
+                        style={{ padding:"3px 6px", borderRadius:5, border:`1px solid ${C.surface2}`, background:C.surface, color:C.text, fontFamily:"inherit", fontSize:"0.72rem" }}>
+                        <option value="">No subject</option>
+                        {subjects.map(s => <option key={s.name} value={s.name}>{s.name}</option>)}
+                      </select>
+                      <button onClick={() => { onEditTask(date, task.id, editingTask.label, editingTask.subject); setEditingTask(null); }}
+                        style={{ padding:"3px 7px", borderRadius:5, border:"none", background:C.primary, color:"#fff", fontFamily:"inherit", fontSize:"0.72rem", cursor:"pointer" }}>✓</button>
+                      <button onClick={() => setEditingTask(null)}
+                        style={{ padding:"3px 7px", borderRadius:5, border:`1px solid ${C.surface2}`, background:C.surface, color:C.muted, fontFamily:"inherit", fontSize:"0.72rem", cursor:"pointer" }}>✕</button>
+                    </div>
+                  );
+
                   return (
-                    <label key={task.id} style={{ display:"flex", alignItems:"flex-start", gap:7, padding:"4px 7px", borderRadius:6, marginBottom:2, cursor:"pointer", background:checked[task.id]?s.bg:"#fafaf8", opacity:checked[task.id]?0.6:1, borderLeft:`3px solid ${s.color}` }}>
+                    <label key={task.id} style={{
+                      display:"flex", alignItems:"flex-start", gap:7,
+                      padding:"4px 7px", borderRadius:6, marginBottom:2, cursor:"pointer",
+                      background:checked[task.id]?s.bg:"#fafaf8",
+                      opacity:checked[task.id]?0.6:1, borderLeft:`3px solid ${s.color}`,
+                    }}>
                       <input type="checkbox" checked={!!checked[task.id]} onChange={() => onToggle(task.id)}
                         style={{ marginTop:2, accentColor:s.color, width:12, height:12, flexShrink:0 }} />
                       <div style={{ flex:1 }}>
                         <span style={{ fontSize:"0.75rem", color:C.text, textDecoration:checked[task.id]?"line-through":"none" }}>{task.label}</span>
                         {task.subject && <span style={{ display:"inline-block", fontSize:"0.58rem", fontWeight:700, background:s.bg, color:s.color, borderRadius:3, padding:"0px 4px", marginLeft:4 }}>{task.subject}</span>}
                       </div>
-                      <button onClick={e => { e.preventDefault(); onDeleteTask(date, task.id); }} style={{ background:"none", border:"none", color:C.muted, fontSize:"0.7rem", cursor:"pointer", padding:"0 2px" }}>✕</button>
+                      <button onClick={e => { e.preventDefault(); setEditingTask({ date, taskId:task.id, label:task.label, subject:task.subject||"" }); }}
+                        style={{ background:"none", border:"none", color:C.muted, fontSize:"0.7rem", cursor:"pointer", padding:"0 2px" }}>✏️</button>
+                      <button onClick={e => { e.preventDefault(); onDeleteTask(date, task.id); }}
+                        style={{ background:"none", border:"none", color:C.muted, fontSize:"0.7rem", cursor:"pointer", padding:"0 2px" }}>✕</button>
                     </label>
                   );
                 })}
@@ -539,6 +567,16 @@ export default function App() {
     setState(prev => { const checked={...prev.checked}; delete checked[taskId]; return {...prev,checked}; });
   };
 
+  const handleEditTask = (date, taskId, label, subject) => {
+    setDays(prev => prev.map(d =>
+      d.date === date ? {
+        ...d, tasks: (d.tasks||[]).map(t =>
+          t.id === taskId ? { ...t, label, subject } : t
+        )
+      } : d
+    ));
+  };
+
   const handleDeleteDay = (date) => {
     const dayToDelete = days.find(d => d.date===date);
     if (dayToDelete) setState(prev => { const checked={...prev.checked}; (dayToDelete.tasks||[]).filter(Boolean).forEach(t => delete checked[t.id]); return {...prev,checked}; });
@@ -633,6 +671,7 @@ export default function App() {
           onDeleteTask={handleDeleteTask} onDeleteDay={handleDeleteDay}
           onImport={handleImport} onEditSubjects={() => setShowSubjectEditor(true)}
           petInfo={{ petName, petId, equipped:state.equipped, mood, happiness:state.happiness, bg:state.equipped?.bg }}
+          onEditTask={handleEditTask}
         />
       )}
       {tab==="pet" && (
