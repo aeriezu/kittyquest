@@ -12,10 +12,12 @@ const PET_STYLES = {
 };
 
 // ─── Wide Animated Background Scenes ─────────────────────────────────────────
+// All backgrounds use viewBox="0 0 300 100" (3:1 ratio)
+// SVG uses width="100%" height="auto" so the full scene is always visible
 
 function BgCozyLibrary() {
   return (
-    <div style={{ position:"absolute", inset:0, overflow:"hidden" }}>
+    <div style={{ position:"absolute", inset:0, overflow:"hidden", background:"#f0ddb8" }}>
       <style>{`
         @keyframes candleFlicker { 0%,100%{opacity:1;transform:scaleY(1)} 50%{opacity:0.7;transform:scaleY(0.85)} 33%{opacity:0.9;transform:scaleY(1.1)} }
         @keyframes dustFloat { 0%{transform:translateY(0) translateX(0);opacity:0} 20%{opacity:0.6} 80%{opacity:0.4} 100%{transform:translateY(-40px) translateX(15px);opacity:0} }
@@ -24,13 +26,10 @@ function BgCozyLibrary() {
         .dust-mote { position:absolute; width:3px; height:3px; border-radius:50%; background:#f8e8b0; animation: dustFloat ease-in-out infinite; }
         .warm-glow { animation: warmPulse 2s ease-in-out infinite; }
       `}</style>
-      <svg width="100%" height="100%" viewBox="0 0 300 100" preserveAspectRatio="xMidYMid slice" style={{ position:"absolute", inset:0 }}>
-        {/* warm room bg */}
+      <svg width="100%" height="100%" viewBox="0 0 300 100" preserveAspectRatio="xMidYMid meet" style={{ position:"absolute", top:0, left:0, width:"100%", height:"100%" }}>
         <rect width="300" height="100" fill="#f0ddb8"/>
         <rect y="75" width="300" height="25" fill="#c8a060"/>
-        {/* warm light overlay */}
         <ellipse cx="150" cy="30" rx="120" ry="60" fill="#f8c840" opacity="0.08" className="warm-glow"/>
-        {/* left bookshelf */}
         <rect x="0" y="15" width="28" height="85" fill="#8b6340"/>
         <rect x="0" y="15" width="28" height="4" fill="#6b4a28"/>
         <rect x="2" y="22" width="5" height="20" fill="#4a7fa0" rx="1"/>
@@ -45,7 +44,6 @@ function BgCozyLibrary() {
         <rect x="9" y="64" width="4" height="13" fill="#c9a84e" rx="1"/>
         <rect x="14" y="65" width="5" height="12" fill="#7a4fa0" rx="1"/>
         <rect x="20" y="64" width="6" height="13" fill="#c97d4e" rx="1"/>
-        {/* right bookshelf */}
         <rect x="272" y="15" width="28" height="85" fill="#8b6340"/>
         <rect x="272" y="15" width="28" height="4" fill="#6b4a28"/>
         <rect x="274" y="22" width="5" height="20" fill="#c85820" rx="1"/>
@@ -56,18 +54,13 @@ function BgCozyLibrary() {
         <rect x="281" y="44" width="4" height="17" fill="#b85c3a" rx="1"/>
         <rect x="286" y="45" width="5" height="16" fill="#c97d4e" rx="1"/>
         <rect x="292" y="46" width="5" height="15" fill="#4a7fa0" rx="1"/>
-        {/* large window center */}
         <rect x="80" y="5" width="140" height="68" fill="#d4eef8" rx="4" opacity="0.9"/>
         <rect x="80" y="5" width="140" height="68" fill="none" stroke="#8b6340" strokeWidth="3" rx="4"/>
         <line x1="150" y1="5" x2="150" y2="73" stroke="#8b6340" strokeWidth="2.5"/>
         <line x1="80" y1="39" x2="220" y2="39" stroke="#8b6340" strokeWidth="2.5"/>
-        {/* window light rays */}
         <rect x="83" y="8" width="64" height="28" fill="#f8e8b0" opacity="0.3"/>
         <rect x="153" y="8" width="64" height="28" fill="#f8e8b0" opacity="0.25"/>
-        {/* rug */}
         <ellipse cx="150" cy="82" rx="100" ry="8" fill="#b85c3a" opacity="0.4"/>
-        <ellipse cx="150" cy="82" rx="80" ry="5" fill="#c97d4e" opacity="0.3"/>
-        {/* candles on shelf */}
         <rect x="240" y="68" width="4" height="9" fill="#f5e8d0" rx="1"/>
         <g className="candle-flame">
           <ellipse cx="242" cy="67" rx="2" ry="3" fill="#f8a820" opacity="0.95"/>
@@ -78,16 +71,11 @@ function BgCozyLibrary() {
           <ellipse cx="254" cy="65" rx="2" ry="3" fill="#f8a820" opacity="0.95"/>
           <ellipse cx="254" cy="64" rx="1" ry="1.5" fill="#fff" opacity="0.8"/>
         </g>
-        {/* book on table */}
         <rect x="55" y="72" width="18" height="3" fill="#4a7fa0" rx="1"/>
         <rect x="57" y="70" width="14" height="4" fill="#3a6a90" rx="1"/>
       </svg>
-      {/* floating dust motes */}
       {[...Array(8)].map((_, i) => (
-        <div key={i} className="dust-mote" style={{
-          left:`${15+i*10}%`, top:`${20+i*8}%`,
-          animationDuration:`${4+i*0.8}s`, animationDelay:`${i*0.6}s`
-        }}/>
+        <div key={i} className="dust-mote" style={{ left:`${15+i*10}%`, top:`${20+i*8}%`, animationDuration:`${4+i*0.8}s`, animationDelay:`${i*0.6}s` }}/>
       ))}
     </div>
   );
@@ -95,22 +83,18 @@ function BgCozyLibrary() {
 
 function BgRainyWindow() {
   return (
-    <div style={{ position:"absolute", inset:0, overflow:"hidden" }}>
+    <div style={{ position:"absolute", inset:0, overflow:"hidden", background:"#6a8aa0" }}>
       <style>{`
         @keyframes rainFallW { 0%{transform:translateY(-20px) translateX(0)} 100%{transform:translateY(120px) translateX(-10px)} }
         @keyframes rainFallW2 { 0%{transform:translateY(-20px) translateX(0)} 100%{transform:translateY(120px) translateX(-7px)} }
         @keyframes cloudDrift { 0%{transform:translateX(0)} 100%{transform:translateX(20px)} }
-        @keyframes dropSlide { 0%{transform:translateY(0);opacity:0.7} 100%{transform:translateY(30px);opacity:0} }
         .rain-w { position:absolute; width:1.5px; border-radius:2px; background:rgba(160,190,220,0.7); animation:rainFallW linear infinite; }
         .rain-w2 { position:absolute; width:1px; border-radius:2px; background:rgba(160,190,220,0.5); animation:rainFallW2 linear infinite; }
         .cloud-drift { animation: cloudDrift 8s ease-in-out infinite alternate; }
-        .drop-slide { animation: dropSlide linear infinite; }
       `}</style>
-      <svg width="100%" height="100%" viewBox="0 0 300 100" preserveAspectRatio="xMidYMid slice" style={{ position:"absolute", inset:0 }}>
-        {/* stormy sky */}
+      <svg width="100%" height="100%" viewBox="0 0 300 100" preserveAspectRatio="xMidYMid meet" style={{ position:"absolute", top:0, left:0, width:"100%", height:"100%" }}>
         <rect width="300" height="100" fill="#6a8aa0"/>
         <rect width="300" height="55" fill="#4a6a80" opacity="0.7"/>
-        {/* clouds */}
         <g className="cloud-drift">
           <ellipse cx="50" cy="18" rx="35" ry="14" fill="#7a9ab0"/>
           <ellipse cx="75" cy="13" rx="30" ry="12" fill="#8aaac0"/>
@@ -122,17 +106,13 @@ function BgRainyWindow() {
           <ellipse cx="175" cy="12" rx="25" ry="10" fill="#6a8aa0"/>
         </g>
         <ellipse cx="130" cy="20" rx="32" ry="12" fill="#8aabb8" opacity="0.6"/>
-        {/* wide window frame */}
         <rect x="10" y="5" width="280" height="88" fill="none" stroke="#6b5040" strokeWidth="5" rx="4"/>
         <line x1="150" y1="5" x2="150" y2="93" stroke="#6b5040" strokeWidth="4"/>
         <line x1="10" y1="50" x2="290" y2="50" stroke="#6b5040" strokeWidth="4"/>
-        {/* window sill */}
         <rect x="5" y="90" width="290" height="10" fill="#c8a870" rx="2"/>
-        {/* rain streaks */}
         {[15,35,55,75,95,115,135,165,185,205,225,245,265,285].map((x,i) => (
           <line key={i} x1={x} y1="0" x2={x-5} y2="50" stroke="#a0c8e0" strokeWidth="0.7" opacity="0.5"/>
         ))}
-        {/* water droplets on glass */}
         {[20,45,70,100,130,160,190,220,250,280].map((x,i) => (
           <g key={i}>
             <ellipse cx={x} cy={20+i*6} rx="1.5" ry="2.5" fill="#c8e0f0" opacity="0.6"/>
@@ -140,7 +120,6 @@ function BgRainyWindow() {
           </g>
         ))}
       </svg>
-      {/* animated rain */}
       {[...Array(20)].map((_, i) => (
         <div key={i} className={i%2===0?"rain-w":"rain-w2"} style={{
           left:`${i*5}%`, height:`${10+(i%3)*5}px`,
@@ -153,7 +132,7 @@ function BgRainyWindow() {
 
 function BgAutumnPark() {
   return (
-    <div style={{ position:"absolute", inset:0, overflow:"hidden" }}>
+    <div style={{ position:"absolute", inset:0, overflow:"hidden", background:"#e8c078" }}>
       <style>{`
         @keyframes leafFall { 0%{transform:translateY(-10px) rotate(0deg);opacity:0.9} 50%{transform:translateY(50px) translateX(15px) rotate(180deg);opacity:0.8} 100%{transform:translateY(110px) translateX(-5px) rotate(360deg);opacity:0} }
         @keyframes leafFall2 { 0%{transform:translateY(-10px) rotate(20deg);opacity:0.8} 50%{transform:translateY(55px) translateX(-12px) rotate(200deg);opacity:0.7} 100%{transform:translateY(110px) translateX(8px) rotate(380deg);opacity:0} }
@@ -162,19 +141,14 @@ function BgAutumnPark() {
         .leaf2 { position:absolute; width:6px; height:5px; border-radius:0 50%; animation: leafFall2 ease-in infinite; }
         .sun-pulse { animation: sunPulse 3s ease-in-out infinite; }
       `}</style>
-      <svg width="100%" height="100%" viewBox="0 0 300 100" preserveAspectRatio="xMidYMid slice" style={{ position:"absolute", inset:0 }}>
-        {/* warm sky */}
+      <svg width="100%" height="100%" viewBox="0 0 300 100" preserveAspectRatio="xMidYMid meet" style={{ position:"absolute", top:0, left:0, width:"100%", height:"100%" }}>
         <rect width="300" height="100" fill="#e8c078"/>
         <rect width="300" height="60" fill="#d49050" opacity="0.4"/>
-        {/* sun */}
         <circle cx="260" cy="18" r="14" fill="#f8c840" opacity="0.7" className="sun-pulse"/>
         <circle cx="260" cy="18" r="10" fill="#fcd840" opacity="0.9" className="sun-pulse"/>
-        {/* ground */}
         <rect y="76" width="300" height="24" fill="#8b6020"/>
         <ellipse cx="150" cy="76" rx="160" ry="7" fill="#a07030"/>
-        {/* path */}
         <ellipse cx="150" cy="90" rx="40" ry="6" fill="#c8a050" opacity="0.5"/>
-        {/* left tree group */}
         <rect x="10" y="35" width="10" height="42" fill="#6b4a20" rx="3"/>
         <ellipse cx="15" cy="28" rx="22" ry="18" fill="#c85820"/>
         <ellipse cx="5"  cy="24" rx="16" ry="13" fill="#d4780a"/>
@@ -184,7 +158,6 @@ function BgAutumnPark() {
         <ellipse cx="44" cy="34" rx="16" ry="14" fill="#d4780a"/>
         <ellipse cx="34" cy="30" rx="13" ry="11" fill="#c85820"/>
         <ellipse cx="55" cy="31" rx="14" ry="12" fill="#e8940a"/>
-        {/* right tree group */}
         <rect x="252" y="32" width="10" height="45" fill="#6b4a20" rx="3"/>
         <ellipse cx="257" cy="25" rx="22" ry="18" fill="#d4780a"/>
         <ellipse cx="245" cy="22" rx="16" ry="13" fill="#c85820"/>
@@ -194,23 +167,18 @@ function BgAutumnPark() {
         <ellipse cx="279" cy="32" rx="16" ry="14" fill="#c85820"/>
         <ellipse cx="268" cy="28" rx="13" ry="11" fill="#d4780a"/>
         <ellipse cx="290" cy="29" rx="14" ry="12" fill="#e8940a"/>
-        {/* bench */}
         <rect x="118" y="68" width="64" height="4" fill="#8b6340" rx="2"/>
         <rect x="122" y="72" width="4" height="7" fill="#6b4a20" rx="1"/>
         <rect x="174" y="72" width="4" height="7" fill="#6b4a20" rx="1"/>
         <rect x="118" y="63" width="64" height="3" fill="#a07040" rx="1"/>
-        {/* ground leaves */}
         {[20,50,80,110,170,200,230,260].map((x,i) => (
           <ellipse key={i} cx={x} cy={78+i%3*2} rx="4" ry="2" fill={["#c85820","#e8940a","#d4780a","#c84a10"][i%4]} opacity="0.6" transform={`rotate(${i*15} ${x} ${78+i%3*2})`}/>
         ))}
       </svg>
-      {/* falling leaves */}
       {[...Array(10)].map((_, i) => (
         <div key={i} className={i%2===0?"leaf":"leaf2"} style={{
-          left:`${5+i*9}%`,
-          background:["#c85820","#e8940a","#d4780a","#c84a10"][i%4],
-          animationDuration:`${2.5+(i%4)*0.7}s`,
-          animationDelay:`${i*0.4}s`, top:0
+          left:`${5+i*9}%`, background:["#c85820","#e8940a","#d4780a","#c84a10"][i%4],
+          animationDuration:`${2.5+(i%4)*0.7}s`, animationDelay:`${i*0.4}s`, top:0
         }}/>
       ))}
     </div>
@@ -219,47 +187,38 @@ function BgAutumnPark() {
 
 function BgNightCafe() {
   return (
-    <div style={{ position:"absolute", inset:0, overflow:"hidden" }}>
+    <div style={{ position:"absolute", inset:0, overflow:"hidden", background:"#150c07" }}>
       <style>{`
         @keyframes starTwinkle { 0%,100%{opacity:0.9} 50%{opacity:0.3} }
         @keyframes steamRise { 0%{transform:translateY(0) scaleX(1);opacity:0.5} 50%{transform:translateY(-8px) scaleX(1.3);opacity:0.3} 100%{transform:translateY(-16px) scaleX(0.8);opacity:0} }
         @keyframes lampGlow { 0%,100%{opacity:0.2} 50%{opacity:0.35} }
-        .star { animation: starTwinkle ease-in-out infinite; }
-        .steam { position:absolute; width:2px; border-radius:2px; background:rgba(245,232,208,0.6); animation: steamRise ease-out infinite; }
-        .lamp-glow { animation: lampGlow 2s ease-in-out infinite; }
+        .star-t { animation: starTwinkle ease-in-out infinite; }
+        .steam-r { position:absolute; width:2px; border-radius:2px; background:rgba(245,232,208,0.6); animation: steamRise ease-out infinite; }
+        .lamp-glow-a { animation: lampGlow 2s ease-in-out infinite; }
       `}</style>
-      <svg width="100%" height="100%" viewBox="0 0 300 100" preserveAspectRatio="xMidYMid slice" style={{ position:"absolute", inset:0 }}>
-        {/* dark interior */}
+      <svg width="100%" height="100%" viewBox="0 0 300 100" preserveAspectRatio="xMidYMid meet" style={{ position:"absolute", top:0, left:0, width:"100%", height:"100%" }}>
         <rect width="300" height="100" fill="#150c07"/>
         <rect y="82" width="300" height="18" fill="#1e1008"/>
-        {/* large window left */}
         <rect x="8" y="8" width="90" height="72" fill="#08121a" rx="4"/>
         <rect x="8" y="8" width="90" height="72" fill="none" stroke="#3a2010" strokeWidth="3" rx="4"/>
         <line x1="53" y1="8" x2="53" y2="80" stroke="#3a2010" strokeWidth="2.5"/>
         <line x1="8" y1="44" x2="98" y2="44" stroke="#3a2010" strokeWidth="2.5"/>
-        {/* night sky stars */}
         {[[18,16],[30,12],[42,20],[65,14],[75,22],[85,10],[20,30],[48,8]].map(([x,y],i) => (
-          <circle key={i} cx={x} cy={y} r={i%3===0?1.2:0.8} fill="#fff" className="star" style={{ animationDelay:`${i*0.4}s`, animationDuration:`${1.5+i*0.3}s` }}/>
+          <circle key={i} cx={x} cy={y} r={i%3===0?1.2:0.8} fill="#fff" className="star-t" style={{ animationDelay:`${i*0.4}s`, animationDuration:`${1.5+i*0.3}s` }}/>
         ))}
-        {/* crescent moon */}
         <circle cx="35" cy="25" r="7" fill="#f8e890" opacity="0.25"/>
         <circle cx="38" cy="23" r="6" fill="#08121a"/>
-        {/* warm lamp right */}
         <rect x="245" y="5" width="4" height="38" fill="#4a3020"/>
         <polygon points="238,5 258,5 254,22 242,22" fill="#c8a040" opacity="0.95"/>
-        <ellipse cx="248" cy="22" rx="14" ry="4" fill="#f8c840" opacity="0.35" className="lamp-glow"/>
-        {/* lamp light cone */}
-        <polygon points="238,22 258,22 270,82 226,82" fill="#f8c840" opacity="0.06" className="lamp-glow"/>
-        {/* table */}
+        <ellipse cx="248" cy="22" rx="14" ry="4" fill="#f8c840" opacity="0.35" className="lamp-glow-a"/>
+        <polygon points="238,22 258,22 270,82 226,82" fill="#f8c840" opacity="0.06" className="lamp-glow-a"/>
         <rect x="180" y="70" width="100" height="5" fill="#4a2e18" rx="2"/>
         <rect x="195" y="75" width="5" height="12" fill="#3a2010" rx="1"/>
         <rect x="265" y="75" width="5" height="12" fill="#3a2010" rx="1"/>
-        {/* coffee cup */}
         <rect x="218" y="56" width="20" height="16" fill="#f5e8d0" rx="3"/>
         <rect x="218" y="56" width="20" height="4" fill="#d4b890" rx="3"/>
         <ellipse cx="228" cy="60" rx="7" ry="2" fill="#6b3a10" opacity="0.8"/>
         <path d="M238 59 Q245 59 245 64 Q245 69 238 69" fill="none" stroke="#f5e8d0" strokeWidth="2.5"/>
-        {/* right bookshelf */}
         <rect x="108" y="8" width="24" height="72" fill="#2a1508" rx="1"/>
         <rect x="110" y="12" width="4" height="16" fill="#4a7fa0" rx="1"/>
         <rect x="115" y="13" width="5" height="15" fill="#c85820" rx="1"/>
@@ -270,15 +229,12 @@ function BgNightCafe() {
         <rect x="110" y="50" width="4" height="12" fill="#4a7fa0" rx="1"/>
         <rect x="115" y="49" width="5" height="13" fill="#b85c3a" rx="1"/>
         <rect x="121" y="50" width="4" height="12" fill="#4a8a5a" rx="1"/>
-        {/* warm overlay */}
         <rect width="300" height="100" fill="#c87020" opacity="0.04"/>
       </svg>
-      {/* steam from coffee */}
       {[0,1,2].map(i => (
-        <div key={i} className="steam" style={{
+        <div key={i} className="steam-r" style={{
           left:`${61+i*1.2}%`, height:`${12+i*4}px`,
-          animationDuration:`${1.2+i*0.3}s`, animationDelay:`${i*0.4}s`,
-          bottom:"32%"
+          animationDuration:`${1.2+i*0.3}s`, animationDelay:`${i*0.4}s`, bottom:"32%"
         }}/>
       ))}
     </div>
@@ -287,26 +243,22 @@ function BgNightCafe() {
 
 function BgCherryBlossoms() {
   return (
-    <div style={{ position:"absolute", inset:0, overflow:"hidden" }}>
+    <div style={{ position:"absolute", inset:0, overflow:"hidden", background:"#fce8f0" }}>
       <style>{`
         @keyframes petalW { 0%{transform:translateY(-10px) translateX(0) rotate(0deg);opacity:0.9} 50%{transform:translateY(55px) translateX(20px) rotate(180deg);opacity:0.8} 100%{transform:translateY(120px) translateX(-10px) rotate(360deg);opacity:0} }
         @keyframes petalW2 { 0%{transform:translateY(-10px) translateX(0) rotate(45deg);opacity:0.8} 50%{transform:translateY(60px) translateX(-15px) rotate(210deg);opacity:0.7} 100%{transform:translateY(120px) translateX(10px) rotate(390deg);opacity:0} }
         @keyframes sunriseGlow { 0%,100%{opacity:0.35} 50%{opacity:0.55} }
         .petal-w { position:absolute; width:7px; height:6px; border-radius:50% 50% 50% 0; background:#f4b8c8; animation: petalW ease-in infinite; }
         .petal-w2 { position:absolute; width:6px; height:5px; border-radius:50% 0 50% 50%; background:#f8d0dc; animation: petalW2 ease-in infinite; }
-        .sunrise { animation: sunriseGlow 3s ease-in-out infinite; }
+        .sunrise-g { animation: sunriseGlow 3s ease-in-out infinite; }
       `}</style>
-      <svg width="100%" height="100%" viewBox="0 0 300 100" preserveAspectRatio="xMidYMid slice" style={{ position:"absolute", inset:0 }}>
-        {/* spring sky */}
+      <svg width="100%" height="100%" viewBox="0 0 300 100" preserveAspectRatio="xMidYMid meet" style={{ position:"absolute", top:0, left:0, width:"100%", height:"100%" }}>
         <rect width="300" height="100" fill="#fce8f0"/>
         <rect width="300" height="65" fill="#f8d0e8" opacity="0.5"/>
-        {/* sun glow */}
-        <circle cx="150" cy="22" r="18" fill="#fce8a0" opacity="0.35" className="sunrise"/>
-        <circle cx="150" cy="22" r="11" fill="#fcd870" opacity="0.55" className="sunrise"/>
-        {/* ground */}
+        <circle cx="150" cy="22" r="18" fill="#fce8a0" opacity="0.35" className="sunrise-g"/>
+        <circle cx="150" cy="22" r="11" fill="#fcd870" opacity="0.55" className="sunrise-g"/>
         <rect y="80" width="300" height="20" fill="#e0c8a0"/>
         <ellipse cx="150" cy="80" rx="160" ry="6" fill="#c8d880" opacity="0.8"/>
-        {/* left tree */}
         <rect x="8" y="30" width="12" height="55" fill="#7a5535" rx="4"/>
         <line x1="14" y1="35" x2="35" y2="18" stroke="#7a5535" strokeWidth="5" strokeLinecap="round"/>
         <line x1="14" y1="42" x2="0"  y2="22" stroke="#7a5535" strokeWidth="4" strokeLinecap="round"/>
@@ -317,7 +269,6 @@ function BgCherryBlossoms() {
         <ellipse cx="28" cy="6"  rx="16" ry="12" fill="#f8d0dc" opacity="0.8"/>
         <ellipse cx="0"  cy="18" rx="14" ry="12" fill="#f4b8c8" opacity="0.75"/>
         <ellipse cx="42" cy="30" rx="14" ry="11" fill="#f8c8d4" opacity="0.7"/>
-        {/* right tree */}
         <rect x="280" y="25" width="12" height="60" fill="#6b4a30" rx="4"/>
         <line x1="286" y1="30" x2="265" y2="15" stroke="#6b4a30" strokeWidth="5" strokeLinecap="round"/>
         <line x1="286" y1="38" x2="300" y2="18" stroke="#6b4a30" strokeWidth="4" strokeLinecap="round"/>
@@ -328,23 +279,17 @@ function BgCherryBlossoms() {
         <ellipse cx="272" cy="4"  rx="16" ry="12" fill="#f4b8c8" opacity="0.8"/>
         <ellipse cx="300" cy="18" rx="14" ry="12" fill="#f8c0cc" opacity="0.75"/>
         <ellipse cx="252" cy="28" rx="14" ry="11" fill="#f4a0b4" opacity="0.7"/>
-        {/* small flowers */}
         {[[30,14],[42,8],[18,10],[55,20],[265,12],[278,6],[252,16],[290,22]].map(([x,y],i) => (
           <g key={i}><circle cx={x} cy={y} r="3" fill="#f8e0e8"/><circle cx={x} cy={y} r="1.2" fill="#f4a0b0"/></g>
         ))}
-        {/* path */}
         <ellipse cx="150" cy="92" rx="50" ry="5" fill="#d4b890" opacity="0.5"/>
-        {/* ground petals */}
         {[20,50,80,120,160,200,240,270].map((x,i) => (
           <ellipse key={i} cx={x} cy={83+i%2*2} rx="3.5" ry="2" fill={i%2===0?"#f4b8c8":"#f8c8d4"} opacity="0.55" transform={`rotate(${i*20} ${x} ${83+i%2*2})`}/>
         ))}
       </svg>
-      {/* falling petals */}
       {[...Array(14)].map((_, i) => (
         <div key={i} className={i%2===0?"petal-w":"petal-w2"} style={{
-          left:`${i*7}%`,
-          animationDuration:`${2.2+(i%5)*0.5}s`,
-          animationDelay:`${i*0.3}s`, top:0
+          left:`${i*7}%`, animationDuration:`${2.2+(i%5)*0.5}s`, animationDelay:`${i*0.3}s`, top:0
         }}/>
       ))}
     </div>
