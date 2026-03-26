@@ -233,8 +233,9 @@ function BgNightCafe() {
       </svg>
       {[0,1,2].map(i => (
         <div key={i} className="steam-r" style={{
-          left:`${55+i*1.2}%`, height:`${12+i*4}px`,
-          animationDuration:`${1.2+i*0.3}s`, animationDelay:`${i*0.4}s`, bottom:"32%"
+          left:`${68+i*1.2}%`, height:`${12+i*4}px`,
+          animationDuration:`${1.2+i*0.3}s`, animationDelay:`${i*0.4}s`,
+          bottom:"38%"
         }}/>
       ))}
     </div>
