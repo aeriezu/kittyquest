@@ -69,7 +69,12 @@ export function useMessages() {
     const r = ref(db, "messages");
     const handler = snap => {
       const data = snap.val() || {};
-      const list = Object.values(data).sort((a, b) => a.ts - b.ts).slice(-30);
+      const oneDayAgo = Date.now() - 24 * 60 * 60 * 1000;
+      const list = Object.entries(data)
+        .filter(([, v]) => v.ts > oneDayAgo)
+        .map(([, v]) => v)
+        .sort((a, b) => a.ts - b.ts)
+        .slice(-30);
       setMessages(list);
     };
     onValue(r, handler);
@@ -78,7 +83,19 @@ export function useMessages() {
 
   const sendMessage = useCallback((username, text) => {
     const r = ref(db, "messages");
-    push(r, { username, text, ts: serverTimestamp() });
+    const oneDayAgo = Date.now() - 24 * 60 * 60 * 1000;
+    // clean up old messages before sending
+    import("firebase/database").then(({ get, remove }) => {
+      get(r).then(snap => {
+        const data = snap.val() || {};
+        Object.entries(data).forEach(([key, val]) => {
+          if (val.ts < oneDayAgo) {
+            remove(ref(db, `messages/${key}`));
+          }
+        });
+      });
+    });
+    push(r, { username, text, ts: Date.now() });
   }, []);
 
   return { messages, sendMessage };
