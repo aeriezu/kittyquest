@@ -39,7 +39,7 @@ function MiniGhost({ id }) {
   return (
     <>
       <style>{`
-        @keyframes ghostFloat-${id} { 0%,100%{transform:translateY(0) rotate(-3deg)} 50%{transform:translateY(-6px) rotate(3deg)} }
+        @keyframes ghostFloat-${id} { 0%,100%{transform:translateY(4px) rotate(-3deg)} 50%{transform:translateY(-2px) rotate(3deg)} }
         @keyframes ghostWobble-${id} { 0%,100%{transform:scaleX(1)} 50%{transform:scaleX(1.08)} }
         .ghost-${id} { animation: ghostFloat-${id} 2s ease-in-out infinite; }
         .ghost-body-${id} { animation: ghostWobble-${id} 2s ease-in-out infinite; }
@@ -47,8 +47,10 @@ function MiniGhost({ id }) {
       <div className={`ghost-${id}`} style={{ position:"relative", width:32, height:38 }}>
         {/* body */}
         <div className={`ghost-body-${id}`} style={{ position:"absolute", top:0, left:"50%", transform:"translateX(-50%)", width:28, height:28, background:"#f0f0f8", borderRadius:"50% 50% 0 0", border:"1.5px solid #c0c0d0" }}/>
-        {/* wavy bottom */}
-        <div style={{ position:"absolute", top:24, left:"50%", transform:"translateX(-50%)", width:28, height:12, background:"#f0f0f8", border:"1.5px solid #c0c0d0", borderTop:"none", clipPath:"polygon(0 0,14% 100%,29% 0,43% 100%,57% 0,71% 100%,86% 0,100% 100%,100% 0)" }}/>
+        {/* wavy bottom — overlaps body by 2px to close the gap */}
+        <div style={{ position:"absolute", top:24, left:"50%", transform:"translateX(-50%)", width:28, height:14, background:"#f0f0f8", border:"1.5px solid #c0c0d0", borderTop:"none", clipPath:"polygon(0 0,14% 100%,29% 0,43% 100%,57% 0,71% 100%,86% 0,100% 100%,100% 0)" }}/>
+        {/* cover seam */}
+        <div style={{ position:"absolute", top:25, left:"50%", transform:"translateX(-50%)", width:26, height:4, background:"#f0f0f8" }}/>
         {/* eyes */}
         <div style={{ position:"absolute", top:8, left:6, width:6, height:7, background:"#2a2a3a", borderRadius:"50%", border:"1px solid #1a1a2a" }}/>
         <div style={{ position:"absolute", top:8, right:6, width:6, height:7, background:"#2a2a3a", borderRadius:"50%", border:"1px solid #1a1a2a" }}/>
