@@ -345,7 +345,7 @@ function PetTab({ petId, petName, mood, happiness, level, title, equipped, owned
     <div style={{ textAlign:"center" }}>
       <div style={{
         borderRadius:16, marginBottom:10, border:`2px solid ${C.surface2}`,
-        overflow:"hidden", position:"relative", height: 200,
+        overflow:"hidden", position:"relative", height: 240,
         width: "100%", display:"flex", alignItems:"center", justifyContent:"center"
       }}>
         <div style={{ position:"absolute", inset:0, zIndex:0 }}>
@@ -354,7 +354,7 @@ function PetTab({ petId, petName, mood, happiness, level, title, equipped, owned
         </div>
         <div style={{ position:"relative", zIndex:1 }}>
           <PixelCat mood={mood} hat={equipped.hat} outfit={equipped.outfit}
-            bg={null} comp={equipped.comp} petId={petId} size={160} />
+            bg={null} comp={equipped.comp} petId={petId} size={130} />
         </div>
       </div>
       <div style={{ fontSize:"0.9rem", fontWeight:700, color:C.text, marginBottom:2 }}>{petName} — Lv.{level} {title}</div>
