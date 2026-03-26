@@ -343,8 +343,8 @@ function AddDayButton({ onAdd, existingGroups }) {
 function PetTab({ petId, petName, mood, happiness, level, title, equipped, owned, onEquip, onChangeCat }) {
   return (
     <div style={{ textAlign:"center" }}>
-      <div style={{ background:C.surface, borderRadius:16, padding:20, marginBottom:10, border:`2px solid ${C.surface2}`, display:"inline-block" }}>
-        <PixelCat mood={mood} hat={equipped.hat} outfit={equipped.outfit} bg={equipped.bg} comp={equipped.comp} petId={petId} size={140} />
+      <div style={{ background:C.surface, borderRadius:16, padding:10, marginBottom:10, border:`2px solid ${C.surface2}`, display:"inline-block" }}>
+        <PixelCat mood={mood} hat={equipped.hat} outfit={equipped.outfit} bg={equipped.bg} comp={equipped.comp} petId={petId} size={200} />
       </div>
       <div style={{ fontSize:"0.9rem", fontWeight:700, color:C.text, marginBottom:2 }}>{petName} — Lv.{level} {title}</div>
       <button onClick={onChangeCat} style={{ padding:"5px 16px", borderRadius:8, marginBottom:10, border:`2px dashed ${C.surface2}`, background:"none", color:C.muted, fontFamily:"inherit", fontSize:"0.72rem", cursor:"pointer" }}>
