@@ -138,7 +138,7 @@ function TasksTab({ days, subjects, checked, onToggle, onAddTask, onDeleteTask, 
         <div style={{
           borderRadius:14, marginBottom:10, border:`1px solid ${C.surface2}`,
           overflow:"hidden", position:"relative", display:"flex", alignItems:"center", gap:12,
-          minHeight: 150,
+          minHeight: 170,
         }}>
           {/* full width background scene */}
           <div style={{ position:"absolute", inset:0, zIndex:0 }}>
@@ -345,7 +345,7 @@ function PetTab({ petId, petName, mood, happiness, level, title, equipped, owned
     <div style={{ textAlign:"center" }}>
       <div style={{
         borderRadius:16, marginBottom:10, border:`2px solid ${C.surface2}`,
-        overflow:"hidden", position:"relative", height:150,
+        overflow:"hidden", position:"relative", height:160,
         width:"100%"
       }}>
         <div style={{ position:"absolute", inset:0, zIndex:0 }}>
