@@ -1,5 +1,6 @@
 import { useRef } from "react";
 import { SHOP } from "../data/constants";
+import Companion from "./Companions";
 
 const PET_STYLES = {
   tabby:  { fur:"#9aa0a0", furDark:"#5a6565", skin:"#ffb0c0", whisker:"#888"    },
@@ -419,8 +420,8 @@ export default function PixelCat({ mood, hat, outfit, bg, comp, petId="tabby", s
         </div>
       </article>
       {comp && (
-        <div style={{ position:"absolute", bottom:0, right:0, fontSize:size * 0.15, zIndex:10 }}>
-          {compItem?.emoji}
+        <div style={{ position:"absolute", bottom:0, right:-10, zIndex:10 }}>
+          <Companion compId={comp} size={size * 0.45} />
         </div>
       )}
     </div>
