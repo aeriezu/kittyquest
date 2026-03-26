@@ -420,7 +420,7 @@ export default function PixelCat({ mood, hat, outfit, bg, comp, petId="tabby", s
         </div>
       </article>
       {comp && (
-        <div style={{ position:"absolute", bottom:2, right:-22, zIndex:10 }}>
+        <div style={{ position:"absolute", bottom:0, right:-28, zIndex:10 }}>
           <Companion compId={comp} size={size * 0.4} />
         </div>
       )}

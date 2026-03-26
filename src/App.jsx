@@ -153,7 +153,7 @@ function TasksTab({ days, subjects, checked, onToggle, onAddTask, onDeleteTask, 
               bg={null} comp={petInfo.equipped.comp} petId={petInfo.petId} size={90} />
           </div>
           {/* name + status */}
-          <div style={{ zIndex:1, padding:"10px 14px 10px 0" }}>
+          <div style={{ zIndex:1, padding:"10px 14px 10px 0", marginLeft: 8 }}>
             <div style={{
               background:"rgba(255,255,255,0.75)", borderRadius:8, padding:"4px 8px",
               backdropFilter:"blur(4px)"
