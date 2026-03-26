@@ -288,7 +288,7 @@ function AddDayButton({ onAdd, existingGroups }) {
       width:"100%", padding:"8px 0", borderRadius:10,
       border:`2px dashed ${C.surface2}`, background:"none",
       color:C.muted, fontFamily:"inherit", fontSize:"0.75rem", cursor:"pointer"
-    }}>+ Add Day</button>
+    }}>+ Add</button>
   );
 
   return (
