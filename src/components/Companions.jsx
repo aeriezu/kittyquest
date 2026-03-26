@@ -146,39 +146,47 @@ function DragonComp({ id }) {
   return (
     <>
       <style>{`
-        @keyframes dragonWing-${id} { 0%,100%{transform:rotate(-10deg) scaleY(1)} 50%{transform:rotate(10deg) scaleY(0.8)} }
+        @keyframes dragonWing-${id} { 0%,100%{transform:rotate(-15deg)} 50%{transform:rotate(15deg)} }
         @keyframes dragonBob-${id} { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-5px)} }
-        @keyframes dragonFire-${id} { 0%,100%{opacity:0.9;transform:scaleX(1)} 50%{opacity:0.6;transform:scaleX(1.2)} }
+        @keyframes dragonFire-${id} { 0%,100%{opacity:0.9;width:8px} 50%{opacity:0.6;width:12px} }
         .dragon-c-${id} { animation: dragonBob-${id} 1.6s ease-in-out infinite; }
-        .dragon-wing-l-${id} { animation: dragonWing-${id} 0.6s ease-in-out infinite; transform-origin: right center; }
-        .dragon-wing-r-${id} { animation: dragonWing-${id} 0.6s ease-in-out infinite 0.1s; transform-origin: left center; }
+        .dragon-wl-${id} { animation: dragonWing-${id} 0.5s ease-in-out infinite; transform-origin: right bottom; }
+        .dragon-wr-${id} { animation: dragonWing-${id} 0.5s ease-in-out infinite 0.05s; transform-origin: left bottom; }
         .dragon-fire-${id} { animation: dragonFire-${id} 0.4s ease-in-out infinite; }
       `}</style>
-      <div className={`dragon-c-${id}`} style={{ position:"relative", width:40, height:44 }}>
+      <div className={`dragon-c-${id}`} style={{ position:"relative", width:38, height:46 }}>
         {/* left wing */}
-        <div className={`dragon-wing-l-${id}`} style={{ position:"absolute", top:8, left:0, width:12, height:18, background:"#3a7a4a", borderRadius:"80% 20% 20% 80%", opacity:0.85, border:"1px solid #2a5a3a" }}/>
+        <div className={`dragon-wl-${id}`} style={{ position:"absolute", top:10, left:-4, width:14, height:20, background:"#3a8a4a", borderRadius:"80% 20% 40% 80%", opacity:0.9, border:"1.5px solid #2a6a3a", zIndex:0 }}/>
         {/* right wing */}
-        <div className={`dragon-wing-r-${id}`} style={{ position:"absolute", top:8, right:0, width:12, height:18, background:"#3a7a4a", borderRadius:"20% 80% 80% 20%", opacity:0.85, border:"1px solid #2a5a3a" }}/>
+        <div className={`dragon-wr-${id}`} style={{ position:"absolute", top:10, right:-4, width:14, height:20, background:"#3a8a4a", borderRadius:"20% 80% 80% 40%", opacity:0.9, border:"1.5px solid #2a6a3a", zIndex:0 }}/>
+        {/* tail — connected to body bottom */}
+        <div style={{ position:"absolute", bottom:0, right:4, width:14, height:12, background:"#5a9a6a", borderRadius:"0 0 8px 8px", border:"1.5px solid #2a6a3a", zIndex:1, transform:"rotate(15deg)", transformOrigin:"top left" }}/>
+        <div style={{ position:"absolute", bottom:0, right:2, width:8, height:6, background:"#5a9a6a", borderRadius:"0 0 6px 6px", border:"1.5px solid #2a6a3a", zIndex:1, transform:"rotate(30deg)", transformOrigin:"top left" }}/>
         {/* body */}
-        <div style={{ position:"absolute", bottom:4, left:"50%", transform:"translateX(-50%)", width:22, height:24, background:"#5a9a6a", borderRadius:"40% 40% 30% 30%", border:"1.5px solid #2a6a3a" }}/>
+        <div style={{ position:"absolute", bottom:6, left:"50%", transform:"translateX(-50%)", width:24, height:26, background:"#5a9a6a", borderRadius:"40% 40% 35% 35%", border:"1.5px solid #2a6a3a", zIndex:2 }}/>
         {/* belly */}
-        <div style={{ position:"absolute", bottom:6, left:"50%", transform:"translateX(-50%)", width:14, height:16, background:"#a0e8a0", borderRadius:"40% 40% 30% 30%", opacity:0.7 }}/>
+        <div style={{ position:"absolute", bottom:8, left:"50%", transform:"translateX(-50%)", width:15, height:18, background:"#a0e8a0", borderRadius:"40% 40% 35% 35%", opacity:0.8, zIndex:3 }}/>
         {/* head */}
-        <div style={{ position:"absolute", top:6, left:"50%", transform:"translateX(-50%)", width:22, height:20, background:"#5a9a6a", borderRadius:"50%", border:"1.5px solid #2a6a3a" }}/>
+        <div style={{ position:"absolute", top:4, left:"50%", transform:"translateX(-50%)", width:24, height:22, background:"#5a9a6a", borderRadius:"50% 50% 45% 45%", border:"1.5px solid #2a6a3a", zIndex:2 }}/>
         {/* horns */}
-        <div style={{ position:"absolute", top:2, left:9, width:5, height:8, background:"#2a6a3a", borderRadius:"50% 50% 0 0", transform:"rotate(-15deg)" }}/>
-        <div style={{ position:"absolute", top:2, right:9, width:5, height:8, background:"#2a6a3a", borderRadius:"50% 50% 0 0", transform:"rotate(15deg)" }}/>
+        <div style={{ position:"absolute", top:0, left:8, width:5, height:9, background:"#3a7a4a", borderRadius:"50% 50% 0 0", transform:"rotate(-12deg)", border:"1px solid #2a6a3a", zIndex:3 }}/>
+        <div style={{ position:"absolute", top:0, right:8, width:5, height:9, background:"#3a7a4a", borderRadius:"50% 50% 0 0", transform:"rotate(12deg)", border:"1px solid #2a6a3a", zIndex:3 }}/>
         {/* eyes */}
-        <div style={{ position:"absolute", top:12, left:9, width:5, height:5, background:"#f8c820", borderRadius:"50%", border:"1px solid #2a6a3a" }}>
+        <div style={{ position:"absolute", top:10, left:7, width:6, height:6, background:"#f8c820", borderRadius:"50%", border:"1.5px solid #2a6a3a", zIndex:4 }}>
           <div style={{ position:"absolute", top:1, left:1, width:3, height:3, background:"#1a1a1a", borderRadius:"50%" }}/>
+          <div style={{ position:"absolute", top:0, left:0, width:1.5, height:1.5, background:"#fff", borderRadius:"50%" }}/>
         </div>
-        <div style={{ position:"absolute", top:12, right:9, width:5, height:5, background:"#f8c820", borderRadius:"50%", border:"1px solid #2a6a3a" }}>
+        <div style={{ position:"absolute", top:10, right:7, width:6, height:6, background:"#f8c820", borderRadius:"50%", border:"1.5px solid #2a6a3a", zIndex:4 }}>
           <div style={{ position:"absolute", top:1, left:1, width:3, height:3, background:"#1a1a1a", borderRadius:"50%" }}/>
+          <div style={{ position:"absolute", top:0, left:0, width:1.5, height:1.5, background:"#fff", borderRadius:"50%" }}/>
         </div>
-        {/* fire breath */}
-        <div className={`dragon-fire-${id}`} style={{ position:"absolute", top:18, left:"50%", transform:"translateX(-50%)", width:8, height:5, background:"linear-gradient(90deg,#f84820,#f8c820)", borderRadius:"0 50% 50% 0", opacity:0.8 }}/>
-        {/* tail */}
-        <div style={{ position:"absolute", bottom:0, right:2, width:10, height:6, background:"#5a9a6a", borderRadius:"0 0 8px 0", border:"1px solid #2a6a3a", transform:"rotate(20deg)" }}/>
+        {/* nostrils */}
+        <div style={{ position:"absolute", top:18, left:"50%", transform:"translateX(-50%)", width:10, height:4, zIndex:4, display:"flex", justifyContent:"space-between" }}>
+          <div style={{ width:3, height:3, background:"#3a7a4a", borderRadius:"50%" }}/>
+          <div style={{ width:3, height:3, background:"#3a7a4a", borderRadius:"50%" }}/>
+        </div>
+        {/* fire */}
+        <div className={`dragon-fire-${id}`} style={{ position:"absolute", top:19, left:"50%", transform:"translateX(-50%)", height:5, background:"linear-gradient(90deg,#f84820,#f8c820)", borderRadius:"2px 4px 4px 2px", opacity:0.85, zIndex:4 }}/>
       </div>
     </>
   );
