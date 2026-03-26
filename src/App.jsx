@@ -343,8 +343,19 @@ function AddDayButton({ onAdd, existingGroups }) {
 function PetTab({ petId, petName, mood, happiness, level, title, equipped, owned, onEquip, onChangeCat }) {
   return (
     <div style={{ textAlign:"center" }}>
-      <div style={{ background:C.surface, borderRadius:16, padding:10, marginBottom:10, border:`2px solid ${C.surface2}`, display:"inline-block" }}>
-        <PixelCat mood={mood} hat={equipped.hat} outfit={equipped.outfit} bg={equipped.bg} comp={equipped.comp} petId={petId} size={200} />
+      <div style={{
+        borderRadius:16, marginBottom:10, border:`2px solid ${C.surface2}`,
+        overflow:"hidden", position:"relative", height:180,
+        display:"flex", alignItems:"center", justifyContent:"center"
+      }}>
+        <div style={{ position:"absolute", inset:0, zIndex:0 }}>
+          <PixelCat mood={mood} hat={equipped.hat} outfit={equipped.outfit}
+            bg={equipped.bg} comp={null} petId={petId} size={0} bgOnly={true} />
+        </div>
+        <div style={{ position:"relative", zIndex:1 }}>
+          <PixelCat mood={mood} hat={equipped.hat} outfit={equipped.outfit}
+            bg={null} comp={equipped.comp} petId={petId} size={160} />
+        </div>
       </div>
       <div style={{ fontSize:"0.9rem", fontWeight:700, color:C.text, marginBottom:2 }}>{petName} — Lv.{level} {title}</div>
       <button onClick={onChangeCat} style={{ padding:"5px 16px", borderRadius:8, marginBottom:10, border:`2px dashed ${C.surface2}`, background:"none", color:C.muted, fontFamily:"inherit", fontSize:"0.72rem", cursor:"pointer" }}>
