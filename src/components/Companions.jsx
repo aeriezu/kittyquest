@@ -148,7 +148,7 @@ function DragonComp({ id }) {
       <style>{`
         @keyframes dragonWing-${id} { 0%,100%{transform:rotate(-15deg)} 50%{transform:rotate(15deg)} }
         @keyframes dragonBob-${id} { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-5px)} }
-        @keyframes dragonFire-${id} { 0%,100%{opacity:0.9;width:8px} 50%{opacity:0.6;width:12px} }
+        @keyframes dragonFire-${id} { 0%,100%{opacity:0.9;transform:translateX(-50%) scaleX(1)} 50%{opacity:0.6;transform:translateX(-50%) scaleX(1.3)} }
         .dragon-c-${id} { animation: dragonBob-${id} 1.6s ease-in-out infinite; }
         .dragon-wl-${id} { animation: dragonWing-${id} 0.5s ease-in-out infinite; transform-origin: right bottom; }
         .dragon-wr-${id} { animation: dragonWing-${id} 0.5s ease-in-out infinite 0.05s; transform-origin: left bottom; }
@@ -186,7 +186,13 @@ function DragonComp({ id }) {
           <div style={{ width:3, height:3, background:"#3a7a4a", borderRadius:"50%" }}/>
         </div>
         {/* fire */}
-        <div className={`dragon-fire-${id}`} style={{ position:"absolute", top:19, left:"50%", transform:"translateX(-50%)", height:5, background:"linear-gradient(90deg,#f84820,#f8c820)", borderRadius:"2px 4px 4px 2px", opacity:0.85, zIndex:4 }}/>
+        <div className={`dragon-fire-${id}`} style={{ 
+          position:"absolute", top:20, left:"50%", transform:"translateX(-50%)", 
+          width:10, height:5, 
+          background:"linear-gradient(90deg,#f84820,#f8c820)", 
+          borderRadius:"2px 8px 8px 2px", 
+          opacity:0.85, zIndex:4 
+        }}/>
       </div>
     </>
   );
