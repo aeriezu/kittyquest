@@ -12,7 +12,7 @@ const PET_STYLES = {
 };
 
 // ─── Wide Animated Background Scenes ─────────────────────────────────────────
-// All backgrounds use viewBox="10 5 280 90" (3:1 ratio)
+// All backgrounds use viewBox="0 0 300 100" (3:1 ratio)
 // SVG uses width="100%" height="auto" so the full scene is always visible
 
 function BgCozyLibrary() {
@@ -26,7 +26,7 @@ function BgCozyLibrary() {
         .dust-mote { position:absolute; width:3px; height:3px; border-radius:50%; background:#f8e8b0; animation: dustFloat ease-in-out infinite; }
         .warm-glow { animation: warmPulse 2s ease-in-out infinite; }
       `}</style>
-      <svg width="100%" height="100%" viewBox="10 5 280 90" preserveAspectRatio="xMidYMid meet" style={{ position:"absolute", top:0, left:0, width:"100%", height:"100%" }}>
+      <svg width="100%" height="100%" viewBox="0 0 300 100" preserveAspectRatio="xMidYMid meet" style={{ position:"absolute", top:0, left:0, width:"100%", height:"100%" }}>
         <rect width="300" height="100" fill="#f0ddb8"/>
         <rect y="75" width="300" height="25" fill="#c8a060"/>
         <ellipse cx="150" cy="30" rx="120" ry="60" fill="#f8c840" opacity="0.08" className="warm-glow"/>
@@ -92,7 +92,7 @@ function BgRainyWindow() {
         .rain-w2 { position:absolute; width:1px; border-radius:2px; background:rgba(160,190,220,0.5); animation:rainFallW2 linear infinite; }
         .cloud-drift { animation: cloudDrift 8s ease-in-out infinite alternate; }
       `}</style>
-      <svg width="100%" height="100%" viewBox="10 5 280 90" preserveAspectRatio="xMidYMid meet" style={{ position:"absolute", top:0, left:0, width:"100%", height:"100%" }}>
+      <svg width="100%" height="100%" viewBox="0 0 300 100" preserveAspectRatio="xMidYMid meet" style={{ position:"absolute", top:0, left:0, width:"100%", height:"100%" }}>
         <rect width="300" height="100" fill="#6a8aa0"/>
         <rect width="300" height="55" fill="#4a6a80" opacity="0.7"/>
         <g className="cloud-drift">
@@ -141,7 +141,7 @@ function BgAutumnPark() {
         .leaf2 { position:absolute; width:6px; height:5px; border-radius:0 50%; animation: leafFall2 ease-in infinite; }
         .sun-pulse { animation: sunPulse 3s ease-in-out infinite; }
       `}</style>
-      <svg width="100%" height="100%" viewBox="10 5 280 90" preserveAspectRatio="xMidYMid meet" style={{ position:"absolute", top:0, left:0, width:"100%", height:"100%" }}>
+      <svg width="100%" height="100%" viewBox="0 0 300 100" preserveAspectRatio="xMidYMid meet" style={{ position:"absolute", top:0, left:0, width:"100%", height:"100%" }}>
         <rect width="300" height="100" fill="#e8c078"/>
         <rect width="300" height="60" fill="#d49050" opacity="0.4"/>
         <circle cx="260" cy="18" r="14" fill="#f8c840" opacity="0.7" className="sun-pulse"/>
@@ -196,7 +196,7 @@ function BgNightCafe() {
         .steam-r { position:absolute; width:2px; border-radius:2px; background:rgba(245,232,208,0.6); animation: steamRise ease-out infinite; }
         .lamp-glow-a { animation: lampGlow 2s ease-in-out infinite; }
       `}</style>
-      <svg width="100%" height="100%" viewBox="10 5 280 90" preserveAspectRatio="xMidYMid meet" style={{ position:"absolute", top:0, left:0, width:"100%", height:"100%" }}>
+      <svg width="100%" height="100%" viewBox="0 0 300 100" preserveAspectRatio="xMidYMid meet" style={{ position:"absolute", top:0, left:0, width:"100%", height:"100%" }}>
         <rect width="300" height="100" fill="#150c07"/>
         <rect y="82" width="300" height="18" fill="#1e1008"/>
         <rect x="8" y="8" width="90" height="72" fill="#08121a" rx="4"/>
@@ -252,7 +252,7 @@ function BgCherryBlossoms() {
         .petal-w2 { position:absolute; width:6px; height:5px; border-radius:50% 0 50% 50%; background:#f8d0dc; animation: petalW2 ease-in infinite; }
         .sunrise-g { animation: sunriseGlow 3s ease-in-out infinite; }
       `}</style>
-      <svg width="100%" height="100%" viewBox="10 5 280 90" preserveAspectRatio="xMidYMid meet" style={{ position:"absolute", top:0, left:0, width:"100%", height:"100%" }}>
+      <svg width="100%" height="100%" viewBox="0 0 300 100" preserveAspectRatio="xMidYMid meet" style={{ position:"absolute", top:0, left:0, width:"100%", height:"100%" }}>
         <rect width="300" height="100" fill="#fce8f0"/>
         <rect width="300" height="65" fill="#f8d0e8" opacity="0.5"/>
         <circle cx="150" cy="22" r="18" fill="#fce8a0" opacity="0.35" className="sunrise-g"/>
