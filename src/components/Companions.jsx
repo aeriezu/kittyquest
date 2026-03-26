@@ -40,25 +40,24 @@ function MiniGhost({ id }) {
     <>
       <style>{`
         @keyframes ghostFloat-${id} { 0%,100%{transform:translateY(4px) rotate(-3deg)} 50%{transform:translateY(-2px) rotate(3deg)} }
-        @keyframes ghostWobble-${id} { 0%,100%{transform:scaleX(1)} 50%{transform:scaleX(1.08)} }
         .ghost-${id} { animation: ghostFloat-${id} 2s ease-in-out infinite; }
-        .ghost-body-${id} { animation: ghostWobble-${id} 2s ease-in-out infinite; }
       `}</style>
-      <div className={`ghost-${id}`} style={{ position:"relative", width:32, height:38 }}>
-        {/* body */}
-        <div className={`ghost-body-${id}`} style={{ position:"absolute", top:0, left:"50%", transform:"translateX(-50%)", width:28, height:28, background:"#f0f0f8", borderRadius:"50% 50% 0 0", border:"1.5px solid #c0c0d0" }}/>
-        {/* wavy bottom — overlaps body by 2px to close the gap */}
-        <div style={{ position:"absolute", top:24, left:"50%", transform:"translateX(-50%)", width:28, height:14, background:"#f0f0f8", border:"1.5px solid #c0c0d0", borderTop:"none", clipPath:"polygon(0 0,14% 100%,29% 0,43% 100%,57% 0,71% 100%,86% 0,100% 100%,100% 0)" }}/>
-        {/* cover seam */}
-        <div style={{ position:"absolute", top:25, left:"50%", transform:"translateX(-50%)", width:26, height:4, background:"#f0f0f8" }}/>
+      <div className={`ghost-${id}`} style={{ position:"relative", width:32, height:40 }}>
+        {/* single ghost shape using clip-path */}
+        <div style={{
+          position:"absolute", inset:0,
+          background:"#f0f0f8",
+          border:"1.5px solid #c0c0d0",
+          clipPath:"polygon(15% 0%, 85% 0%, 100% 15%, 100% 75%, 86% 65%, 72% 75%, 57% 65%, 43% 75%, 28% 65%, 14% 75%, 0% 65%, 0% 15%)",
+          borderRadius:"50% 50% 0 0"
+        }}/>
         {/* eyes */}
-        <div style={{ position:"absolute", top:8, left:6, width:6, height:7, background:"#2a2a3a", borderRadius:"50%", border:"1px solid #1a1a2a" }}/>
-        <div style={{ position:"absolute", top:8, right:6, width:6, height:7, background:"#2a2a3a", borderRadius:"50%", border:"1px solid #1a1a2a" }}/>
-        {/* eye shine */}
-        <div style={{ position:"absolute", top:9, left:7, width:2, height:2, background:"#fff", borderRadius:"50%" }}/>
-        <div style={{ position:"absolute", top:9, right:7, width:2, height:2, background:"#fff", borderRadius:"50%" }}/>
+        <div style={{ position:"absolute", top:10, left:6, width:6, height:7, background:"#2a2a3a", borderRadius:"50%" }}/>
+        <div style={{ position:"absolute", top:10, right:6, width:6, height:7, background:"#2a2a3a", borderRadius:"50%" }}/>
+        <div style={{ position:"absolute", top:11, left:7, width:2, height:2, background:"#fff", borderRadius:"50%" }}/>
+        <div style={{ position:"absolute", top:11, right:7, width:2, height:2, background:"#fff", borderRadius:"50%" }}/>
         {/* mouth */}
-        <div style={{ position:"absolute", top:18, left:"50%", transform:"translateX(-50%)", width:8, height:4, borderBottom:"2px solid #4a4a5a", borderRadius:"0 0 50% 50%" }}/>
+        <div style={{ position:"absolute", top:20, left:"50%", transform:"translateX(-50%)", width:8, height:4, borderBottom:"2px solid #4a4a5a", borderRadius:"0 0 50% 50%" }}/>
       </div>
     </>
   );
