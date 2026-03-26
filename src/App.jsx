@@ -294,7 +294,7 @@ function AddDayButton({ onAdd, existingGroups }) {
   return (
     <div style={{ background:C.surface, borderRadius:10, padding:12, border:`1px solid ${C.surface2}`, marginBottom:8 }}>
       <input value={date} onChange={e => setDate(e.target.value)}
-        placeholder="Date label (e.g. Mon Apr 14)"
+        placeholder="Group/Day label (e.g. 'Mon Apr 14' or 'Math' )"
         onKeyDown={e => { if(e.key==="Enter") handleAdd(); }}
         autoFocus
         style={{ width:"100%", padding:"6px 10px", borderRadius:7, marginBottom:6, border:`1px solid ${C.surface2}`, background:C.bg, color:C.text, fontFamily:"inherit", fontSize:"0.75rem", boxSizing:"border-box" }} />
