@@ -236,28 +236,59 @@ function TasksTab({ days, subjects, checked, onToggle, onAddTask, onDeleteTask, 
           </div>
         );
       })}
-      <AddDayButton subjects={subjects} onAdd={onAddTask} existingDates={days.map(d => d.date)} />
+      <AddDayButton onAdd={onAddTask} existingGroups={groups} />
     </div>
   );
 }
 
-function AddDayButton({ subjects, onAdd, existingDates }) {
+function AddDayButton({ onAdd, existingGroups }) {
   const [open, setOpen] = useState(false);
   const [date, setDate] = useState("");
   const [group, setGroup] = useState("");
-  const handleAdd = () => { if (!date.trim()) return; onAdd(date.trim(), null, null, group.trim() || null); setOpen(false); setDate(""); setGroup(""); };
+  const [newGroup, setNewGroup] = useState("");
+  const [showNewGroup, setShowNewGroup] = useState(false);
+
+  const handleAdd = () => {
+    if (!date.trim()) return;
+    const finalGroup = showNewGroup ? newGroup.trim() : group || null;
+    onAdd(date.trim(), null, null, finalGroup || null);
+    setOpen(false); setDate(""); setGroup(""); setNewGroup(""); setShowNewGroup(false);
+  };
+
   if (!open) return (
-    <button onClick={() => setOpen(true)} style={{ width:"100%", padding:"8px 0", borderRadius:10, border:`2px dashed ${C.surface2}`, background:"none", color:C.muted, fontFamily:"inherit", fontSize:"0.75rem", cursor:"pointer" }}>+ Add Day</button>
+    <button onClick={() => setOpen(true)} style={{
+      width:"100%", padding:"8px 0", borderRadius:10,
+      border:`2px dashed ${C.surface2}`, background:"none",
+      color:C.muted, fontFamily:"inherit", fontSize:"0.75rem", cursor:"pointer"
+    }}>+ Add Day</button>
   );
+
   return (
     <div style={{ background:C.surface, borderRadius:10, padding:12, border:`1px solid ${C.surface2}`, marginBottom:8 }}>
-      <input value={date} onChange={e => setDate(e.target.value)} placeholder="Date label (e.g. Mon Apr 14)"
+      <input value={date} onChange={e => setDate(e.target.value)}
+        placeholder="Date label (e.g. Mon Apr 14)"
+        onKeyDown={e => { if(e.key==="Enter") handleAdd(); }}
+        autoFocus
         style={{ width:"100%", padding:"6px 10px", borderRadius:7, marginBottom:6, border:`1px solid ${C.surface2}`, background:C.bg, color:C.text, fontFamily:"inherit", fontSize:"0.75rem", boxSizing:"border-box" }} />
-      <input value={group} onChange={e => setGroup(e.target.value)} placeholder="Week/group label (optional)"
-        style={{ width:"100%", padding:"6px 10px", borderRadius:7, marginBottom:6, border:`1px solid ${C.surface2}`, background:C.bg, color:C.text, fontFamily:"inherit", fontSize:"0.75rem", boxSizing:"border-box" }} />
+      {!showNewGroup ? (
+        <select value={group} onChange={e => { if(e.target.value==="__new__"){ setShowNewGroup(true); setGroup(""); } else setGroup(e.target.value); }}
+          style={{ width:"100%", padding:"6px 10px", borderRadius:7, marginBottom:6, border:`1px solid ${C.surface2}`, background:C.bg, color:C.text, fontFamily:"inherit", fontSize:"0.75rem", boxSizing:"border-box" }}>
+          <option value="">No group</option>
+          {existingGroups.map(g => <option key={g} value={g}>{g}</option>)}
+          <option value="__new__">+ New group...</option>
+        </select>
+      ) : (
+        <div style={{ display:"flex", gap:6, marginBottom:6 }}>
+          <input value={newGroup} onChange={e => setNewGroup(e.target.value)}
+            placeholder="New group name (e.g. Week 4)"
+            style={{ flex:1, padding:"6px 10px", borderRadius:7, border:`1px solid ${C.surface2}`, background:C.bg, color:C.text, fontFamily:"inherit", fontSize:"0.75rem" }} />
+          <button onClick={() => { setShowNewGroup(false); setNewGroup(""); }}
+            style={{ padding:"6px 10px", borderRadius:7, border:`1px solid ${C.surface2}`, background:C.surface, color:C.muted, fontFamily:"inherit", fontSize:"0.75rem", cursor:"pointer" }}>✕</button>
+        </div>
+      )}
       <div style={{ display:"flex", gap:6 }}>
         <button onClick={handleAdd} style={{ flex:1, padding:"6px 0", borderRadius:7, border:"none", background:C.primary, color:"#fff", fontFamily:"inherit", fontSize:"0.75rem", fontWeight:700, cursor:"pointer" }}>Add</button>
-        <button onClick={() => setOpen(false)} style={{ flex:1, padding:"6px 0", borderRadius:7, border:`1px solid ${C.surface2}`, background:C.surface, color:C.muted, fontFamily:"inherit", fontSize:"0.75rem", cursor:"pointer" }}>Cancel</button>
+        <button onClick={() => { setOpen(false); setDate(""); setGroup(""); setNewGroup(""); setShowNewGroup(false); }} style={{ flex:1, padding:"6px 0", borderRadius:7, border:`1px solid ${C.surface2}`, background:C.surface, color:C.muted, fontFamily:"inherit", fontSize:"0.75rem", cursor:"pointer" }}>Cancel</button>
       </div>
     </div>
   );
