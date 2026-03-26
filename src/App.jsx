@@ -154,9 +154,14 @@ function TasksTab({ days, subjects, checked, onToggle, onAddTask, onDeleteTask, 
           </div>
           {/* name + status */}
           <div style={{ zIndex:1, padding:"10px 14px 10px 0" }}>
-            <div style={{ fontSize:"0.78rem", fontWeight:700, color:C.text }}>{petInfo.petName}</div>
-            <div style={{ fontSize:"0.65rem", color:C.muted }}>
-              {petInfo.happiness>70?"😸 Happy & studying!":petInfo.happiness>40?"😺 Getting there...":"😿 Check some tasks off!"}
+            <div style={{
+              background:"rgba(255,255,255,0.75)", borderRadius:8, padding:"4px 8px",
+              backdropFilter:"blur(4px)"
+            }}>
+              <div style={{ fontSize:"0.78rem", fontWeight:700, color:C.text }}>{petInfo.petName}</div>
+              <div style={{ fontSize:"0.65rem", color:C.muted }}>
+                {petInfo.happiness>70?"😸 Happy & studying!":petInfo.happiness>40?"😺 Getting there...":"😿 Check some tasks off!"}
+              </div>
             </div>
           </div>
         </div>
