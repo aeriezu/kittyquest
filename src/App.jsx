@@ -552,6 +552,7 @@ export default function App() {
   const [showSubjectEditor, setShowSubjectEditor] = useState(false);
   const [showCatSelector,   setShowCatSelector]   = useState(false);
   const [showRoomEditor,    setShowRoomEditor]    = useState(false);
+  const [houseLoaded,       setHouseLoaded]       = useState(false);
 
   const allTasks = days.flatMap(d => d.tasks || []).filter(Boolean);
   const { state, done, toggleTask, handleSpin, buyItem, equipItem, cashOut, tickHappiness, incrementCheers, setState } = useGameState(allTasks.length);
@@ -580,6 +581,7 @@ export default function App() {
         else { const savedDays = JSON.parse(localStorage.getItem("studyquest-days") || "null"); if (savedDays) setDays(savedDays); setDaysLoaded(true); }
         const houseSnap = await get(ref(db, `users/${user.uid}/house`));
         if (houseSnap.exists()) setHouse({ ...EMPTY_HOUSE, ...houseSnap.val() });
+        setHouseLoaded(true);
       }
       setAuthReady(true);
     });
@@ -616,7 +618,7 @@ export default function App() {
   usePublishProfile(uid, username, petId, petName, actualDone, allTasks.length, state.coins, state.equipped);
   usePublishTasks(uid, allTasks.map(t => ({ ...t, done: !!state.checked[t.id] })));
   usePublishTodayDone(uid, todayDone, state.streak);
-  usePublishHouse(uid, house);
+  usePublishHouse(uid, house, houseLoaded);
 
   // ── Handlers ─────────────────────────────────────────────────────────────
   const handleOnboardingDone = (newUid, uname, pid, pname, subs) => {

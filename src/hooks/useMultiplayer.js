@@ -141,9 +141,9 @@ export function usePublishTodayDone(uid, todayDone, streak) {
 }
 
 // ─── Publish house data ───────────────────────────────────────────────────────
-export function usePublishHouse(uid, house) {
+export function usePublishHouse(uid, house, houseLoaded) {
   useEffect(() => {
-    if (!uid || !house) return;
+    if (!uid || !house || !houseLoaded) return;
     set(ref(db, `users/${uid}/house`), house);
-  }, [uid, house]);
+  }, [uid, house, houseLoaded]);
 }
