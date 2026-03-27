@@ -102,7 +102,7 @@ function FriendCard({ f, username }) {
       {/* House visit */}
       {tab==="house" && (
         <div style={{ padding:12 }}>
-          {f.house && Object.values(f.house).some(Boolean) ? (
+          {true ? (
             <>
               <div style={{ fontSize:"0.68rem", fontWeight:700, color:C.muted, marginBottom:8 }}>
                 {f.username}'s room
