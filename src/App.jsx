@@ -4,7 +4,6 @@ import { ref, get, set } from "firebase/database";
 import { auth, db } from "./firebase";
 import { C, px, EMPTY_EQ, EMPTY_HOUSE, SHOP, QUEST_TEMPLATES, getLevel, SUBJECT_PALETTE, PET_OPTIONS } from "./data/constants";
 import { useGameState } from "./hooks/useGameState";
-import { usePublishProfile, usePublishTasks, usePublishTodayDone } from "./hooks/useMultiplayer";
 import PixelCat from "./components/PixelCat";
 import SpinWheel from "./components/SpinWheel";
 import FriendsTab from "./components/FriendsTab";
