@@ -10,6 +10,7 @@ import SpinWheel from "./components/SpinWheel";
 import FriendsTab from "./components/FriendsTab";
 import Onboarding from "./components/Onboarding";
 import HouseRoom from "./components/HouseRoom";
+import { usePublishProfile, usePublishTasks, usePublishTodayDone, usePublishHouse } from "./hooks/useMultiplayer";
 
 // ─── Cat Selector Modal ───────────────────────────────────────────────────────
 function CatSelector({ currentPetId, onSelect, onClose }) {
@@ -616,6 +617,7 @@ export default function App() {
   usePublishProfile(uid, username, petId, petName, actualDone, allTasks.length, state.coins, state.equipped);
   usePublishTasks(uid, allTasks.map(t => ({ ...t, done: !!state.checked[t.id] })));
   usePublishTodayDone(uid, todayDone, state.streak);
+  usePublishHouse(uid, house);
 
   // ── Handlers ─────────────────────────────────────────────────────────────
   const handleOnboardingDone = (newUid, uname, pid, pname, subs) => {

@@ -27,7 +27,7 @@ export function useFriendProfiles(uid) {
       const data = snap.val() || {};
       const list = Object.entries(data)
         .filter(([k]) => k !== uid)
-        .map(([, v]) => ({ ...v.profile, tasks: v.tasks || [] }))
+        .map(([, v]) => ({ ...v.profile, tasks: v.tasks || [], house: v.house || {} }))
         .filter(Boolean)
         .sort((a, b) => (b.done || 0) - (a.done || 0));
       setFriends(list);
@@ -138,4 +138,12 @@ export function usePublishTodayDone(uid, todayDone, streak) {
     set(ref(db, `users/${uid}/todayDone`), todayDone);
     set(ref(db, `users/${uid}/streak`),    streak);
   }, [uid, todayDone, streak]);
+}
+
+// ─── Publish house data ───────────────────────────────────────────────────────
+export function usePublishHouse(uid, house) {
+  useEffect(() => {
+    if (!uid || !house) return;
+    set(ref(db, `users/${uid}/house`), house);
+  }, [uid, house]);
 }
