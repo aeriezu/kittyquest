@@ -9,7 +9,6 @@ const PET_STYLES = {
   white:  { fur:"#f5f5f8", furDark:"#c8ccd0", skin:"#ffb8cc", whisker:"#bbb"   },
   calico: { fur:"#e8c888", furDark:"#a06828", skin:"#ffb090", whisker:"#c8a060" },
   tuxedo: { fur:"#1a1a20", furDark:"#0a0a10", skin:"#f0f0f0", whisker:"#444"   },
-  dragon: { fur:"#5a9a6a", furDark:"#2a6a3a", skin:"#a0e8a0", whisker:"#2a6a3a" },
 };
 
 // ─── Wide Animated Background Scenes ─────────────────────────────────────────
