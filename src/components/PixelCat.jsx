@@ -208,17 +208,18 @@ function BgNightCafe() {
         ))}
         <circle cx="35" cy="25" r="7" fill="#f8e890" opacity="0.25"/>
         <circle cx="38" cy="23" r="6" fill="#08121a"/>
-        <rect x="230" y="5" width="4" height="38" fill="#4a3020"/>
-        <polygon points="223,5 243,5 239,22 227,22" fill="#c8a040" opacity="0.95"/>
-        <ellipse cx="233" cy="22" rx="14" ry="4" fill="#f8c840" opacity="0.35" className="lamp-glow-a"/>
-        <polygon points="223,22 243,22 255,82 211,82" fill="#f8c840" opacity="0.06" className="lamp-glow-a"/>
-        <rect x="160" y="70" width="100" height="5" fill="#4a2e18" rx="2"/>
-        <rect x="175" y="75" width="5" height="12" fill="#3a2010" rx="1"/>
-        <rect x="245" y="75" width="5" height="12" fill="#3a2010" rx="1"/>
-        <rect x="198" y="56" width="20" height="16" fill="#f5e8d0" rx="3"/>
-        <rect x="198" y="56" width="20" height="4" fill="#d4b890" rx="3"/>
-        <ellipse cx="208" cy="60" rx="7" ry="2" fill="#6b3a10" opacity="0.8"/>
-        <path d="M218 59 Q225 59 225 64 Q225 69 218 69" fill="none" stroke="#f5e8d0" strokeWidth="2.5"/>
+        <rect x="245" y="5" width="4" height="38" fill="#4a3020"/>
+        <polygon points="238,5 258,5 254,22 242,22" fill="#c8a040" opacity="0.95"/>
+        <ellipse cx="248" cy="22" rx="14" ry="4" fill="#f8c840" opacity="0.35" className="lamp-glow-a"/>
+        <polygon points="238,22 258,22 270,82 226,82" fill="#f8c840" opacity="0.06" className="lamp-glow-a"/>
+        <rect x="180" y="70" width="100" height="5" fill="#4a2e18" rx="2"/>
+        <rect x="195" y="75" width="5" height="12" fill="#3a2010" rx="1"/>
+        <rect x="265" y="75" width="5" height="12" fill="#3a2010" rx="1"/>
+        <rect x="218" y="56" width="20" height="16" fill="#f5e8d0" rx="3"/>
+        <rect x="218" y="56" width="20" height="4" fill="#d4b890" rx="3"/>
+        <ellipse cx="228" cy="60" rx="7" ry="2" fill="#6b3a10" opacity="0.8"/>
+        <path d="M238 59 Q245 59 245 64 Q245 69 238 69" fill="none" stroke="#f5e8d0" strokeWidth="2.5"/>
+        <rect x="108" y="8" width="24" height="72" fill="#2a1508" rx="1"/>
         <rect x="110" y="12" width="4" height="16" fill="#4a7fa0" rx="1"/>
         <rect x="115" y="13" width="5" height="15" fill="#c85820" rx="1"/>
         <rect x="121" y="12" width="4" height="16" fill="#4a8a5a" rx="1"/>
@@ -232,9 +233,8 @@ function BgNightCafe() {
       </svg>
       {[0,1,2].map(i => (
         <div key={i} className="steam-r" style={{
-          left:`${68+i*1.2}%`, height:`${12+i*4}px`,
-          animationDuration:`${1.2+i*0.3}s`, animationDelay:`${i*0.4}s`,
-          bottom:"38%"
+          left:`${61+i*1.2}%`, height:`${12+i*4}px`,
+          animationDuration:`${1.2+i*0.3}s`, animationDelay:`${i*0.4}s`, bottom:"32%"
         }}/>
       ))}
     </div>
@@ -332,12 +332,15 @@ export default function PixelCat({ mood, hat, outfit, bg, comp, petId="tabby", s
 .${id} .tail{animation:wagTail-${id} 13s infinite;transform-origin:20% 20%;width:50%;height:50%;border-radius:50%;border:7em solid #0000;border-top-color:var(--fur-dark);border-left-color:var(--fur-dark);clip-path:polygon(100% 0,100% 100%,0 30%,0 0);top:75%;left:52%;}
 .${id} .tail::before{content:"";width:7em;aspect-ratio:1;background:var(--fur-dark);border-radius:50%;left:81%;top:-9%;}
 .${id} .body{left:50%;translate:-50%;bottom:0;width:35%;height:40%;background:radial-gradient(100% 80% at 50% 0,var(--fur-dark) 48%,transparent 52%),var(--fur);border-radius:100%/200% 200% 20% 20%;}
-.${id}.tuxedo .body{background:radial-gradient(60% 70% at 50% 60%,#f0f0f0 40%,#e0e0e0 55%,transparent 70%),radial-gradient(100% 80% at 50% 0,var(--fur-dark) 48%,transparent 52%),var(--fur);}
-.${id}.calico .body{background:radial-gradient(40% 50% at 30% 40%,#c97040 60%,transparent 70%),radial-gradient(35% 40% at 70% 60%,#333 50%,transparent 65%),radial-gradient(100% 80% at 50% 0,var(--fur-dark) 48%,transparent 52%),var(--fur);}
+.${id}.tuxedo .body{background:radial-gradient(100% 80% at 50% 0,var(--fur-dark) 48%,transparent 52%),var(--fur);}
+.${id}.tuxedo .body::after{content:"";width:40%;height:70%;background:#f0f0f0;border-radius:50% 50% 40% 40%;bottom:0;left:50%;translate:-50%;opacity:0.95;}
+.${id}.tuxedo .head::before{content:"";width:30%;height:25%;background:#f0f0f0;border-radius:50%;bottom:5%;left:50%;translate:-50%;opacity:0.9;z-index:10;}
+.${id}.calico .body{background:radial-gradient(100% 80% at 50% 0,var(--fur-dark) 48%,transparent 52%),var(--fur);}
+.${id}.calico .body::after{content:"";width:30%;height:45%;background:#c97040;border-radius:3em;top:15%;left:10%;opacity:0.75;box-shadow:14em 5em 0 #333;}
+.${id}.calico .head::before{content:"";width:20%;height:18%;background:#c97040;border-radius:50%;top:20%;left:18%;opacity:0.7;z-index:10;box-shadow:9em -2em 0 #2a1a0a;}
 .${id}.tabby .body{background:radial-gradient(100% 80% at 50% 0,var(--fur-dark) 48%,transparent 52%),var(--fur);}
 .${id}.tabby .body::after{content:"";width:8%;height:50%;background:var(--fur-dark);top:10%;left:20%;border-radius:2em;opacity:0.4;box-shadow:6em 0 0 var(--fur-dark),13em 0 0 var(--fur-dark);}
 .${id}.tabby .head::before{content:"";width:7%;height:20%;background:var(--fur-dark);top:10%;left:50%;translate:-50%;border-radius:2em;opacity:0.55;box-shadow:-5em 1em 0 var(--fur-dark),5em 1em 0 var(--fur-dark);z-index:10;}
-.${id}.dragon .body{background:repeating-linear-gradient(170deg,var(--fur-dark) 0,var(--fur-dark) 4%,transparent 4%,transparent 14%),radial-gradient(100% 80% at 50% 0,var(--fur-dark) 48%,transparent 52%),var(--fur);}
 .${id} .leg{width:165%;height:38%;background:var(--fur);bottom:0;left:50%;translate:-50%;border-radius:8em 8em 100% 100%/10em 10em 16em 16em;scale:1 -1;}
 .${id} .paw{width:35%;height:49%;border:0.75em solid #fff;border-top:0;border-radius:0 0 5em 5em;border-bottom:1em solid #fff;top:48%;rotate:-10deg;left:10%;clip-path:polygon(0 20%,100% 30%,100% 100%,0 100%);}
 .${id} .paw+.paw{right:7%;height:50%;left:auto;rotate:13deg;scale:-1 1;clip-path:polygon(0 25%,100% 15%,100% 100%,0 100%);}
@@ -345,13 +348,10 @@ export default function PixelCat({ mood, hat, outfit, bg, comp, petId="tabby", s
 .${id}.white .paw{border-color:#ddd;}
 .${id} .ear{width:40%;aspect-ratio:1;border:4em solid var(--fur);border-radius:5% 90% 10% 80%;background:var(--skin);}
 .${id} .ear+.ear{scale:-1 1;right:0;animation:twitch-${id} 7.2s infinite;}
-.${id}.dragon .ear{border-color:var(--fur);background:var(--skin);clip-path:polygon(50% 0%,100% 100%,0% 100%);}
-.${id}.dragon .ear+.ear{scale:-1 1;right:0;}
 .${id} .head{width:80%;aspect-ratio:1.1;background:linear-gradient(#0003 0%,#0001 20%,#0000 50%),var(--fur);left:50%;translate:-50%;border-radius:100%/125% 125% 80% 75%;animation:tiltHead-${id} 13s infinite;transform-origin:50% 100%;}
-.${id}.tuxedo .head{background:radial-gradient(55% 40% at 50% 85%,#f0f0f0 50%,#e8e8e8 65%,transparent 75%),linear-gradient(#0003 0%,#0001 20%,#0000 50%),var(--fur);}
-.${id}.calico .head{background:radial-gradient(25% 20% at 20% 30%,#c97040 50%,transparent 65%),radial-gradient(20% 15% at 78% 20%,#5a3010 45%,transparent 60%),linear-gradient(#0003 0%,#0001 20%,#0000 50%),var(--fur);}
+.${id}.tuxedo .head{background:linear-gradient(#0003 0%,#0001 20%,#0000 50%),var(--fur);}
+.${id}.calico .head{background:linear-gradient(#0003 0%,#0001 20%,#0000 50%),var(--fur);}
 .${id}.white .head{background:linear-gradient(#0001 0%,#0000 30%),var(--fur);}
-.${id}.dragon .head{background:radial-gradient(30% 25% at 25% 35%,#3a8a4a 50%,transparent 65%),radial-gradient(25% 20% at 72% 25%,#2a6a3a 45%,transparent 60%),linear-gradient(#0003 0%,#0001 20%,#0000 50%),var(--fur);}
 .${id} .whisker{width:30%;height:30%;border-radius:50%;border:2em solid #0000;border-top-color:var(--wh);border-left-color:var(--wh);clip-path:polygon(100% 0,100% 100%,0 30%,0 0);}
 .${id} .whisker:nth-child(1){top:70%;translate:-65%;}
 .${id} .whisker:nth-child(2){top:80%;translate:-40%;rotate:-20deg;}
