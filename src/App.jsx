@@ -111,7 +111,10 @@ function ImportSchedule({ onImport }) {
 // ─── TasksTab ─────────────────────────────────────────────────────────────────
 function TasksTab({ days, subjects, checked, onToggle, onAddTask, onDeleteTask, onDeleteDay, onImport, onEditSubjects, petInfo, onEditTask }) {
   const [filter,      setFilter]      = useState("all");
-  const [collapsed,   setCollapsed]   = useState({});
+  const [collapsed, setCollapsed] = useState(() => {
+    try { return JSON.parse(localStorage.getItem("sq-collapsed") || "{}"); }
+    catch { return {}; }
+  });
   const [newTask,     setNewTask]     = useState({ subject:"", label:"" });
   const [addingTo,    setAddingTo]    = useState(null);
   const [editingTask, setEditingTask] = useState(null);
@@ -179,7 +182,13 @@ function TasksTab({ days, subjects, checked, onToggle, onAddTask, onDeleteTask, 
         const subjectMap = Object.fromEntries(subjects.map(s => [s.name, s]));
         return (
           <div key={date} style={{ background:C.surface, borderRadius:10, marginBottom:7, overflow:"hidden", border:`1px solid ${C.surface2}` }}>
-            <div onClick={() => setCollapsed(c => ({ ...c, [date]: !c[date] }))}
+            <div onClick={() => {
+              setCollapsed(c => {
+                const next = { ...c, [date]: !c[date] };
+                localStorage.setItem("sq-collapsed", JSON.stringify(next));
+                return next;
+              });
+            }}
               style={{ display:"flex", alignItems:"center", gap:8, padding:"8px 11px", cursor:"pointer", background:allDone?"#d4edd4":C.surface }}>
               <span style={{ flex:1, fontSize:"0.78rem", fontWeight:700, color:allDone?C.green:C.text }}>{allDone?"✅ ":""}{date}</span>
               <span style={{ fontSize:"0.65rem", color:C.muted }}>{d}/{safeTasks.length}</span>
