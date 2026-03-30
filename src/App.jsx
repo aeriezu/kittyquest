@@ -127,8 +127,7 @@ function TasksTab({ days, subjects, checked, onToggle, onAddTask, onDeleteTask, 
           <div style={{ position:"absolute", inset:0, zIndex:0 }}>
             <PixelCat mood={petInfo.mood} hat={petInfo.equipped.hat} outfit={petInfo.equipped.outfit} bg={petInfo.bg} comp={null} petId={petInfo.petId} size={0} bgOnly={true} />
           </div>
-          <div style={{ animation:"catBob 2.8s ease-in-out infinite", flexShrink:0, position:"relative", zIndex:1, padding:"10px 0 10px 14px" }}>
-            <style>{`@keyframes catBob { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-5px)} }`}</style>
+          <div style={{ flexShrink:0, position:"relative", zIndex:1, padding:"10px 0 10px 14px" }}>
             <PixelCat mood={petInfo.mood} hat={petInfo.equipped.hat} outfit={petInfo.equipped.outfit} bg={null} comp={petInfo.equipped.comp} petId={petInfo.petId} size={90} />
           </div>
           <div style={{ zIndex:1, padding:"10px 14px 10px 0" }}>

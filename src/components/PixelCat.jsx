@@ -335,7 +335,9 @@ export default function PixelCat({ mood, hat, outfit, bg, comp, petId="tabby", s
 .${id} .body{left:50%;translate:-50%;bottom:0;width:35%;height:40%;background:radial-gradient(100% 80% at 50% 0,var(--fur-dark) 48%,transparent 52%),var(--fur);border-radius:100%/200% 200% 20% 20%;}
 .${id}.tuxedo .body{background:radial-gradient(60% 70% at 50% 60%,#f0f0f0 40%,#e0e0e0 55%,transparent 70%),radial-gradient(100% 80% at 50% 0,var(--fur-dark) 48%,transparent 52%),var(--fur);}
 .${id}.calico .body{background:radial-gradient(40% 50% at 30% 40%,#c97040 60%,transparent 70%),radial-gradient(35% 40% at 70% 60%,#333 50%,transparent 65%),radial-gradient(100% 80% at 50% 0,var(--fur-dark) 48%,transparent 52%),var(--fur);}
-.${id}.tabby .body{background:repeating-linear-gradient(175deg,var(--fur-dark) 0,var(--fur-dark) 3%,transparent 3%,transparent 12%),radial-gradient(100% 80% at 50% 0,var(--fur-dark) 48%,transparent 52%),var(--fur);}
+.${id}.tabby .body{background:radial-gradient(100% 80% at 50% 0,var(--fur-dark) 48%,transparent 52%),var(--fur);}
+.${id}.tabby .body::after{content:"";width:8%;height:50%;background:var(--fur-dark);top:10%;left:20%;border-radius:2em;opacity:0.4;box-shadow:6em 0 0 var(--fur-dark),13em 0 0 var(--fur-dark);}
+.${id}.tabby .head::before{content:"";width:7%;height:20%;background:var(--fur-dark);top:10%;left:50%;translate:-50%;border-radius:2em;opacity:0.55;box-shadow:-5em 1em 0 var(--fur-dark),5em 1em 0 var(--fur-dark);z-index:10;}
 .${id}.dragon .body{background:repeating-linear-gradient(170deg,var(--fur-dark) 0,var(--fur-dark) 4%,transparent 4%,transparent 14%),radial-gradient(100% 80% at 50% 0,var(--fur-dark) 48%,transparent 52%),var(--fur);}
 .${id} .leg{width:165%;height:38%;background:var(--fur);bottom:0;left:50%;translate:-50%;border-radius:8em 8em 100% 100%/10em 10em 16em 16em;scale:1 -1;}
 .${id} .paw{width:35%;height:49%;border:0.75em solid #fff;border-top:0;border-radius:0 0 5em 5em;border-bottom:1em solid #fff;top:48%;rotate:-10deg;left:10%;clip-path:polygon(0 20%,100% 30%,100% 100%,0 100%);}
