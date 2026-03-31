@@ -121,9 +121,6 @@ function WallpaperCityWindows() {
         {[0,1,2,3,4].map(i => (
           <rect key={i} x="0" y={139+i*4} width="300" height="3.5" fill={i%2===0?"#3a2810":"#4a3820"} opacity="0.8"/>
         ))}
-        {/* room walls beside window */}
-        <rect x="0" y="0" width="22" height="160" fill="#f0ece4"/>
-        <rect x="278" y="0" width="22" height="160" fill="#f0ece4"/>
       </svg>
     </div>
   );
