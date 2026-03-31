@@ -819,14 +819,17 @@ export default function HouseRoom({ house, catElement, compact = false }) {
         </div>
         {/* center slot — cat lives here */}
         <div style={{ display:"flex", flexDirection:"column", alignItems:"center", zIndex:3 }}>
-          {catElement}
-          {h.center && !catElement && <FurnitureItem id={h.center} size={furnSize*0.8} />}
-          {h.center && catElement && (
-            <div style={{ marginTop:-8 }}>
-              <FurnitureItem id={h.center} size={furnSize*0.6} />
+          {catElement ? (
+            <div style={{ display:"flex", flexDirection:"column", alignItems:"center" }}>
+              {catElement}
+              {/* cat bed underneath the cat */}
+              <div style={{ width:90, height:18, background:"#c97d4e", borderRadius:"50%", marginTop:-10, border:"2px solid #a05a2a", boxShadow:"0 3px 8px rgba(0,0,0,0.25)", position:"relative", zIndex:-1 }}>
+                <div style={{ width:74, height:11, background:"#e8c8a8", borderRadius:"50%", margin:"3px auto" }}/>
+              </div>
             </div>
-          )}
-          {!h.center && !catElement && (
+          ) : h.center ? (
+            <FurnitureItem id={h.center} size={furnSize*0.8} />
+          ) : (
             <div style={{ width:furnSize, height:furnSize, border:`2px dashed #c8b090`, borderRadius:8, opacity:0.3, display:"flex", alignItems:"center", justifyContent:"center", fontSize:"1.2rem", color:"#c8b090" }}>+</div>
           )}
         </div>
