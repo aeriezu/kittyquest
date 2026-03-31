@@ -76,8 +76,6 @@ function WallpaperCityWindows() {
         .city-l { animation: cityLight ease-in-out infinite; }
       `}</style>
       <svg width="100%" height="100%" viewBox="0 0 300 160" preserveAspectRatio="xMidYMid slice" style={{ position:"absolute", inset:0 }}>
-        {/* interior wall - warm white */}
-        <rect width="300" height="160" fill="#f0ece4"/>
         {/* floor-to-ceiling window frame */}
         <rect x="20" y="0" width="260" height="135" fill="#1a2a3a" rx="2"/>
         {/* sky gradient through window */}
