@@ -24,6 +24,7 @@ export const PET_OPTIONS = [
   { id:"white",  label:"White Cat",   color:"#f5f5f8" },
   { id:"calico", label:"Calico",      color:"#e8c888" },
   { id:"tuxedo", label:"Tuxedo",      color:"#1a1a20" },
+  { id:"dragon", label:"Dragon Cat",  color:"#4a8a5a" },
 ];
 
 // ─── Shop Items ──────────────────────────────────────────────────────────────
@@ -53,26 +54,26 @@ export const SHOP = [
   { id:"comp4", cost:25, type:"comp",   slot:null,        label:"Star Sprite",     emoji:"⭐", rare:false },
   { id:"comp5", cost:0,  type:"comp",   slot:null,        label:"Dragon",          emoji:"🐉", rare:true  },
   // ── Home: Wallpapers ──
-  { id:"hw1",   cost:8,  type:"home",   slot:"wallpaper", label:"Sakura Walls",    emoji:"🌸", rare:false },
-  { id:"hw2",   cost:8,  type:"home",   slot:"wallpaper", label:"Starry Night",    emoji:"⭐", rare:false },
-  { id:"hw3",   cost:10, type:"home",   slot:"wallpaper", label:"Forest Green",    emoji:"🌿", rare:false },
-  { id:"hw4",   cost:10, type:"home",   slot:"wallpaper", label:"Warm Brick",      emoji:"🧱", rare:false },
-  { id:"hw5",   cost:0,  type:"home",   slot:"wallpaper", label:"Cloud Dream",     emoji:"☁️", rare:true  },
+  { id:"hw1",   cost:8,  type:"home",   slot:"wallpaper", label:"Industrial Brick", emoji:"🧱", rare:false },
+  { id:"hw2",   cost:8,  type:"home",   slot:"wallpaper", label:"City Windows",     emoji:"🪟", rare:false },
+  { id:"hw3",   cost:10, type:"home",   slot:"wallpaper", label:"Urban Jungle",     emoji:"🌿", rare:false },
+  { id:"hw4",   cost:10, type:"home",   slot:"wallpaper", label:"Artist Loft",      emoji:"🎨", rare:false },
+  { id:"hw5",   cost:0,  type:"home",   slot:"wallpaper", label:"Luxury Loft",      emoji:"✨", rare:true  },
   // ── Home: Floors ──
-  { id:"hf1",   cost:6,  type:"home",   slot:"floor",     label:"Wood Planks",     emoji:"🪵", rare:false },
-  { id:"hf2",   cost:6,  type:"home",   slot:"floor",     label:"Pastel Tiles",    emoji:"🟦", rare:false },
-  { id:"hf3",   cost:8,  type:"home",   slot:"floor",     label:"Grass Mat",       emoji:"🌿", rare:false },
-  { id:"hf4",   cost:0,  type:"home",   slot:"floor",     label:"Star Floor",      emoji:"✨", rare:true  },
+  { id:"hf1",   cost:6,  type:"home",   slot:"floor",     label:"Dark Hardwood",    emoji:"🪵", rare:false },
+  { id:"hf2",   cost:6,  type:"home",   slot:"floor",     label:"Polished Concrete",emoji:"🔲", rare:false },
+  { id:"hf3",   cost:8,  type:"home",   slot:"floor",     label:"Herringbone",      emoji:"🟫", rare:false },
+  { id:"hf4",   cost:0,  type:"home",   slot:"floor",     label:"White Oak",        emoji:"⬜", rare:true  },
   // ── Home: Furniture ──
-  { id:"fu1",   cost:12, type:"home",   slot:"furniture", label:"Bookshelf",       emoji:"📚", rare:false },
-  { id:"fu2",   cost:10, type:"home",   slot:"furniture", label:"Cozy Couch",      emoji:"🛋️", rare:false },
-  { id:"fu3",   cost:8,  type:"home",   slot:"furniture", label:"Plant",           emoji:"🪴", rare:false },
-  { id:"fu4",   cost:8,  type:"home",   slot:"furniture", label:"Study Desk",      emoji:"🪑", rare:false },
-  { id:"fu5",   cost:6,  type:"home",   slot:"furniture", label:"Candle",          emoji:"🕯️", rare:false },
-  { id:"fu6",   cost:15, type:"home",   slot:"furniture", label:"Floor Lamp",      emoji:"🌙", rare:false },
-  { id:"fu7",   cost:12, type:"home",   slot:"furniture", label:"Tea Set",         emoji:"☕", rare:false },
-  { id:"fu8",   cost:18, type:"home",   slot:"furniture", label:"Stuffed Animal",  emoji:"🧸", rare:false },
-  { id:"fu9",   cost:0,  type:"home",   slot:"furniture", label:"Magic Cauldron",  emoji:"🪄", rare:true  },
+  { id:"fu1",   cost:12, type:"home",   slot:"furniture", label:"Tall Bookshelf",   emoji:"📚", rare:false },
+  { id:"fu2",   cost:15, type:"home",   slot:"furniture", label:"Leather Sectional",emoji:"🛋️", rare:false },
+  { id:"fu3",   cost:8,  type:"home",   slot:"furniture", label:"Fiddle Leaf Fig",  emoji:"🌿", rare:false },
+  { id:"fu4",   cost:12, type:"home",   slot:"furniture", label:"Standing Desk",    emoji:"💻", rare:false },
+  { id:"fu5",   cost:6,  type:"home",   slot:"furniture", label:"Candle Cluster",   emoji:"🕯️", rare:false },
+  { id:"fu6",   cost:10, type:"home",   slot:"furniture", label:"Record Player",    emoji:"🎵", rare:false },
+  { id:"fu7",   cost:12, type:"home",   slot:"furniture", label:"Coffee Station",   emoji:"☕", rare:false },
+  { id:"fu8",   cost:8,  type:"home",   slot:"furniture", label:"Cat Bed",          emoji:"🐱", rare:false },
+  { id:"fu9",   cost:0,  type:"home",   slot:"furniture", label:"Hanging Plants",   emoji:"🪴", rare:true  },
 ];
 
 export const EMPTY_EQ = { hat:null, outfit:null, bg:null, comp:null };
