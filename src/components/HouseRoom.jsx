@@ -77,13 +77,13 @@ function WallpaperCityWindows() {
       `}</style>
       <svg width="100%" height="100%" viewBox="0 0 300 160" preserveAspectRatio="xMidYMid slice" style={{ position:"absolute", inset:0 }}>
         {/* floor-to-ceiling window frame */}
-        <rect x="20" y="0" width="260" height="135" fill="#1a2a3a" rx="2"/>
+        <rect x="0" y="0" width="300" height="135" fill="#1a2a3a" rx="2"/>
         {/* sky gradient through window */}
-        <rect x="22" y="2" width="256" height="133" fill="#1a1a2a"/>
-        <rect x="22" y="2" width="256" height="60" fill="#2a1a3a" opacity="0.8"/>
+        <rect x="0" y="0" width="300" height="133" fill="#1a1a2a"/>
+        <rect x="0" y="0" width="300" height="60" fill="#2a1a3a" opacity="0.8"/>
         {/* golden hour sky */}
-        <rect x="22" y="55" width="256" height="40" fill="#c87020" opacity="0.3"/>
-        <rect x="22" y="75" width="256" height="30" fill="#f8a020" opacity="0.2"/>
+        <rect x="0" y="55" width="300" height="40" fill="#c87020" opacity="0.3"/>
+        <rect x="0" y="75" width="300" height="30" fill="#f8a020" opacity="0.2"/>
         {/* city skyline silhouette */}
         <rect x="22"  y="80"  width="20" height="55" fill="#0a0a14"/>
         <rect x="25"  y="70"  width="14" height="10" fill="#0a0a14"/>
@@ -110,10 +110,9 @@ function WallpaperCityWindows() {
         ))}
         {/* window frame dividers */}
         <line x1="150" y1="0" x2="150" y2="135" stroke="#2a2a2a" strokeWidth="3"/>
-        <line x1="20"  y1="67" x2="280" y2="67" stroke="#2a2a2a" strokeWidth="3"/>
+        <line x1="0"   y1="67" x2="300" y2="67" stroke="#2a2a2a" strokeWidth="3"/>
         {/* window ledge */}
-        <rect x="15" y="133" width="270" height="6" fill="#d4c8b0" rx="2"/>
-        {/* floor */}
+        <rect x="0" y="133" width="300" height="6" fill="#d4c8b0" rx="2"/>        {/* floor */}
         <rect y="139" width="300" height="21" fill="#3a2810"/>
         {/* hardwood planks */}
         {[0,1,2,3,4].map(i => (
