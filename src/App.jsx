@@ -738,7 +738,7 @@ export default function App() {
 
       {/* Tab bar */}
       <div style={{ display:"flex", gap:4, marginBottom:14, overflowX:"auto", paddingBottom:2 }}>
-        {[["tasks","📋"],["pet","🐱"],["quests","⚡"],["friend","👯"],["shop","🛍️"],["calendar","📅"]].map(([v,l]) => (
+        {[["tasks","📋"],["calendar","📅"],["pet","🐱"],["quests","⚡"],["friend","👯"],["shop","🛍️"]].map(([v,l]) => (
           <button key={v} onClick={() => setTab(v)} style={{ flexShrink:0, padding:"6px 8px", borderRadius:6, border:`2px solid ${tab===v?C.primary:C.surface2}`, background:tab===v?C.primary:C.surface, color:tab===v?"#fff":C.text, fontFamily:"inherit", fontSize:"0.7rem", fontWeight:700, cursor:"pointer" }}>{l}</button>
         ))}
       </div>
