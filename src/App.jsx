@@ -110,15 +110,17 @@ function ImportSchedule({ onImport }) {
 }
 
 // ─── TasksTab ─────────────────────────────────────────────────────────────────
-function TasksTab({ days, subjects, checked, onToggle, onAddTask, onDeleteTask, onDeleteDay, onImport, onEditSubjects, petInfo, onEditTask }) {
+function TasksTab({ days, subjects, checked, onToggle, onAddTask, onDeleteTask, onDeleteDay, onImport, onEditSubjects, petInfo, onEditTask, onMoveTask }) {
   const [filter,      setFilter]      = useState("all");
-  const [collapsed, setCollapsed] = useState(() => {
+  const [collapsed,   setCollapsed]   = useState(() => {
     try { return JSON.parse(localStorage.getItem("sq-collapsed") || "{}"); }
     catch { return {}; }
   });
   const [newTask,     setNewTask]     = useState({ subject:"", label:"" });
   const [addingTo,    setAddingTo]    = useState(null);
   const [editingTask, setEditingTask] = useState(null);
+  const [dragTask,    setDragTask]    = useState(null); // { taskId, fromDate }
+  const [dragOver,    setDragOver]    = useState(null); // date string
 
   const allTasks = days.flatMap(d => d.tasks || []).filter(Boolean);
   const visible  = filter === "all" ? days : days.filter(d => d.group === filter);
@@ -175,14 +177,36 @@ function TasksTab({ days, subjects, checked, onToggle, onAddTask, onDeleteTask, 
         </div>
       )}
 
+      {/* drag hint */}
+      {dragTask && (
+        <div style={{ background:C.primary, color:"#fff", borderRadius:8, padding:"6px 12px", marginBottom:8, fontSize:"0.68rem", textAlign:"center", opacity:0.9 }}>
+          📦 Drop onto a day to move task there
+        </div>
+      )}
+
       {visible.map(({ date, tasks }) => {
         const safeTasks = (tasks || []).filter(Boolean);
         const d = safeTasks.filter(t => checked[t.id]).length;
         const allDone = d === safeTasks.length && safeTasks.length > 0;
         const isCol = collapsed[date];
+        const isDragOver = dragOver === date;
         const subjectMap = Object.fromEntries(subjects.map(s => [s.name, s]));
         return (
-          <div key={date} style={{ background:C.surface, borderRadius:10, marginBottom:7, overflow:"hidden", border:`1px solid ${C.surface2}` }}>
+          <div key={date}
+            onDragOver={e => { e.preventDefault(); setDragOver(date); }}
+            onDragLeave={e => { if (!e.currentTarget.contains(e.relatedTarget)) setDragOver(null); }}
+            onDrop={() => {
+              if (dragTask && dragTask.fromDate !== date) {
+                onMoveTask(dragTask.taskId, dragTask.fromDate, date);
+              }
+              setDragTask(null); setDragOver(null);
+            }}
+            style={{
+              background: isDragOver ? C.primary + "18" : C.surface,
+              borderRadius:10, marginBottom:7, overflow:"hidden",
+              border: isDragOver ? `2px solid ${C.primary}` : `1px solid ${C.surface2}`,
+              transition:"border 0.15s, background 0.15s",
+            }}>
             <div onClick={() => {
               setCollapsed(c => {
                 const next = { ...c, [date]: !c[date] };
@@ -190,9 +214,10 @@ function TasksTab({ days, subjects, checked, onToggle, onAddTask, onDeleteTask, 
                 return next;
               });
             }}
-              style={{ display:"flex", alignItems:"center", gap:8, padding:"8px 11px", cursor:"pointer", background:allDone?"#d4edd4":C.surface }}>
+              style={{ display:"flex", alignItems:"center", gap:8, padding:"8px 11px", cursor:"pointer", background:allDone?"#d4edd4":"transparent" }}>
               <span style={{ flex:1, fontSize:"0.78rem", fontWeight:700, color:allDone?C.green:C.text }}>{allDone?"✅ ":""}{date}</span>
               <span style={{ fontSize:"0.65rem", color:C.muted }}>{d}/{safeTasks.length}</span>
+              {isDragOver && <span style={{ fontSize:"0.65rem", color:C.primary, fontWeight:700 }}>drop here</span>}
               <button onClick={e => { e.stopPropagation(); onDeleteDay(date); }} style={{ background:"none", border:"none", color:C.muted, fontSize:"0.7rem", cursor:"pointer", padding:"0 4px" }}>🗑️</button>
               <span style={{ fontSize:"0.6rem", color:C.muted }}>{isCol?"▶":"▼"}</span>
             </div>
@@ -201,6 +226,7 @@ function TasksTab({ days, subjects, checked, onToggle, onAddTask, onDeleteTask, 
                 {safeTasks.map(task => {
                   const s = subjectMap[task.subject] || { color:C.muted, bg:C.surface };
                   const isEditing = editingTask?.taskId === task.id;
+                  const isDragging = dragTask?.taskId === task.id;
                   if (isEditing) return (
                     <div key={task.id} style={{ display:"flex", gap:5, marginBottom:4, padding:"4px 7px", borderRadius:6, background:C.bg, border:`1px solid ${C.primary}` }}>
                       <input value={editingTask.label} onChange={e => setEditingTask(t => ({ ...t, label:e.target.value }))}
@@ -218,8 +244,25 @@ function TasksTab({ days, subjects, checked, onToggle, onAddTask, onDeleteTask, 
                     </div>
                   );
                   return (
-                    <label key={task.id} style={{ display:"flex", alignItems:"flex-start", gap:7, padding:"4px 7px", borderRadius:6, marginBottom:2, cursor:"pointer", background:checked[task.id]?s.bg:"#fafaf8", opacity:checked[task.id]?0.6:1, borderLeft:`3px solid ${s.color}` }}>
-                      <input type="checkbox" checked={!!checked[task.id]} onChange={() => onToggle(task.id, task.label)} style={{ marginTop:2, accentColor:s.color, width:12, height:12, flexShrink:0 }} />
+                    <label key={task.id}
+                      draggable
+                      onDragStart={e => { e.stopPropagation(); setDragTask({ taskId: task.id, fromDate: date }); }}
+                      onDragEnd={() => { setDragTask(null); setDragOver(null); }}
+                      style={{
+                        display:"flex", alignItems:"flex-start", gap:7,
+                        padding:"4px 7px", borderRadius:6, marginBottom:2,
+                        cursor: isDragging ? "grabbing" : "grab",
+                        background: isDragging ? C.primary + "22" : checked[task.id] ? s.bg : "#fafaf8",
+                        opacity: isDragging ? 0.5 : checked[task.id] ? 0.6 : 1,
+                        borderLeft:`3px solid ${s.color}`,
+                        transform: isDragging ? "scale(0.98)" : "scale(1)",
+                        transition:"opacity 0.15s, transform 0.15s",
+                        userSelect:"none",
+                      }}>
+                      <span style={{ fontSize:"0.65rem", color:C.muted, marginTop:2, flexShrink:0, cursor:"grab" }}>⠿</span>
+                      <input type="checkbox" checked={!!checked[task.id]} onChange={() => onToggle(task.id, task.label)}
+                        style={{ marginTop:2, accentColor:s.color, width:12, height:12, flexShrink:0 }}
+                        onClick={e => e.stopPropagation()} />
                       <div style={{ flex:1 }}>
                         <span style={{ fontSize:"0.75rem", color:C.text, textDecoration:checked[task.id]?"line-through":"none" }}>{task.label}</span>
                         {task.subject && <span style={{ display:"inline-block", fontSize:"0.58rem", fontWeight:700, background:s.bg, color:s.color, borderRadius:3, padding:"0px 4px", marginLeft:4 }}>{task.subject}</span>}
@@ -405,6 +448,7 @@ function PetTab({ petId, petName, mood, happiness, level, title, totalXp, equipp
         </div>
         <HouseRoom house={house} compact={true} catElement={
           <div style={{ animation:"catBob 2.8s ease-in-out infinite" }}>
+            <style>{`@keyframes catBob{0%,100%{transform:translateY(0)}50%{transform:translateY(-4px)}}`}</style>
             <PixelCat mood={mood} hat={equipped.hat} outfit={equipped.outfit} bg={null} comp={equipped.comp} petId={petId} size={80} />
           </div>
         } />
@@ -442,7 +486,6 @@ function QuestsTab({ coins, achievements, onSpin, dailyQuests, questDone, onComp
         <div style={{ fontSize:"0.78rem", fontWeight:700, color:C.text, marginBottom:8 }}>Daily Quests</div>
         {dailyQuests.map(q => {
           const isDone = questDone[q.id];
-          // check if quest requirement is met (tasks done >= quest number)
           const reqMatch = q.label.match(/(\d+)/);
           const req = reqMatch ? parseInt(reqMatch[1]) : 1;
           const canComplete = !isDone && totalTasksDone >= req;
@@ -569,24 +612,20 @@ export default function App() {
     });
   }, []);
 
-  // ── Persist days ──────────────────────────────────────────────────────────
   useEffect(() => {
     if (!daysLoaded) return;
     localStorage.setItem("studyquest-days", JSON.stringify(days));
     if (uid) set(ref(db, `users/${uid}/days`), days);
   }, [days, uid, daysLoaded]);
 
-  // ── Persist game state ────────────────────────────────────────────────────
   useEffect(() => {
     if (!uid || !state) return;
     const safeChecked = Object.fromEntries(Object.entries(state.checked || {}).filter(([k]) => k && !k.includes(".") && !k.includes("#") && !k.includes("$") && !k.includes("/") && !k.includes("[") && !k.includes("]")));
     set(ref(db, `users/${uid}/gameState`), { ...state, checked: safeChecked });
   }, [uid, state]);
 
-  // ── Happiness decay ───────────────────────────────────────────────────────
   useEffect(() => { const t = setInterval(tickHappiness, 60000); return () => clearInterval(t); }, [tickHappiness]);
 
-  // ── Daily quests ──────────────────────────────────────────────────────────
   useEffect(() => {
     const today = new Date().toDateString();
     try { const q = JSON.parse(localStorage.getItem("studyquest-quests") || "{}"); if (q.date === today) { setDailyQuests(q.quests || []); return; } } catch {}
@@ -595,7 +634,6 @@ export default function App() {
     localStorage.setItem("studyquest-quests", JSON.stringify({ date:new Date().toDateString(), quests }));
   }, []);
 
-  // ── Multiplayer publish ───────────────────────────────────────────────────
   const todayDone = allTasks.filter(t => { const today = new Date().toDateString(); return state.checked[t.id] && state.lastDate === today; }).length;
   usePublishProfile(uid, username, petId, petName, actualDone, allTasks.length, state.coins, state.equipped);
   usePublishTasks(uid, allTasks.map(t => ({ ...t, done: !!state.checked[t.id] })));
@@ -627,9 +665,7 @@ export default function App() {
   const showAchievement = ach => { setNewAch(ach); setTimeout(() => setNewAch(null), 3000); };
   const showLevelUp     = lvl => { setLevelUp(lvl); setTimeout(() => setLevelUp(null), 3000); };
 
-  const handleToggle = (id, label) => {
-    toggleTask(id, label, showPopup, showAchievement, showLevelUp);
-  };
+  const handleToggle = (id, label) => toggleTask(id, label, showPopup, showAchievement, showLevelUp);
 
   const handleAddTask = (date, label, subject, group = null) => {
     setDays(prev => {
@@ -647,6 +683,19 @@ export default function App() {
 
   const handleEditTask = (date, taskId, label, subject) => {
     setDays(prev => prev.map(d => d.date===date ? { ...d, tasks:(d.tasks||[]).map(t => t.id===taskId?{...t,label,subject}:t) } : d));
+  };
+
+  const handleMoveTask = (taskId, fromDate, toDate) => {
+    if (fromDate === toDate) return;
+    setDays(prev => {
+      const task = prev.find(d => d.date === fromDate)?.tasks?.find(t => t.id === taskId);
+      if (!task) return prev;
+      return prev.map(d => {
+        if (d.date === fromDate) return { ...d, tasks: (d.tasks||[]).filter(t => t.id !== taskId) };
+        if (d.date === toDate)   return { ...d, tasks: [...(d.tasks||[]), task] };
+        return d;
+      });
+    });
   };
 
   const handleDeleteDay = (date) => {
@@ -749,8 +798,11 @@ export default function App() {
           onDeleteTask={handleDeleteTask} onDeleteDay={handleDeleteDay}
           onImport={handleImport} onEditSubjects={() => setShowSubjectEditor(true)}
           petInfo={{ petName, petId, equipped:state.equipped, mood, happiness:state.happiness, bg:state.equipped?.bg }}
-          onEditTask={handleEditTask}
+          onEditTask={handleEditTask} onMoveTask={handleMoveTask}
         />
+      )}
+      {tab==="calendar" && (
+        <CalendarTab days={days} subjects={subjects} checked={state.checked} />
       )}
       {tab==="pet" && (
         <PetTab petId={petId} petName={petName} mood={mood}
@@ -774,10 +826,6 @@ export default function App() {
         <ShopTab coins={state.coins} owned={state.owned} equipped={state.equipped}
           onBuy={item => buyItem(item,showAchievement)} onEquip={equipItem}
           house={house} />
-      )}
-
-      {tab==="calendar" && (
-        <CalendarTab days={days} subjects={subjects} checked={state.checked} />
       )}
     </div>
   );
